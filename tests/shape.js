@@ -10,8 +10,7 @@ describe('shape', () => {
 
   it('should throw when passed an invalid plain shape object', () => {
     const invalidShape = { foo: 'bar' }
-    expect(() => shape(invalidShape))
-      .toThrow('A Plain Shape Object must have a type property')
+    expect(() => shape(invalidShape)).toThrow()
   })
 
   it('should return an object with the correct properties', () => {

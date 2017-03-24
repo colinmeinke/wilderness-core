@@ -4,9 +4,7 @@ import { valid } from '../src/plain-shape-object'
 
 describe('valid', () => {
   it('should throw when passed a non-object', () => {
-    expect(() => valid(5)).toThrow(
-      'You tried to pass a non-object as a Plain Shape Object'
-    )
+    expect(() => valid(5)).toThrow()
   })
 
   it('should throw when no type property', () => {

@@ -24,6 +24,9 @@
       "path": "node_modules/cz-conventional-changelog"
     }
   },
+  "dependencies": {
+    "svg-points": "^3.2.0"
+  },
   "description": "A Javascript API for drawing and animating SVG",
   "devDependencies": {
     "babel-cli": "^6.24.0",
@@ -50,6 +53,5 @@
     "fix": "standard --fix",
     "lint": "standard --verbose | snazzy",
     "test": "jest"
-  },
-  "dependencies": {}
+  }
 }

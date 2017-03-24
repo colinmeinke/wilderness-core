@@ -1,4 +1,4 @@
-import { valid } from 'plain-shape-object'
+import { valid } from './plain-shape-object'
 
 /**
  * An SVG shape as defined by https://github.com/colinmeinke/svg-points.
@@ -39,7 +39,7 @@ const shape = (...plainShapeObjects) => {
     )
   }
 
-  if (valid(plainShapeObjects)) {
+  if (valid(...plainShapeObjects)) {
     return {
       plainShapeObjects
     }

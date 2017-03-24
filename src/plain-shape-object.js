@@ -1,4 +1,4 @@
-import { shapeValid } from 'svg-points'
+import { valid as shapeValid } from 'svg-points'
 
 const animationPropsValid = plainShapeObjects => {
   return true
@@ -45,7 +45,7 @@ const corePropsValid = plainShapeObjects => {
  *
  * @example
  * errorMsg([
- *   'cx prop is required on an ellipse',
+ *   'cx prop is required on a ellipse',
  *   'cy prop must be of type number'
  * ])
  */
