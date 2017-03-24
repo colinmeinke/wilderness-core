@@ -4,6 +4,18 @@
     "email": "hello@colinmeinke.com",
     "url": "https://colinmeinke.com"
   },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ]
+  },
   "bugs": {
     "url": "https://github.com/colinmeinke/wilderness-core/issues"
   },
@@ -14,6 +26,9 @@
   },
   "description": "A Javascript API for drawing and animating SVG",
   "devDependencies": {
+    "babel-cli": "^6.24.0",
+    "babel-jest": "^19.0.0",
+    "babel-preset-env": "^1.2.2",
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "jest": "^19.0.2",
@@ -35,5 +50,6 @@
     "fix": "standard --fix",
     "lint": "standard --verbose | snazzy",
     "test": "jest"
-  }
+  },
+  "dependencies": {}
 }
