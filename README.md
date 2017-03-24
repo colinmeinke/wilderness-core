@@ -21,7 +21,7 @@ const circle = {
 ```
 
 For a list of all properties allowed in a Plain Shape Object
-[see the wiki]().
+[see the wiki](https://github.com/colinmeinke/wilderness-core/wiki/Plain-Shape-Object).
 
 ### Shape
 
