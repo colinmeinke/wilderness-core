@@ -1,0 +1,39 @@
+{
+  "author": {
+    "name": "Colin Meinke",
+    "email": "hello@colinmeinke.com",
+    "url": "https://colinmeinke.com"
+  },
+  "bugs": {
+    "url": "https://github.com/colinmeinke/wilderness-core/issues"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
+  },
+  "description": "A Javascript API for drawing and animating SVG",
+  "devDependencies": {
+    "commitizen": "^2.9.6",
+    "cz-conventional-changelog": "^2.0.0",
+    "jest": "^19.0.2",
+    "snazzy": "^6.0.0",
+    "standard": "^9.0.2"
+  },
+  "homepage": "https://github.com/colinmeinke/wilderness#readme",
+  "license": "ISC",
+  "jest": {
+    "testRegex": "/tests/.*.js"
+  },
+  "name": "wilderness-core",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/colinmeinke/wilderness-core.git"
+  },
+  "scripts": {
+    "commit": "git-cz",
+    "fix": "standard --fix",
+    "lint": "standard --verbose | snazzy",
+    "test": "jest"
+  }
+}
