@@ -36,7 +36,7 @@ const validate = plainShapeObjects => plainShapeObjects.map(s => {
  * @returns {Shape}
  *
  * @example
- * shape(circle, square)
+ * const morph = shape(circle, square)
  */
 const shape = (...plainShapeObjects) => {
   if (plainShapeObjects.length === 0) {

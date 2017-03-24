@@ -27,5 +27,5 @@ For a list of all properties allowed in a Plain Shape Object
 
 ```js
 import { shape } from 'wilderness-core'
-const circleShape = shape(circle)
+const morph = shape(circle, square)
 ```
