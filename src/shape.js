@@ -1,3 +1,5 @@
+import { valid } from 'plain-shape-object'
+
 /**
  * An SVG shape as defined by https://github.com/colinmeinke/svg-points.
  *
@@ -20,14 +22,6 @@
  * @property {PlainShapeObject[]} plainShapeObjects
  */
 
-// @todo abstract this to the svg-points lib
-// and validate other properties
-const validate = plainShapeObjects => plainShapeObjects.map(s => {
-  if (typeof s.type === 'undefined') {
-    throw new TypeError('A Plain Shape Object must have a type property')
-  }
-})
-
 /**
  * Creates a Shape from one or more Plain Shape Object.
  *
@@ -40,13 +34,15 @@ const validate = plainShapeObjects => plainShapeObjects.map(s => {
  */
 const shape = (...plainShapeObjects) => {
   if (plainShapeObjects.length === 0) {
-    throw new TypeError('The shape function must be passed at least one Plain Shape Object')
+    throw new TypeError(
+      `The shape function must be passed at least one Plain Shape Object`
+    )
   }
 
-  validate(plainShapeObjects)
-
-  return {
-    plainShapeObjects
+  if (valid(plainShapeObjects)) {
+    return {
+      plainShapeObjects
+    }
   }
 }
 
