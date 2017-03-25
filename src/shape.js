@@ -1,24 +1,12 @@
+import { keyframes } from './keyframe'
 import { valid } from './plain-shape-object'
 
 /**
- * An SVG shape as defined by https://github.com/colinmeinke/svg-points.
- *
- * @typedef {Object} PlainShapeObjectCoreProps
- */
-
-/**
- * A three dimensional shape.
- *
- * @typedef {Object} PlainShapeObject
- *
- * @extends PlainShapeObjectCoreProps
- */
-
-/**
- * A four dimensional shape (i.e. includes time).
+ * A sequence of static shapes.
  *
  * @typedef {Object} Shape
  *
+ * @property {Keyframe[]} keyframes
  * @property {PlainShapeObject[]} plainShapeObjects
  */
 
@@ -41,6 +29,7 @@ const shape = (...plainShapeObjects) => {
 
   if (valid(...plainShapeObjects)) {
     return {
+      keyframes: keyframes(plainShapeObjects),
       plainShapeObjects
     }
   }

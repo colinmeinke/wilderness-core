@@ -1,5 +1,19 @@
 import { valid as shapeValid } from 'svg-points'
 
+/**
+ * An SVG shape as defined by https://github.com/colinmeinke/svg-points.
+ *
+ * @typedef {Object} PlainShapeObjectCoreProps
+ */
+
+/**
+ * A static shape.
+ *
+ * @typedef {Object} PlainShapeObject
+ *
+ * @extends PlainShapeObjectCoreProps
+ */
+
 const animationPropsValid = plainShapeObjects => {
   return true
 }
