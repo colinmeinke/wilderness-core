@@ -22,6 +22,9 @@ describe('shape', () => {
       fill: '#E54'
     }
 
-    expect(shape(circle)).toHaveProperty('plainShapeObjects')
+    const s = shape(circle)
+
+    expect(s).toHaveProperty('keyframes')
+    expect(s).toHaveProperty('plainShapeObjects')
   })
 })

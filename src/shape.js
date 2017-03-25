@@ -1,4 +1,4 @@
-import { keyframes } from './keyframe'
+import keyframes from './keyframe'
 import { valid } from './plain-shape-object'
 
 /**

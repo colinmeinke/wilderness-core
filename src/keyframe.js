@@ -22,7 +22,7 @@ import { toPoints } from 'svg-points'
  *
  * @typedef {Object} Keyframe
  *
- * @property {} position
+ * @property {number} position
  * @property {KeyframeShape} keyframeShape
  */
 
@@ -49,6 +49,8 @@ const keyframeShape = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) 
       k.childKeyframeShapes.push(keyframeShape(childPlainShapeObject))
     })
   }
+
+  return k
 }
 
 /**
@@ -62,21 +64,11 @@ const keyframeShape = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) 
  * @example
  * keyframes([ circle, square ])
  */
-const keyframes = plainShapeObjects => {
-  let currentPosition = 0
-
-  const k = plainShapeObjects.map(plainShapeObject => {
-    k.push({
-      position: currentPosition,
-      keyframeShape: keyframeShape(plainShapeObject)
-    })
-
-    currentPosition += 1 / (plainShapeObjects.length - 1)
-  })
-
-  // @todo return equaliseKeyframes(k)
-
-  return k
-}
+const keyframes = plainShapeObjects => (
+  plainShapeObjects.map((plainShapeObject, i) => ({
+    position: 0,
+    keyframeShape: keyframeShape(plainShapeObject)
+  }))
+)
 
 export default keyframes
