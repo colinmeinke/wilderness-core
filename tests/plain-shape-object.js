@@ -27,4 +27,15 @@ describe('valid', () => {
 
     expect(() => valid(plainShapeObject)).toThrow()
   })
+
+  it('should throw when a child shape is invalid', () => {
+    const plainShapeObject = {
+      type: 'g',
+      shapes: [ {}, {} ]
+    }
+
+    expect(() => valid(plainShapeObject)).toThrow()
+  })
+
+  it('should be valid when passed valid plain shape objects')
 })

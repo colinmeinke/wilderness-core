@@ -3247,9 +3247,9 @@ supports-color@^3.1.2:
   dependencies:
     has-flag "^1.0.0"
 
-svg-points@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/svg-points/-/svg-points-3.2.0.tgz#83d01690e7844289def3dd697921ab25aafa8052"
+svg-points@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/svg-points/-/svg-points-4.0.0.tgz#31b8ce7a130cd1d5de05cb53f5fca09833694eb3"
 
 symbol-tree@^3.2.1:
   version "3.2.2"
