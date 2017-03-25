@@ -9,7 +9,7 @@ Currently exploring new ideas around
 
 These are the building blocks of Wilderness.
 A *Plain Shape Object* allows you to define a static shape,
-as specified in the
+as specified by the
 [SVG Points spec](https://github.com/colinmeinke/svg-points#svg-points).
 
 ```js

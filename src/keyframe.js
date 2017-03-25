@@ -1,7 +1,8 @@
 import { toPoints } from 'svg-points'
 
 /**
- * Shape data as specified by https://github.com/colinmeinke/points.
+ * Shape data as specified by the
+ * {@link https://github.com/colinmeinke/points Points spec}.
  *
  * @typedef {Object[]} Points
  */
