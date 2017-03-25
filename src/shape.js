@@ -18,7 +18,7 @@ import { valid } from './plain-shape-object'
  * @returns {Shape}
  *
  * @example
- * const morph = shape(circle, square)
+ * shape(circle, square)
  */
 const shape = (...plainShapeObjects) => {
   if (plainShapeObjects.length === 0) {
