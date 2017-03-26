@@ -13,7 +13,7 @@ describe('shape', () => {
     expect(() => shape(invalidShape)).toThrow()
   })
 
-  it('should return an object with the correct properties', () => {
+  it('should return an object with the correct props', () => {
     const circle = {
       type: 'circle',
       cx: 50,

@@ -38,16 +38,16 @@ import { toPoints } from 'svg-points'
  */
 const keyframeShape = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) => {
   const k = {
-    points: toPoints(plainShapeObject),
+    points: plainShapeObject.type === 'g'
+      ? null
+      : toPoints(plainShapeObject),
     styles: {}
   }
 
   if (childPlainShapeObjects) {
-    k.childKeyframeShapes = []
-
-    childPlainShapeObjects.map(childPlainShapeObject => {
-      k.childKeyframeShapes.push(keyframeShape(childPlainShapeObject))
-    })
+    k.childKeyframeShapes = childPlainShapeObjects.map(childPlainShapeObject => (
+      keyframeShape(childPlainShapeObject)
+    ))
   }
 
   return k
