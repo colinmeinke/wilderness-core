@@ -29,8 +29,7 @@ const shape = (...plainShapeObjects) => {
 
   if (valid(...plainShapeObjects)) {
     return {
-      keyframes: keyframes(plainShapeObjects),
-      plainShapeObjects
+      keyframes: keyframes(plainShapeObjects)
     }
   }
 }

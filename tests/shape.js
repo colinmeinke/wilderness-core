@@ -25,6 +25,5 @@ describe('shape', () => {
     const s = shape(circle)
 
     expect(s).toHaveProperty('keyframes')
-    expect(s).toHaveProperty('plainShapeObjects')
   })
 })
