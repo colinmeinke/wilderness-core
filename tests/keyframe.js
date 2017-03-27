@@ -13,11 +13,28 @@ describe('keyframes', () => {
 
     const [ k ] = keyframes(plainShapeObjects)
 
+    expect(k).toHaveProperty('name')
     expect(k).toHaveProperty('position')
-    expect(k).toHaveProperty('keyframeShape')
+    expect(k).toHaveProperty('frameShape')
   })
 
-  it('should return items with the correct keyframeShape props', () => {
+  it('should set the item name prop to ', () => {
+    const name = 'CIRCLE'
+
+    const plainShapeObjects = [{
+      name,
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 20
+    }]
+
+    const [ k ] = keyframes(plainShapeObjects)
+
+    expect(k.name).toBe(name)
+  })
+
+  it('should return items with the correct frameShape props', () => {
     const plainShapeObjects = [{
       type: 'circle',
       cx: 50,
@@ -26,13 +43,14 @@ describe('keyframes', () => {
     }]
 
     const [ k ] = keyframes(plainShapeObjects)
-    const { keyframeShape } = k
+    const { frameShape } = k
 
-    expect(keyframeShape).toHaveProperty('points')
-    expect(keyframeShape).toHaveProperty('styles')
+    expect(frameShape).toHaveProperty('points')
+    expect(frameShape).toHaveProperty('styles')
+    expect(frameShape).toHaveProperty('tween')
   })
 
-  it('should return items with a valid keyframeShape.points prop', () => {
+  it('should return items with a valid frameShape.points prop', () => {
     const plainShapeObjects = [{
       type: 'circle',
       cx: 50,
@@ -41,7 +59,7 @@ describe('keyframes', () => {
     }]
 
     const [ k ] = keyframes(plainShapeObjects)
-    const { keyframeShape: { points } } = k
+    const { frameShape: { points } } = k
 
     const expectedPoints = [
       { x: 50, y: 30, moveTo: true },
@@ -52,7 +70,7 @@ describe('keyframes', () => {
     expect(points).toEqual(expectedPoints)
   })
 
-  it('should return items with a keyframeShape.points prop of null when passed a g Plain Shape Object', () => {
+  it('should return items with a frameShape.points prop of null when passed a g Plain Shape Object', () => {
     const plainShapeObjects = [{
       type: 'g',
       shapes: [{
@@ -64,12 +82,12 @@ describe('keyframes', () => {
     }]
 
     const [ k ] = keyframes(plainShapeObjects)
-    const { keyframeShape: { points } } = k
+    const { frameShape: { points } } = k
 
     expect(points).toBe(null)
   })
 
-  it('should return an item with a keyframeShape.childKeyframeShapes prop', () => {
+  it('should return an item with a frameShape.childFrameShapes prop', () => {
     const plainShapeObjects = [{
       type: 'g',
       shapes: [{
@@ -81,8 +99,8 @@ describe('keyframes', () => {
     }]
 
     const [ k ] = keyframes(plainShapeObjects)
-    const { keyframeShape } = k
+    const { frameShape } = k
 
-    expect(keyframeShape).toHaveProperty('childKeyframeShapes')
+    expect(frameShape).toHaveProperty('childFrameShapes')
   })
 })

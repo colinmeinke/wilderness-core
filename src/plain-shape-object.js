@@ -14,10 +14,6 @@ import { valid as shapeValid } from 'svg-points'
  * @extends PlainShapeObjectCoreProps
  */
 
-const animationPropsValid = plainShapeObjects => {
-  return true
-}
-
 /**
  * Validates Plain Shape Object Core Props.
  *
@@ -71,7 +67,28 @@ const manipulationPropsValid = plainShapeObjects => {
   return true
 }
 
+/**
+ * Creates a Plain Shape Object from a Shape.
+ *
+ * @param {Shape} shape
+ *
+ * @returns {PlainShapeObject}
+ *
+ * @example
+ * plainShapeObject(circle)
+ */
+const plainShapeObject = shape => {
+  return {
+    type: 'path',
+    d: ''
+  }
+}
+
 const stylePropsValid = plainShapeObjects => {
+  return true
+}
+
+const tweenPropsValid = plainShapeObjects => {
   return true
 }
 
@@ -90,10 +107,11 @@ const stylePropsValid = plainShapeObjects => {
  * }
  */
 const valid = (...plainShapeObjects) => (
-  animationPropsValid(plainShapeObjects) &&
   corePropsValid(plainShapeObjects) &&
   manipulationPropsValid(plainShapeObjects) &&
-  stylePropsValid(plainShapeObjects)
+  stylePropsValid(plainShapeObjects) &&
+  tweenPropsValid(plainShapeObjects)
 )
 
 export { valid }
+export default plainShapeObject

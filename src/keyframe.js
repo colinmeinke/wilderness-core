@@ -1,57 +1,14 @@
-import { toPoints } from 'svg-points'
-
-/**
- * Shape data as specified by the
- * {@link https://github.com/colinmeinke/points Points spec}.
- *
- * @typedef {Object[]} Points
- */
-
-/**
- * The data required to render a shape.
- *
- * @typedef {Object} KeyframeShape
- *
- * @property {Points} points
- * @property {Object} styles
- * @property {KeyframeShape[]} childKeyframeShapes
- */
+import { frameShapeFromPlainShapeObject } from './frame'
 
 /**
  * The data required to render and tween to a shape.
  *
  * @typedef {Object} Keyframe
  *
+ * @property {} name
  * @property {number} position
- * @property {KeyframeShape} keyframeShape
+ * @property {FrameShape} frameShape
  */
-
-/**
- * Creates a KeyframeShape from a Plain Shape Object.
- *
- * @param {PlainShapeObject} plainShapeObject
- *
- * @returns {KeyframeShape}
- *
- * @example
- * keyframeShape(circle)
- */
-const keyframeShape = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) => {
-  const k = {
-    points: plainShapeObject.type === 'g'
-      ? null
-      : toPoints(plainShapeObject),
-    styles: {}
-  }
-
-  if (childPlainShapeObjects) {
-    k.childKeyframeShapes = childPlainShapeObjects.map(childPlainShapeObject => (
-      keyframeShape(childPlainShapeObject)
-    ))
-  }
-
-  return k
-}
 
 /**
  * Creates an array of Keyframes from an array of
@@ -65,9 +22,10 @@ const keyframeShape = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) 
  * keyframes([ circle, square ])
  */
 const keyframes = plainShapeObjects => (
-  plainShapeObjects.map((plainShapeObject, i) => ({
+  plainShapeObjects.map(({ name, ...plainShapeObject }, i) => ({
+    name: typeof name !== 'undefined' ? name : i,
     position: 0,
-    keyframeShape: keyframeShape(plainShapeObject)
+    frameShape: frameShapeFromPlainShapeObject(plainShapeObject)
   }))
 )
 
