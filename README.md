@@ -43,7 +43,7 @@ const morph = shape(circle, square)
 Before a *Shape* can start playback, it needs to be queued on
 a *Timeline*. A *Timeline* is created with the timeline function.
 A *Timeline* can be composed of many *Shapes*. By default *Shapes*
-will queued consecutively.
+will be queued consecutively.
 
 ```js
 import { shape, timeline } from 'wilderness-core'
@@ -76,6 +76,9 @@ In the example above, the options passed together with each
 will start playback 200 milliseconds before `shape1` finishes
 playback.
 
+Additionally, playback options can be passed as the last argument
+of the timeline function.
+
 ```js
 import { shape, timeline } from 'wilderness-core'
 
@@ -88,12 +91,9 @@ const animation = timeline(shape1, shape2, {
 })
 ```
 
-Additionally, playback options can be passed as the last argument
-of the timeline function.
-
 ### Frame
 
-A *Frame* is an array of shapes at a point on a *Timeline*. A
+A *Frame* is an array of shapes at a specific point in time. A
 *Frame* is created by passing a *Timeline* to the frame function.
 
 ```js
@@ -141,3 +141,6 @@ animation.subscibe('keyframe', ({ name, reverse }) => {
 
 play(animation)
 ```
+
+For a list of all events
+[see the wiki](https://github.com/colinmeinke/wilderness-core/wiki/Events).
