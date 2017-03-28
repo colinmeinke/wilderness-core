@@ -38,6 +38,23 @@ import { shape } from 'wilderness-core'
 const morph = shape(circle, square)
 ```
 
+The plainShapeObject function does the reverse, creating a *Plain
+Shape Object* from a *Shape*.
+
+```js
+const { shape, plainShapeObject } from 'wilderness-core'
+const morph = shape(circle, square)
+
+// At some point in time later
+console.log(plainShapeObject(morph))
+
+const circle = {
+  type: 'path',
+  d: '...' // A shape somewhere between a circle and a square
+  fill: '#E54'
+}
+```
+
 ### Timeline
 
 Before a *Shape* can start playback, it needs to be queued on
@@ -91,6 +108,22 @@ const animation = timeline(shape1, shape2, {
 })
 ```
 
+This is also where middleware can be defined.
+
+```js
+import { shape, timeline } from 'wilderness-core'
+
+const shape1 = shape({})
+const shape2 = shape({})
+
+const animation = timeline(shape1, shape2, {
+  middleware: [
+    colorMiddleware,
+    unitMiddleware
+  ]
+})
+```
+
 ### Frame
 
 A *Frame* is an array of shapes at a specific point in time. A
@@ -135,7 +168,7 @@ const shape2 = shape({})
 
 const animation = timeline(shape1, shape2)
 
-animation.subscibe('keyframe', ({ name, reverse }) => {
+animation.subscribe('keyframe', ({ name, reverse }) => {
   console.log(`Playback hit keyframe named ${name}`)
 })
 
