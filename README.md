@@ -48,11 +48,11 @@ const morph = shape(circle, square)
 // At some point in time later
 console.log(plainShapeObject(morph))
 
-const circle = {
-  type: 'path',
-  d: '...' // A shape somewhere between a circle and a square
-  fill: '#E54'
-}
+// {
+//   type: 'path',
+//   d: '...' // A shape somewhere between a circle and a square
+//   fill: '#E54'
+// }
 ```
 
 ### Timeline
