@@ -40,10 +40,10 @@ const morph = shape(circle, square)
 
 ### Timeline
 
-Before you can start playback of *Shapes*, they need to be set on
-a timeline, using the timeline function. This will create a *Timeline*.
-A *Timeline* can be composed of many *Shapes*, however, a *Shape* can
-only be set on one *Timeline*.
+Before a *Shape* can start playback, it needs to be queued on
+a *Timeline*. A *Timeline* is created with the timeline function.
+A *Timeline* can be composed of many *Shapes*. By default *Shapes*
+will queued consecutively.
 
 ```js
 import { shape, timeline } from 'wilderness-core'
@@ -54,8 +54,7 @@ const shape2 = shape({})
 const animation = timeline(shape1, shape2)
 ```
 
-The timeline function can also take an options object with
-each *Shape*.
+Each *Shape* passed into timeline function can also take options.
 
 ```js
 import { shape, timeline } from 'wilderness-core'
@@ -71,8 +70,7 @@ timeline(
 )
 ```
 
-By default *Shapes* will playback in order. However, in the above
-*Timeline*, both `shape2` and `shape3` will start
+In the example above, both `shape2` and `shape3` will start
 playback 200 milliseconds before `shape1` finishes playback.
 
 ```js
