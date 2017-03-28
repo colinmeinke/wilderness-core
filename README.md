@@ -65,8 +65,8 @@ will be queued consecutively.
 ```js
 import { shape, timeline } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
+const shape1 = shape()
+const shape2 = shape()
 
 const animation = timeline(shape1, shape2)
 ```
@@ -77,9 +77,9 @@ options.
 ```js
 import { shape, timeline } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
-const shape3 = shape({})
+const shape1 = shape()
+const shape2 = shape()
+const shape3 = shape()
 
 timeline(
   [ shape1, { name: 'SHAPE1' } ],
@@ -99,8 +99,8 @@ of the timeline function.
 ```js
 import { shape, timeline } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
+const shape1 = shape()
+const shape2 = shape()
 
 const animation = timeline(shape1, shape2, {
   duration: 5000,
@@ -113,8 +113,8 @@ This is also where middleware can be defined.
 ```js
 import { shape, timeline } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
+const shape1 = shape()
+const shape2 = shape()
 
 const animation = timeline(shape1, shape2, {
   middleware: [
@@ -132,8 +132,8 @@ A *Frame* is an array of shapes at a specific point in time. A
 ```js
 import { shape, timeline, frame } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
+const shape1 = shape()
+const shape2 = shape()
 
 const animation = timeline(shape1, shape2)
 
@@ -147,8 +147,8 @@ frame(timeline).map(frameShape => {
 ```js
 import { shape, timeline, play } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
+const shape1 = shape()
+const shape2 = shape()
 
 const animation = timeline(shape1, shape2)
 
@@ -163,8 +163,8 @@ playback events.
 ```js
 import { shape, timeline, play } from 'wilderness-core'
 
-const shape1 = shape({})
-const shape2 = shape({})
+const shape1 = shape()
+const shape2 = shape()
 
 const animation = timeline(shape1, shape2)
 
