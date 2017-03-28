@@ -93,8 +93,7 @@ of the timeline function.
 
 ### Frame
 
-A *Frame* is an array of shapes. In the context of a *Timeline*, it
-represents the shapes at the current point along that timeline. A
+A *Frame* is an array of shapes at a point on a *Timeline*. A
 *Frame* is created by passing a *Timeline* to the frame function.
 
 ```js
