@@ -54,7 +54,8 @@ const shape2 = shape({})
 const animation = timeline(shape1, shape2)
 ```
 
-Each *Shape* passed into timeline function can also take options.
+Each *Shape* passed into the timeline function can also take
+options.
 
 ```js
 import { shape, timeline } from 'wilderness-core'
@@ -70,8 +71,10 @@ timeline(
 )
 ```
 
-In the example above, both `shape2` and `shape3` will start
-playback 200 milliseconds before `shape1` finishes playback.
+In the example above, the options passed together with each
+*Shape* will adjust the queue timing. Both `shape2` and `shape3`
+will start playback 200 milliseconds before `shape1` finishes
+playback.
 
 ```js
 import { shape, timeline } from 'wilderness-core'
