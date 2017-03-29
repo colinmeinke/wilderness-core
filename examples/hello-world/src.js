@@ -1,5 +1,5 @@
 import { render } from '../crude-wilderness-dom'
-import { shape } from '../../src/index.js'
+import { shape } from '../../src'
 
 render(
   document.querySelector('svg'),
