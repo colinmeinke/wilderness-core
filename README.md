@@ -46,6 +46,7 @@ const { shape, plainShapeObject } from 'wilderness-core'
 const morph = shape(circle, square)
 
 // At some point in time later
+// after playback has started
 console.log(plainShapeObject(morph))
 
 // {
