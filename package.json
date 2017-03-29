@@ -68,7 +68,7 @@
     "snazzy": "^6.0.0",
     "standard": "^9.0.2"
   },
-  "homepage": "https://github.com/colinmeinke/wilderness#readme",
+  "homepage": "https://github.com/colinmeinke/wilderness-core#readme",
   "license": "ISC",
   "jest": {
     "testRegex": "/tests/.*.js"
