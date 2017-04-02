@@ -14,7 +14,6 @@ import { toPoints } from 'svg-points'
  *
  * @property {Points} points
  * @property {Object} styles
- * @property {Object} tween
  * @property {FrameShape[]} childFrameShapes
  */
 
@@ -39,8 +38,7 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
     points: plainShapeObject.type === 'g'
       ? null
       : toPoints(plainShapeObject),
-    styles: {},
-    tween: {}
+    styles: {}
   }
 
   if (childPlainShapeObjects) {

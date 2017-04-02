@@ -4,18 +4,29 @@ import keyframes from '../src/keyframe'
 
 describe('keyframes', () => {
   it('should return items with the correct props', () => {
-    const plainShapeObjects = [{
-      type: 'circle',
-      cx: 50,
-      cy: 50,
-      r: 20
-    }]
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100
+      }
+    ]
 
-    const [ k ] = keyframes(plainShapeObjects)
+    const [ k1, k2 ] = keyframes(plainShapeObjects)
 
-    expect(k).toHaveProperty('name')
-    expect(k).toHaveProperty('position')
-    expect(k).toHaveProperty('frameShape')
+    expect(k1).toHaveProperty('name')
+    expect(k1).toHaveProperty('position')
+    expect(k1).toHaveProperty('frameShape')
+    expect(k1.tween).toBeUndefined()
+    expect(k2).toHaveProperty('tween')
   })
 
   it('should set the item name prop to ', () => {
@@ -35,19 +46,20 @@ describe('keyframes', () => {
   })
 
   it('should return items with the correct frameShape props', () => {
-    const plainShapeObjects = [{
-      type: 'circle',
-      cx: 50,
-      cy: 50,
-      r: 20
-    }]
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      }
+    ]
 
     const [ k ] = keyframes(plainShapeObjects)
     const { frameShape } = k
 
     expect(frameShape).toHaveProperty('points')
     expect(frameShape).toHaveProperty('styles')
-    expect(frameShape).toHaveProperty('tween')
   })
 
   it('should return items with a valid frameShape.points prop', () => {
