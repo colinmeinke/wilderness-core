@@ -35,13 +35,12 @@ import { toPoints } from 'svg-points'
  */
 const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) => {
   const k = {
-    points: plainShapeObject.type === 'g'
-      ? null
-      : toPoints(plainShapeObject),
     styles: {}
   }
 
-  if (childPlainShapeObjects) {
+  if (plainShapeObject.type !== 'g') {
+    k.points = toPoints(plainShapeObject)
+  } else if (childPlainShapeObjects) {
     k.childFrameShapes = childPlainShapeObjects.map(childPlainShapeObject => (
       frameShapeFromPlainShapeObject(childPlainShapeObject)
     ))

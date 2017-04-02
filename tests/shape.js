@@ -59,27 +59,4 @@ describe('shape', () => {
 
     expect(s.keyframes.length).toEqual(2)
   })
-
-  it('should add an extra keyframe if a plain shape object has a delay prop', () => {
-    const circle = {
-      type: 'circle',
-      cx: 50,
-      cy: 50,
-      r: 20,
-      fill: '#E54'
-    }
-
-    const square = {
-      type: 'rect',
-      width: 50,
-      height: 50,
-      x: 100,
-      y: 100,
-      delay: 1000
-    }
-
-    const s = shape(circle, square)
-
-    expect(s.keyframes.length).toEqual(3)
-  })
 })

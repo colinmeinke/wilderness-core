@@ -29,7 +29,55 @@ describe('keyframes', () => {
     expect(k2).toHaveProperty('tween')
   })
 
-  it('should set the item name prop to ', () => {
+  it('should add an extra keyframe if a plain shape object has a delay prop', () => {
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100,
+        delay: 1000
+      }
+    ]
+
+    const k = keyframes(plainShapeObjects)
+
+    expect(k.length).toEqual(3)
+  })
+
+  it('should return items with the correct position props', () => {
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100,
+        delay: 1000
+      }
+    ]
+
+    const [ k1, k2, k3 ] = keyframes(plainShapeObjects)
+
+    expect(k1.position).toEqual(0)
+    expect(k2.position).toEqual(1000 / 1200)
+    expect(k3.position).toEqual(1)
+  })
+
+  it('should set the item name prop', () => {
     const name = 'CIRCLE'
 
     const plainShapeObjects = [{
@@ -82,7 +130,7 @@ describe('keyframes', () => {
     expect(points).toEqual(expectedPoints)
   })
 
-  it('should return items with a frameShape.points prop of null when passed a g Plain Shape Object', () => {
+  it('should return item without frameShape.points prop when passed a g Plain Shape Object', () => {
     const plainShapeObjects = [{
       type: 'g',
       shapes: [{
@@ -96,7 +144,7 @@ describe('keyframes', () => {
     const [ k ] = keyframes(plainShapeObjects)
     const { frameShape: { points } } = k
 
-    expect(points).toBe(null)
+    expect(points).toBeUndefined()
   })
 
   it('should return an item with a frameShape.childFrameShapes prop', () => {

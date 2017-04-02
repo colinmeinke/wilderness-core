@@ -6,7 +6,7 @@ import { frameShapeFromPlainShapeObject } from './frame'
  * @typedef {Object} Keyframe
  *
  * @property {string|number} name
- * @property {number} position
+ * @property {number} position - a number between 0 and 1 (inclusive)
  * @property {FrameShape} frameShape
  * @property {Object} tween
  */
@@ -25,23 +25,24 @@ import { frameShapeFromPlainShapeObject } from './frame'
 const keyframes = plainShapeObjects => {
   const k = []
 
-  plainShapeObjects.map(({ name, ...plainShapeObject }, i) => {
+  plainShapeObjects.map(({ delay, duration, name, ...plainShapeObject }, i) => {
     const keyframe = {
       name: typeof name !== 'undefined' ? name : i,
-      position: 0,
       frameShape: frameShapeFromPlainShapeObject(plainShapeObject)
     }
 
     if (i > 0) {
-      keyframe.tween = {}
+      keyframe.tween = {
+        duration: typeof duration !== 'undefined' ? duration : 200
+      }
 
-      if (plainShapeObject.delay) {
+      if (delay) {
         const previousKeyframe = k[ k.length - 1 ]
 
         const delayKeyframe = {
           ...previousKeyframe,
           name: `${previousKeyframe.name}.delay`,
-          tween: { duration: plainShapeObject.delay }
+          tween: { duration: delay }
         }
 
         k.push(delayKeyframe)
@@ -51,7 +52,52 @@ const keyframes = plainShapeObjects => {
     k.push(keyframe)
   })
 
-  return k
+  return positionedKeyframes(k)
 }
+
+/**
+ * Adds the position prop to each Keyframe in an
+ * array of Keyframes.
+ *
+ * @param {Keyframe[]} k
+ *
+ * @returns {Keyframe[]}
+ *
+ * @example
+ * positionedKeyframes(keyframes)
+ */
+const positionedKeyframes = k => {
+  const totalDuration = keyframesTotalDuration(k)
+
+  let durationAtKeyframe = 0
+
+  return k.map(keyframe => {
+    const { tween: { duration = 0 } = {} } = keyframe
+
+    durationAtKeyframe += duration
+
+    return {
+      ...keyframe,
+      position: durationAtKeyframe === 0
+        ? 0
+        : durationAtKeyframe / totalDuration
+    }
+  })
+}
+
+/**
+ * Adds the tween duration of an array of Keyframes.
+ *
+ * @param {Keyframe[]} k
+ *
+ * @returns {number}
+ *
+ * @example
+ * keyframesTotalDuration(keyframes)
+ */
+const keyframesTotalDuration = k => k.reduce((
+  currentDuration,
+  { tween: { duration = 0 } = {} }
+) => (currentDuration += duration), 0)
 
 export default keyframes
