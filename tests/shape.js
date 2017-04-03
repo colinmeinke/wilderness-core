@@ -24,7 +24,14 @@ describe('shape', () => {
     expect(() => shape(validShape, invalidShape)).toThrow()
   })
 
+  it('should throw when passed invalid name option', () => {
+    const s = { type: 'rect', width: 50, height: 50, x: 100, y: 100 }
+    expect(() => shape(s, { name: [] })).toThrow()
+  })
+
   it('should return an object with the correct props', () => {
+    const name = 'CIRCLE'
+
     const circle = {
       type: 'circle',
       cx: 50,
@@ -33,9 +40,10 @@ describe('shape', () => {
       fill: '#E54'
     }
 
-    const s = shape(circle)
+    const s = shape(circle, { name })
 
     expect(s).toHaveProperty('keyframes')
+    expect(s.name).toEqual(name)
   })
 
   it('should return an object with multiple keyframes', () => {
