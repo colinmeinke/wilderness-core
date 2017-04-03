@@ -12,8 +12,7 @@ import { frameShapeFromPlainShapeObject } from './frame'
  */
 
 /**
- * Creates an array of Keyframes from an array of
- * Plain Shape Objects.
+ * Creates an array of Keyframes from an array of Plain Shape Objects.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *
@@ -56,8 +55,7 @@ const keyframes = plainShapeObjects => {
 }
 
 /**
- * Adds the position prop to each Keyframe in an
- * array of Keyframes.
+ * Adds the position prop to each Keyframe in an array of Keyframes.
  *
  * @param {Keyframe[]} k
  *
