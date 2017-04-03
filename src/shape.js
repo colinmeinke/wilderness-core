@@ -7,7 +7,6 @@ import { valid } from './plain-shape-object'
  * @typedef {Object} Shape
  *
  * @property {Keyframe[]} keyframes
- * @property {PlainShapeObject[]} plainShapeObjects
  */
 
 /**
