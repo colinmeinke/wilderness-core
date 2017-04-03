@@ -73,7 +73,7 @@ describe('keyframes', () => {
     const [ k1, k2, k3 ] = keyframes(plainShapeObjects)
 
     expect(k1.position).toEqual(0)
-    expect(k2.position).toEqual(1000 / 1200)
+    expect(k2.position).toEqual(1000 / 1250)
     expect(k3.position).toEqual(1)
   })
 

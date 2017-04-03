@@ -1,3 +1,4 @@
+import config from './config'
 import { frameShapeFromPlainShapeObject } from './frame'
 
 /**
@@ -32,7 +33,9 @@ const keyframes = plainShapeObjects => {
 
     if (i > 0) {
       keyframe.tween = {
-        duration: typeof duration !== 'undefined' ? duration : 200
+        duration: typeof duration !== 'undefined'
+          ? duration
+          : config.defaults.keyframes.duration
       }
 
       if (delay) {
