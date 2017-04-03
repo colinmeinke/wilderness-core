@@ -1,7 +1,8 @@
 const config = {
   defaults: {
     keyframes: {
-      duration: 250
+      duration: 250,
+      easing: 'easeInOutQuad'
     }
   }
 }

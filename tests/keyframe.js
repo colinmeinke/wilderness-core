@@ -1,5 +1,6 @@
 /* globals describe it expect */
 
+import config from '../src/config'
 import keyframes from '../src/keyframe'
 
 describe('keyframes', () => {
@@ -27,6 +28,39 @@ describe('keyframes', () => {
     expect(k1).toHaveProperty('frameShape')
     expect(k1.tween).toBeUndefined()
     expect(k2).toHaveProperty('tween')
+    expect(k2.tween).toHaveProperty('duration')
+    expect(k2.tween).toHaveProperty('easing')
+    expect(k2.tween.duration).toBe(config.defaults.keyframes.duration)
+    expect(typeof k2.tween.easing).toBe('function')
+  })
+
+  it('should return items with the correct keyframe tween props', () => {
+    const dur = 1000
+    const easingFunction = () => 5
+
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100,
+        duration: dur,
+        easing: easingFunction
+      }
+    ]
+
+    const [ , k ] = keyframes(plainShapeObjects)
+    const { tween: { duration, easing } } = k
+
+    expect(duration).toBe(dur)
+    expect(easing).toBe(easingFunction)
   })
 
   it('should add an extra keyframe if a plain shape object has a delay prop', () => {

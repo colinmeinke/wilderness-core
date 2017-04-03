@@ -1,5 +1,6 @@
 import config from './config'
 import { frameShapeFromPlainShapeObject } from './frame'
+import tweenFunctions from 'tween-functions'
 
 /**
  * The data required to render and tween to a shape.
@@ -11,6 +12,35 @@ import { frameShapeFromPlainShapeObject } from './frame'
  * @property {FrameShape} frameShape
  * @property {Object} tween
  */
+
+/**
+ * An easing function.
+ *
+ * @param {(function|string)} easing - An easing function or the name of an easing function from https://github.com/chenglou/tween-functions.
+ *
+ * @returns {function}
+ *
+ * @example
+ * easingFunc('easeInOutQuad')
+ */
+const easingFunction = (easing = config.defaults.keyframes.easing) => {
+  switch (typeof easing) {
+    case 'string':
+      if (tweenFunctions[ easing ]) {
+        return tweenFunctions[ easing ]
+      }
+
+      throw new TypeError(
+        `Easing must match one of the options defined by https://github.com/chenglou/tween-functions`
+      )
+
+    case 'function':
+      return easing
+
+    default:
+      throw new TypeError(`Easing must be of type function or string`)
+  }
+}
 
 /**
  * Creates an array of Keyframes from an array of Plain Shape Objects.
@@ -25,7 +55,13 @@ import { frameShapeFromPlainShapeObject } from './frame'
 const keyframes = plainShapeObjects => {
   const k = []
 
-  plainShapeObjects.map(({ delay, duration, name, ...plainShapeObject }, i) => {
+  plainShapeObjects.map(({
+    delay,
+    duration,
+    easing,
+    name,
+    ...plainShapeObject
+  }, i) => {
     const keyframe = {
       name: typeof name !== 'undefined' ? name : i,
       frameShape: frameShapeFromPlainShapeObject(plainShapeObject)
@@ -35,7 +71,8 @@ const keyframes = plainShapeObjects => {
       keyframe.tween = {
         duration: typeof duration !== 'undefined'
           ? duration
-          : config.defaults.keyframes.duration
+          : config.defaults.keyframes.duration,
+        easing: easingFunction(easing)
       }
 
       if (delay) {
