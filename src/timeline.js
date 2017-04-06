@@ -1,4 +1,10 @@
 const sort = props => {
+  if (props.length === 0) {
+    throw new TypeError(
+      `The timeline function must be passed at least one Shape`
+    )
+  }
+
   return { shapes: props, options: {} }
 }
 
