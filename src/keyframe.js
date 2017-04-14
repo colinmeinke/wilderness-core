@@ -23,7 +23,7 @@ import tweenFunctions from 'tween-functions'
  * @example
  * easingFunc('easeInOutQuad')
  */
-const easingFunction = (easing = config.defaults.keyframes.easing) => {
+const easingFunction = (easing = config.defaults.keyframe.easing) => {
   switch (typeof easing) {
     case 'string':
       if (tweenFunctions[ easing ]) {
@@ -71,7 +71,7 @@ const keyframes = plainShapeObjects => {
       keyframe.tween = {
         duration: typeof duration !== 'undefined'
           ? duration
-          : config.defaults.keyframes.duration,
+          : config.defaults.keyframe.duration,
         easing: easingFunction(easing)
       }
 
