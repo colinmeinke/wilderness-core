@@ -84,6 +84,18 @@ describe('shape', () => {
       .toThrow('The timeline function started option must be a positive number or zero')
   })
 
+  it('should throw if passed an invalid shape name option', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    expect(() => timeline([ validShape, { name: [] } ]))
+      .toThrow('The name prop must be of type string or number')
+  })
+
+  it('should throw if passed an invalid shape queue option', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    expect(() => timeline([ validShape, { queue: [ 'valid', 'invalid' ] } ]))
+      .toThrow('The queue prop second array item must be of type number')
+  })
+
   it('should not throw if passed a valid Shape and options', () => {
     const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
 

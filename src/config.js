@@ -9,6 +9,7 @@ const config = {
       delay: 0,
       initialIterations: 0,
       iterations: 1,
+      queue: 0,
       reverse: false
     }
   }
