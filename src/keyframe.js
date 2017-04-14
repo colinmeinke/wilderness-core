@@ -8,7 +8,7 @@ import tweenFunctions from 'tween-functions'
  * @typedef {Object} Keyframe
  *
  * @property {string|number} name
- * @property {number} position - a number between 0 and 1 (inclusive)
+ * @property {number} position - A number between 0 and 1 (inclusive).
  * @property {FrameShape} frameShape
  * @property {Object} tween
  */

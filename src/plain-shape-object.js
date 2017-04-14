@@ -11,7 +11,7 @@ import { valid as shapeValid } from 'svg-points'
  *
  * @typedef {Object} PlainShapeObjectTweenProps
  *
- * @property {number} delay - milliseconds before tween starts
+ * @property {number} delay - Milliseconds before the tween starts.
  */
 
 /**
