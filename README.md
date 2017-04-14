@@ -125,6 +125,9 @@ const animation = timeline(shape1, shape2, {
 })
 ```
 
+In reality the middleware in the above example is not necessary,
+as these are the two middlewares that Wilderness adds by default.
+
 ### Frame
 
 A *Frame* is an array of shapes at a specific point in time. A
