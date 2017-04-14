@@ -58,7 +58,7 @@ console.log(plainShapeObject(morph))
 
 ### Timeline
 
-Before a *Shape* can start playback, it needs to be queued on
+Before a *Shape* can start animating, it needs to be queued on
 a *Timeline*. A *Timeline* is created with the timeline function.
 A *Timeline* can be composed of many *Shapes*. By default *Shapes*
 will be queued consecutively.
