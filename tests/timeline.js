@@ -133,4 +133,45 @@ describe('shape', () => {
     expect(reverse).toBe(config.defaults.timeline.reverse)
     expect(started).not.toBeDefined()
   })
+
+  it('should calculate correct playback duration', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
+
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const { playbackOptions: { duration } } = timeline(
+      shape1,
+      [ shape2, { queue: -200 } ]
+    )
+
+    expect(duration).toBe(650)
+  })
+
+  it('should', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
+
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const { timelineShapes } = timeline(
+      shape1,
+      [ shape2, { queue: -200 } ]
+    )
+
+    expect(timelineShapes[ 0 ].timelinePosition.start).toBe(0 / 650)
+    expect(timelineShapes[ 0 ].timelinePosition.end).toBe(500 / 650)
+    expect(timelineShapes[ 1 ].timelinePosition.start).toBe(300 / 650)
+    expect(timelineShapes[ 1 ].timelinePosition.end).toBe(650 / 650)
+  })
 })
