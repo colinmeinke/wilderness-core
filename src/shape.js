@@ -1,4 +1,4 @@
-import keyframes from './keyframe'
+import keyframesAndDuration from './keyframe'
 import { valid } from './plain-shape-object'
 
 /**
@@ -32,10 +32,9 @@ import { valid } from './plain-shape-object'
  */
 const shape = (...props) => {
   const { plainShapeObjects, options: { name } } = sort(props)
+  const { duration, keyframes } = keyframesAndDuration(plainShapeObjects)
 
-  const s = {
-    keyframes: keyframes(plainShapeObjects)
-  }
+  const s = { duration, keyframes }
 
   if (typeof name !== 'undefined') {
     s.name = name

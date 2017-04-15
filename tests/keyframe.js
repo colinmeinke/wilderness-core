@@ -1,10 +1,10 @@
 /* globals describe it expect */
 
 import config from '../src/config'
-import keyframes from '../src/keyframe'
+import keyframesAndDuration from '../src/keyframe'
 
 describe('keyframes', () => {
-  it('should return items with the correct props', () => {
+  it('should return keyframes with the correct props', () => {
     const plainShapeObjects = [
       {
         type: 'circle',
@@ -21,7 +21,8 @@ describe('keyframes', () => {
       }
     ]
 
-    const [ k1, k2 ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k1, k2 ] = keyframes
 
     expect(k1).toHaveProperty('name')
     expect(k1).toHaveProperty('position')
@@ -34,7 +35,7 @@ describe('keyframes', () => {
     expect(typeof k2.tween.easing).toBe('function')
   })
 
-  it('should return items with the correct keyframe tween props', () => {
+  it('should return keyframes with the correct keyframe tween props', () => {
     const dur = 1000
     const easingFunction = () => 5
 
@@ -56,7 +57,8 @@ describe('keyframes', () => {
       }
     ]
 
-    const [ , k ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ , k ] = keyframes
     const { tween: { duration, easing } } = k
 
     expect(duration).toBe(dur)
@@ -81,12 +83,12 @@ describe('keyframes', () => {
       }
     ]
 
-    const k = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
 
-    expect(k.length).toEqual(3)
+    expect(keyframes.length).toEqual(3)
   })
 
-  it('should return items with the correct position props', () => {
+  it('should return keyframes with the correct position props', () => {
     const plainShapeObjects = [
       {
         type: 'circle',
@@ -104,7 +106,8 @@ describe('keyframes', () => {
       }
     ]
 
-    const [ k1, k2, k3 ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k1, k2, k3 ] = keyframes
 
     expect(k1.position).toEqual(0)
     expect(k2.position).toEqual(1000 / 1250)
@@ -122,12 +125,13 @@ describe('keyframes', () => {
       r: 20
     }]
 
-    const [ k ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k ] = keyframes
 
     expect(k.name).toBe(name)
   })
 
-  it('should return items with the correct frameShape props', () => {
+  it('should return keyframes with the correct frameShape props', () => {
     const plainShapeObjects = [
       {
         type: 'circle',
@@ -137,7 +141,8 @@ describe('keyframes', () => {
       }
     ]
 
-    const [ k ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k ] = keyframes
     const { frameShape } = k
 
     expect(frameShape).toHaveProperty('points')
@@ -155,7 +160,8 @@ describe('keyframes', () => {
       }]
     }]
 
-    const [ k ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k ] = keyframes
     const { frameShape } = k
     const [ childFrameShape ] = frameShape.childFrameShapes
 
@@ -165,7 +171,7 @@ describe('keyframes', () => {
     expect(childFrameShape).toHaveProperty('styles')
   })
 
-  it('should return items with a valid frameShape.points prop', () => {
+  it('should return keyframes with a valid frameShape.points prop', () => {
     const plainShapeObjects = [{
       type: 'circle',
       cx: 50,
@@ -173,7 +179,8 @@ describe('keyframes', () => {
       r: 20
     }]
 
-    const [ k ] = keyframes(plainShapeObjects)
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k ] = keyframes
     const { frameShape: { points } } = k
 
     const expectedPoints = [
@@ -183,5 +190,68 @@ describe('keyframes', () => {
     ]
 
     expect(points).toEqual(expectedPoints)
+  })
+
+  it('should return the correct default duration', () => {
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100
+      }
+    ]
+
+    const { duration } = keyframesAndDuration(plainShapeObjects)
+
+    expect(duration).toBe(config.defaults.keyframe.duration * 2)
+  })
+
+  it('should return the correct duration', () => {
+    const duration1 = 720
+    const duration2 = 291
+
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100,
+        duration: duration1
+      },
+      {
+        type: 'rect',
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 100,
+        duration: duration2
+      }
+    ]
+
+    const { duration } = keyframesAndDuration(plainShapeObjects)
+
+    expect(duration).toBe(duration1 + duration2)
   })
 })

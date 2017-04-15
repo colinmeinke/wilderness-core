@@ -14,6 +14,15 @@ import tweenFunctions from 'tween-functions'
  */
 
 /**
+ * A set of keyframes and their total duration.
+ *
+ * @typedef {Object} KeyframesAndDuration
+ *
+ * @property {Keyframe[]} keyframes
+ * @property {number} duration
+ */
+
+/**
  * An easing function.
  *
  * @param {(function|string)} easing - An easing function or the name of an easing function from https://github.com/chenglou/tween-functions.
@@ -47,12 +56,12 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *
- * @returns {Keyframe[]}
+ * @returns {KeyframesAndDuration}
  *
  * @example
  * keyframes([ circle, square ])
  */
-const keyframes = plainShapeObjects => {
+const keyframesAndDuration = plainShapeObjects => {
   const k = []
 
   plainShapeObjects.map(({
@@ -91,22 +100,26 @@ const keyframes = plainShapeObjects => {
     k.push(keyframe)
   })
 
-  return positionedKeyframes(k)
+  const totalDuration = keyframesTotalDuration(k)
+
+  return {
+    duration: totalDuration,
+    keyframes: positionedKeyframes(k, totalDuration)
+  }
 }
 
 /**
  * Adds the position prop to each Keyframe in an array of Keyframes.
  *
  * @param {Keyframe[]} k
+ * @param {number} totalDuration
  *
  * @returns {Keyframe[]}
  *
  * @example
  * positionedKeyframes(keyframes)
  */
-const positionedKeyframes = k => {
-  const totalDuration = keyframesTotalDuration(k)
-
+const positionedKeyframes = (k, totalDuration) => {
   let durationAtKeyframe = 0
 
   return k.map(keyframe => {
@@ -138,4 +151,4 @@ const keyframesTotalDuration = k => k.reduce((
   { tween: { duration = 0 } = {} }
 ) => (currentDuration += duration), 0)
 
-export default keyframes
+export default keyframesAndDuration

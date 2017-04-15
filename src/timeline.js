@@ -135,18 +135,20 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
     throw new TypeError(`The name prop must be of type string or number`)
   }
 
-  if (Array.isArray(queue)) {
-    if (typeof queue[ 0 ] !== 'string' && typeof queue[ 0 ] !== 'number') {
-      throw new TypeError(`The queue prop first array item must be of type string or number`)
-    }
+  if (typeof queue !== 'undefined') {
+    if (Array.isArray(queue)) {
+      if (typeof queue[ 0 ] !== 'string' && typeof queue[ 0 ] !== 'number') {
+        throw new TypeError(`The queue prop first array item must be of type string or number`)
+      }
 
-    if (typeof queue[ 1 ] !== 'number') {
-      throw new TypeError(`The queue prop second array item must be of type number`)
-    }
+      if (typeof queue[ 1 ] !== 'number') {
+        throw new TypeError(`The queue prop second array item must be of type number`)
+      }
 
-    return { follow: queue[ 0 ], name, offset: queue[ 1 ], shape }
-  } else if (typeof queue !== 'number') {
-    throw new TypeError(`The queue prop must be of type number or array`)
+      return { follow: queue[ 0 ], name, offset: queue[ 1 ], shape }
+    } else if (typeof queue !== 'number') {
+      throw new TypeError(`The queue prop must be of type number or array`)
+    }
 
     return { name, offset: queue, shape }
   }

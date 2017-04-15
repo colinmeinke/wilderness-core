@@ -43,6 +43,7 @@ describe('shape', () => {
     const s = shape(circle, { name })
 
     expect(s).toHaveProperty('keyframes')
+    expect(s).toHaveProperty('duration')
     expect(s.name).toEqual(name)
   })
 
@@ -63,8 +64,33 @@ describe('shape', () => {
       y: 100
     }
 
-    const s = shape(circle, square)
+    const { keyframes } = shape(circle, square)
 
-    expect(s.keyframes.length).toEqual(2)
+    expect(keyframes.length).toEqual(2)
+  })
+
+  it('should return an object with the correct duration', () => {
+    const d = 600
+
+    const circle = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 20,
+      fill: '#E54'
+    }
+
+    const square = {
+      type: 'rect',
+      width: 50,
+      height: 50,
+      x: 100,
+      y: 100,
+      duration: d
+    }
+
+    const { duration } = shape(circle, square)
+
+    expect(duration).toEqual(d)
   })
 })
