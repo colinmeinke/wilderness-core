@@ -49,8 +49,9 @@ import config from './config'
  * @typedef {Object} ShapeWithOptions
  *
  * @property {Shape} shape
- * @property {(string|number)} name
- * @property {((string|number)[]|number)} queue
+ * @property {(string|number)} name - A unique reference.
+ * @property {(string|number)} follow - The name of the Shape to queue after.
+ * @property {number} offset - Millisecond offset from end of the follow Shape to start of this Shape.
  */
 
 /**
@@ -135,18 +136,22 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
   }
 
   if (Array.isArray(queue)) {
-    if (typeof queue[ 0 ] !== 'string') {
-      throw new TypeError(`The queue prop first array item must be of type string`)
+    if (typeof queue[ 0 ] !== 'string' && typeof queue[ 0 ] !== 'number') {
+      throw new TypeError(`The queue prop first array item must be of type string or number`)
     }
 
     if (typeof queue[ 1 ] !== 'number') {
       throw new TypeError(`The queue prop second array item must be of type number`)
     }
+
+    return { follow: queue[ 0 ], name, offset: queue[ 1 ], shape }
   } else if (typeof queue !== 'number') {
     throw new TypeError(`The queue prop must be of type number or array`)
+
+    return { name, offset: queue, shape }
   }
 
-  return { name, queue, shape }
+  return { name, offset: 0, shape }
 }
 
 /**
@@ -179,7 +184,7 @@ const sort = props => {
       if (prop.keyframes) {
         current.shapesWithOptions.push({
           name: i,
-          queue: config.defaults.timeline.queue,
+          offset: config.defaults.timeline.queue,
           shape: prop
         })
       } else {
