@@ -49,7 +49,20 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
   return k
 }
 
-const frame = timeline => {
+/**
+ * Calculates the the current Frame of a Timeline
+ *
+ * @param {Timeline} timeline
+ * @param {number} [at]
+ *
+ * @returns {Frame}
+ *
+ * @example
+ * frame(timeline)
+ */
+const frame = (timeline, at) => {
+  at = typeof at !== 'undefined' ? at : Date.now()
+
   return []
 }
 
