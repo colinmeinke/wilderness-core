@@ -30,7 +30,7 @@ For a list of all props allowed in a *Plain Shape Object*
 A *Shape* is created with the shape function.
 A *Shape* is a sequence of static shapes.
 When the shape function is passed one or more *Plain Shape Object*
-it will create a keyframe for each shape. Wilderness will equalise
+it will create a keyframe for each. Wilderness will equalise
 these keyframes so we can later tween between them.
 
 ```js
