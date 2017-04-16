@@ -194,9 +194,76 @@ describe('shape', () => {
     }).toThrow(`No Shape or Keyframe matching name 'foo'`)
   })
 
-  it('should correctly queue Shape after named (string) Shape')
+  it('should correctly queue Shape after named (string) Shape', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
 
-  it('should correctly queue Shape after named (index) Shape')
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
 
-  it('should correctly queue Shape after named Keyframe')
+    const shape3 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const { timelineShapes } = timeline(
+      [ shape1, { name: 'foo' } ],
+      shape2,
+      [ shape3, { queue: [ 'foo', -350 ] } ]
+    )
+
+    expect(timelineShapes[ 2 ].timelinePosition.start).toBe(150 / 850)
+    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(500 / 850)
+  })
+
+  it('should correctly queue Shape after named (index) Shape', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
+
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const shape3 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const { timelineShapes } = timeline(
+      shape1,
+      shape2,
+      [ shape3, { queue: [ 0, -350 ] } ]
+    )
+
+    expect(timelineShapes[ 2 ].timelinePosition.start).toBe(150 / 850)
+    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(500 / 850)
+  })
+
+  it('should correctly queue Shape after named Keyframe', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 250, name: 'foo' },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
+
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const { timelineShapes } = timeline(
+      shape1,
+      [ shape2, { queue: 'foo' } ]
+    )
+
+    expect(timelineShapes[ 1 ].timelinePosition.start).toBe(250 / 750)
+    expect(timelineShapes[ 1 ].timelinePosition.end).toBe(600 / 750)
+  })
 })

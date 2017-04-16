@@ -151,20 +151,28 @@ const playbackOptions = ({
  */
 const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
   if (typeof follow !== 'undefined') {
-    msTimelineShapes.map(({ shape, timelinePosition }) => {
-      if (follow === shape.name) {
-        return shape.timelinePosition.end + offset
-      }
-    })
+    for (let i = 0; i < msTimelineShapes.length; i++) {
+      const s = msTimelineShapes[ i ]
 
-    msTimelineShapes.map(({ shape, timelinePosition }) => {
-      shape.keyframes.map(keyframe => {
+      if (follow === s.shape.name) {
+        return s.timelinePosition.end + offset
+      }
+    }
+
+    for (let i = 0; i < msTimelineShapes.length; i++) {
+      const s = msTimelineShapes[ i ]
+
+      for (let j = 0; j < s.shape.keyframes.length; j++) {
+        const keyframe = s.shape.keyframes[ j ]
+
         if (follow === keyframe.name) {
-          return shape.timelinePosition.start +
-            shape.duration * keyframe.position + offset
+          if (follow === keyframe.name) {
+            return s.timelinePosition.start +
+              s.shape.duration * keyframe.position + offset
+          }
         }
-      })
-    })
+      }
+    }
 
     throw new Error(`No Shape or Keyframe matching name '${follow}'`)
   }
@@ -210,11 +218,13 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
       }
 
       return { follow: queue[ 0 ], name, offset: queue[ 1 ], shape }
-    } else if (typeof queue !== 'number') {
-      throw new TypeError(`The queue prop must be of type number or array`)
+    } else if (typeof queue === 'number') {
+      return { name, offset: queue, shape }
+    } else if (typeof queue === 'string') {
+      return { follow: queue, name, offset: 0, shape }
     }
 
-    return { name, offset: queue, shape }
+    throw new TypeError(`The queue prop must be of type number, string or array`)
   }
 
   return { name, offset: 0, shape }
@@ -410,8 +420,10 @@ const timelineShapesAndDuration = shapesWithOptions => {
 
   const msTimelineShapes = []
 
-  shapesWithOptions.map(({ follow, offset, shape }, i) => {
-    if (typeof shape.name === 'undefined') {
+  shapesWithOptions.map(({ follow, name, offset, shape }, i) => {
+    if (typeof name !== 'undefined') {
+      shape.name = name
+    } else if (typeof shape.name === 'undefined') {
       shape.name = i
     }
 
