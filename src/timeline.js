@@ -305,10 +305,16 @@ const timeline = (...props) => {
     opts.duration = duration
   }
 
-  return {
+  const t = {
     playbackOptions: opts,
     timelineShapes: timelineShapes
   }
+
+  timelineShapes.map(({ shape }) => {
+    shape.timeline = t
+  })
+
+  return t
 }
 
 /**
@@ -421,6 +427,10 @@ const timelineShapesAndDuration = shapesWithOptions => {
   const msTimelineShapes = []
 
   shapesWithOptions.map(({ follow, name, offset, shape }, i) => {
+    if (typeof shape.timeline !== 'undefined') {
+      throw new Error(`A Shape can only be added to one timeline`)
+    }
+
     if (typeof name !== 'undefined') {
       shape.name = name
     } else if (typeof shape.name === 'undefined') {

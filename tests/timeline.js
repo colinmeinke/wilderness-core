@@ -297,4 +297,13 @@ describe('shape', () => {
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(400 / 1100)
     expect(timelineShapes[ 2 ].timelinePosition.end).toBe(750 / 1100)
   })
+
+  it('should throw if a Shape is already associated with a timeline', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    timeline(validShape)
+
+    expect(() => timeline(validShape))
+      .toThrow('A Shape can only be added to one timeline')
+  })
 })
