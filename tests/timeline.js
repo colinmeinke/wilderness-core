@@ -266,4 +266,35 @@ describe('shape', () => {
     expect(timelineShapes[ 1 ].timelinePosition.start).toBe(250 / 750)
     expect(timelineShapes[ 1 ].timelinePosition.end).toBe(600 / 750)
   })
+
+  it('should prioritise queing named Shape over Keyframe', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 250, name: 'foo' },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
+
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const shape3 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    const { timelineShapes } = timeline(
+      [ shape1, { name: 'foo' } ],
+      shape2,
+      [ shape3, { queue: [ 'foo', -350 ] } ]
+    )
+
+    expect(timelineShapes[ 0 ].timelinePosition.start).toBe(0 / 1100)
+    expect(timelineShapes[ 0 ].timelinePosition.end).toBe(750 / 1100)
+    expect(timelineShapes[ 1 ].timelinePosition.start).toBe(750 / 1100)
+    expect(timelineShapes[ 1 ].timelinePosition.end).toBe(1100 / 1100)
+    expect(timelineShapes[ 2 ].timelinePosition.start).toBe(400 / 1100)
+    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(750 / 1100)
+  })
 })
