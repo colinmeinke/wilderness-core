@@ -153,7 +153,7 @@ describe('shape', () => {
     expect(duration).toBe(650)
   })
 
-  it('should', () => {
+  it('should calculate correct keyframe positions', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
       { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
