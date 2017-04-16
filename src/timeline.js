@@ -20,6 +20,33 @@ import config from './config'
  */
 
 /**
+ * The position of an object on a Timeline in Milliseconds.
+ *
+ * @typedef {Object} MsTimelinePosition
+ *
+ * @property {number} start.
+ * @property {number} end.
+ */
+
+/**
+ * A Shape positioned on a Timeline (position set in milliseconds).
+ *
+ * @typedef {Object} MsTimelineShape
+ *
+ * @property {Shape} shape
+ * @property {MsTimelinePosition} timelinePosition
+ */
+
+/**
+ * A set of Timeline Shapes and their total duration.
+ *
+ * @typedef {Object} TimelineShapesAndDuration
+ *
+ * @property {TimelineShape[]} timelineShapes
+ * @property {number} duration
+ */
+
+/**
  * The options required to calculate the current playback position
  * between 0 to 1, at any point in time.
  *
@@ -80,9 +107,9 @@ import config from './config'
  * @returns {PlaybackOptions}
  *
  * @example
- * playbackOptsFromTimelineOpts(timelineOptions)
+ * playbackOptions(timelineOptions)
  */
-const playbackOptsFromTimelineOpts = ({
+const playbackOptions = ({
   alternate,
   delay,
   duration,
@@ -92,7 +119,7 @@ const playbackOptsFromTimelineOpts = ({
   reverse,
   started
 }) => {
-  const playbackOptions = {
+  const opts = {
     alternate,
     delay,
     duration,
@@ -102,10 +129,47 @@ const playbackOptsFromTimelineOpts = ({
   }
 
   if (typeof started !== 'undefined') {
-    playbackOptions.started = started
+    opts.started = started
   }
 
-  return playbackOptions
+  return opts
+}
+
+/**
+ * Calculate the start position of a Shape on the timeline.
+ *
+ * @param {Object} props
+ * @param {(string|number)} [props.follow]
+ * @param {MsTimelineShape[]} props.msTimelineShapes
+ * @param {number} props.offset
+ * @param {number} props.timelineEnd - The current end of the timeline.
+ *
+ * @returns {number}
+ *
+ * @example
+ * shapeStart({ 'foo', msTimelineShapes, 200, 2000 })
+ */
+const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
+  if (typeof follow !== 'undefined') {
+    msTimelineShapes.map(({ shape, timelinePosition }) => {
+      if (follow === shape.name) {
+        return shape.timelinePosition.end + offset
+      }
+    })
+
+    msTimelineShapes.map(({ shape, timelinePosition }) => {
+      shape.keyframes.map(keyframe => {
+        if (follow === keyframe.name) {
+          return shape.timelinePosition.start +
+            shape.duration * keyframe.position + offset
+        }
+      })
+    })
+
+    throw new Error(`No Shape or Keyframe matching name '${follow}'`)
+  }
+
+  return timelineEnd + offset
 }
 
 /**
@@ -224,15 +288,16 @@ const sort = props => {
 const timeline = (...props) => {
   const { shapesWithOptions, timelineOptions } = sort(props)
 
+  const opts = playbackOptions(timelineOptions)
+  const { duration, timelineShapes } = timelineShapesAndDuration(shapesWithOptions)
+
+  if (typeof opts.duration === 'undefined') {
+    opts.duration = duration
+  }
+
   return {
-    playbackOptions: playbackOptsFromTimelineOpts(timelineOptions),
-    timelineShapes: shapesWithOptions.map(({ name, queue, shape }) => ({
-      shape,
-      timelinePosition: {
-        start: 0,
-        end: 1
-      }
-    }))
+    playbackOptions: opts,
+    timelineShapes: timelineShapes
   }
 }
 
@@ -267,12 +332,12 @@ const timelineOptions = options => {
     throw new TypeError(`The timeline function delay option must be a positive number or zero`)
   }
 
-  if (typeof duration === 'undefined') {
-    t.duration = 1000
-  } else if (typeof duration !== 'number' || duration < 0) {
-    throw new TypeError(`The timeline function duration option must be a positive number or zero`)
-  } else {
-    t.duration = duration
+  if (typeof duration !== 'undefined') {
+    if (typeof duration !== 'number' || duration < 0) {
+      throw new TypeError(`The timeline function duration option must be a positive number or zero`)
+    } else {
+      t.duration = duration
+    }
   }
 
   if (typeof initialIterations !== 'number' || initialIterations < 0) {
@@ -302,6 +367,79 @@ const timelineOptions = options => {
   t.reverse = reverse
 
   return t
+}
+
+/**
+ * Converts a set of Ms Timeline Shapes to a set of Timeline Shapes
+ * given the timeline's start and total duration values.
+ *
+ * @param {Object} props
+ * @param {number} props.duration
+ * @param {msTimelineShape[]} props.msTimelineShapes
+ * @param {number} props.start
+ *
+ * @returns {TimelineShape[]}
+ *
+ * @example
+ * timelineShapes()
+ */
+const timelineShapes = ({ duration, msTimelineShapes, start }) => (
+  msTimelineShapes.map(({ shape, timelinePosition }) => ({
+    shape,
+    timelinePosition: {
+      start: (timelinePosition.start - start) / duration,
+      end: (timelinePosition.end - start) / duration
+    }
+  }))
+)
+
+/**
+ * Converts a set of Shapes With Options into Timeline Shapes
+ * and their total duration.
+ *
+ * @param {ShapeWithOptions[]}
+ *
+ * @returns {TimelineShapesAndDuration}
+ *
+ * @example
+ * timelineShapes(shapesWithOptions)
+ */
+const timelineShapesAndDuration = shapesWithOptions => {
+  let timelineStart = 0
+  let timelineEnd = 0
+
+  const msTimelineShapes = []
+
+  shapesWithOptions.map(({ follow, offset, shape }, i) => {
+    if (typeof shape.name === 'undefined') {
+      shape.name = i
+    }
+
+    const start = shapeStart({
+      follow,
+      msTimelineShapes,
+      offset,
+      timelineEnd
+    })
+
+    const end = start + shape.duration
+
+    timelineStart = Math.min(timelineStart, start)
+    timelineEnd = Math.max(timelineEnd, end)
+
+    msTimelineShapes.push({ shape, timelinePosition: { start, end } })
+  })
+
+  const timelineDuration = Math.abs(timelineStart - timelineEnd)
+
+  return {
+    duration: timelineDuration,
+    timelineShapes: timelineShapes({
+      duration: timelineDuration,
+      msTimelineShapes,
+      start: timelineStart
+    })
+  }
 }
 
 export default timeline

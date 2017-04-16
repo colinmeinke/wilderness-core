@@ -14,7 +14,7 @@ import tweenFunctions from 'tween-functions'
  */
 
 /**
- * A set of keyframes and their total duration.
+ * A set of Keyframes and their total duration.
  *
  * @typedef {Object} KeyframesAndDuration
  *

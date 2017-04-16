@@ -127,7 +127,7 @@ describe('shape', () => {
 
     expect(alternate).toBe(config.defaults.timeline.alternate)
     expect(delay).toBe(config.defaults.timeline.delay)
-    expect(duration).toBe(1000)
+    expect(duration).toBe(0)
     expect(initialIterations).toBe(config.defaults.timeline.initialIterations)
     expect(iterations).toBe(config.defaults.timeline.iterations)
     expect(reverse).toBe(config.defaults.timeline.reverse)
@@ -174,4 +174,29 @@ describe('shape', () => {
     expect(timelineShapes[ 1 ].timelinePosition.start).toBe(300 / 650)
     expect(timelineShapes[ 1 ].timelinePosition.end).toBe(650 / 650)
   })
+
+  it('should throw when Shape queued after unknown Shape or Keyframe', () => {
+    const shape1 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+    )
+
+    const shape2 = shape(
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+    )
+
+    expect(() => {
+      timeline(
+        shape1,
+        [ shape2, { queue: [ 'foo', -200 ] } ]
+      )
+    }).toThrow(`No Shape or Keyframe matching name 'foo'`)
+  })
+
+  it('should correctly queue Shape after named (string) Shape')
+
+  it('should correctly queue Shape after named (index) Shape')
+
+  it('should correctly queue Shape after named Keyframe')
 })
