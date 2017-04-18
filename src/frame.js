@@ -61,6 +61,14 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
  * frame(timeline)
  */
 const frame = (timeline, at) => {
+  if (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions) {
+    throw new TypeError(`The frame function's first argument must be a Timeline`)
+  }
+
+  if (typeof at !== 'undefined' && typeof at !== 'number') {
+    throw new TypeError(`The frame function's second argument must be of type number`)
+  }
+
   at = typeof at !== 'undefined' ? at : Date.now()
 
   return []
