@@ -6,8 +6,8 @@ import config from './config'
  *
  * @typedef {Object} TimelinePosition
  *
- * @property {number} start - A number between 0 and 1 (inclusive).
- * @property {number} end - A number between 0 and 1 (inclusive).
+ * @property {Position} start
+ * @property {Position} end
  */
 
 /**

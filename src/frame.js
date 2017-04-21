@@ -24,6 +24,12 @@ import { toPoints } from 'svg-points'
  */
 
 /**
+ * A number between 0 and 1 (inclusive).
+ *
+ * @typedef {number} Position
+ */
+
+/**
  * Creates a FrameShape from a Plain Shape Object.
  *
  * @param {PlainShapeObject} plainShapeObject
@@ -31,9 +37,9 @@ import { toPoints } from 'svg-points'
  * @returns {FrameShape}
  *
  * @example
- * frameShapeFromPlainShapeObject(circle)
+ * frameShape(circle)
  */
-const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) => {
+const frameShape = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) => {
   const k = {
     styles: {}
   }
@@ -42,11 +48,73 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
     k.points = toPoints(plainShapeObject)
   } else if (childPlainShapeObjects) {
     k.childFrameShapes = childPlainShapeObjects.map(childPlainShapeObject => (
-      frameShapeFromPlainShapeObject(childPlainShapeObject)
+      frameShape(childPlainShapeObject)
     ))
   }
 
   return k
+}
+
+/**
+ * The number of iterations completed.
+ *
+ * @param {Object} opts
+ * @param {number} opts.at
+ * @param {number} opts.delay
+ * @param {number} opts.duration
+ * @param {number} opts.iterations
+ * @param {number} [opts.started]
+ *
+ * @returns {number}
+ *
+ * @example
+ * iterations(opts)
+ */
+const iterationsComplete = ({ at, delay, duration, iterations, started }) => {
+  const start = started + delay
+
+  if (typeof started === 'undefined' || at <= start) {
+    return 0
+  }
+
+  const ms = at - start
+  const maxDuration = duration * iterations
+
+  if (ms >= maxDuration) {
+    return iterations
+  }
+
+  return ms / duration
+}
+
+/**
+ * A position at a given time
+ *
+ * @param {PlaybackOptions} playbackOptions
+ * @param {number} at
+ *
+ * @returns {Position}
+ *
+ * @example
+ * position(playbackOptions, Date.now())
+ */
+const position = ({
+  alternate,
+  delay,
+  duration,
+  initialIterations,
+  iterations,
+  reverse,
+  started
+}, at) => {
+  const totalIterations = initialIterations +
+    iterationsComplete({ at, delay, duration, iterations, started })
+
+  const i = totalIterations % 1
+
+  return alternate && totalIterations % 2 > 1
+    ? reverse ? i : 1 - i
+    : reverse ? 1 - i : i
 }
 
 /**
@@ -69,10 +137,13 @@ const frame = (timeline, at) => {
     throw new TypeError(`The frame function's second argument must be of type number`)
   }
 
-  at = typeof at !== 'undefined' ? at : Date.now()
+  const timelinePosition = position(
+    timeline.playbackOptions,
+    typeof at !== 'undefined' ? at : Date.now()
+  )
 
   return []
 }
 
-export { frameShapeFromPlainShapeObject }
+export { frameShape, position }
 export default frame

@@ -1,5 +1,5 @@
 import config from './config'
-import { frameShapeFromPlainShapeObject } from './frame'
+import { frameShape } from './frame'
 import tweenFunctions from 'tween-functions'
 
 /**
@@ -8,7 +8,7 @@ import tweenFunctions from 'tween-functions'
  * @typedef {Object} Keyframe
  *
  * @property {(string|number)} name - A unique reference.
- * @property {number} position - A number between 0 and 1 (inclusive).
+ * @property {Position} position
  * @property {FrameShape} frameShape
  * @property {Object} tween
  */
@@ -73,7 +73,7 @@ const keyframesAndDuration = plainShapeObjects => {
   }, i) => {
     const keyframe = {
       name: typeof name !== 'undefined' ? name : i,
-      frameShape: frameShapeFromPlainShapeObject(plainShapeObject)
+      frameShape: frameShape(plainShapeObject)
     }
 
     if (i > 0) {
