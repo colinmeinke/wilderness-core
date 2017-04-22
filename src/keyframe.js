@@ -1,5 +1,5 @@
 import config from './config'
-import { frameShape } from './frame'
+import { frameShapeFromPlainShapeObject } from './frame'
 import tweenFunctions from 'tween-functions'
 
 /**
@@ -14,7 +14,7 @@ import tweenFunctions from 'tween-functions'
  */
 
 /**
- * A set of Keyframes and their total duration.
+ * A Keyframe array and their total duration.
  *
  * @typedef {Object} KeyframesAndDuration
  *
@@ -52,7 +52,7 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
 }
 
 /**
- * Creates an array of Keyframes from an array of Plain Shape Objects.
+ * Creates a Keyframe array from a PlainShapeObject array.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *
@@ -73,7 +73,7 @@ const keyframesAndDuration = plainShapeObjects => {
   }, i) => {
     const keyframe = {
       name: typeof name !== 'undefined' ? name : i,
-      frameShape: frameShape(plainShapeObject)
+      frameShape: frameShapeFromPlainShapeObject(plainShapeObject)
     }
 
     if (i > 0) {
@@ -109,7 +109,7 @@ const keyframesAndDuration = plainShapeObjects => {
 }
 
 /**
- * Adds the position prop to each Keyframe in an array of Keyframes.
+ * Adds the position prop to each Keyframe in a Keyframe array.
  *
  * @param {Keyframe[]} k
  * @param {number} totalDuration
@@ -137,7 +137,7 @@ const positionedKeyframes = (k, totalDuration) => {
 }
 
 /**
- * Adds the tween duration of an array of Keyframes.
+ * Adds the tween duration of a Keyframe array.
  *
  * @param {Keyframe[]} k
  *

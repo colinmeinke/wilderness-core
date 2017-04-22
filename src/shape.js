@@ -10,7 +10,7 @@ import { valid } from './plain-shape-object'
  */
 
 /**
- * An object containing Plain Shape Objects and shape options.
+ * An object containing PlainShapeObjects and shape options.
  *
  * @typedef {Object} SortedShapeProps
  *
@@ -20,7 +20,7 @@ import { valid } from './plain-shape-object'
  */
 
 /**
- * Creates a Shape from one or more Plain Shape Object.
+ * Creates a Shape from one or more PlainShapeObject.
  * Optionally can take an options object as the last argument.
  *
  * @param {(PlainShapeObject|Object)[]} props
@@ -44,7 +44,7 @@ const shape = (...props) => {
 }
 
 /**
- * Sorts an array of props into Plain Shape Objects and options.
+ * Sorts an array of props into a PlainShapeObject array and options.
  *
  * @param {(PlainShapeObject|Object)[]} props
  *
@@ -74,7 +74,7 @@ const sort = props => {
 }
 
 /**
- * Validates an array of Plain Shape Objects and shape options.
+ * Validates a PlainShapeObject array and shape options.
  *
  * @param {SortedShapeProps}
  *

@@ -25,7 +25,7 @@ import { valid as shapeValid } from 'svg-points'
  */
 
 /**
- * Validates Plain Shape Object Core Props.
+ * Validates PlainShapeObjectCoreProps.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *
@@ -108,7 +108,7 @@ const namePropsValid = plainShapeObjects => {
 }
 
 /**
- * Creates a Plain Shape Object from a Shape.
+ * Creates a PlainShapeObject from a Shape.
  *
  * @param {Shape} shape
  *
@@ -129,7 +129,7 @@ const stylePropsValid = plainShapeObjects => {
 }
 
 /**
- * Validates Plain Shape Object Tween Props.
+ * Validates PlainShapeObjectTweenProps.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *
@@ -159,7 +159,7 @@ const tweenPropsValid = plainShapeObjects => {
 }
 
 /**
- * Validates one or more Plain Shape Object.
+ * Validates one or more PlainShapeObject.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *

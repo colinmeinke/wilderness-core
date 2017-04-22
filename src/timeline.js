@@ -20,7 +20,7 @@ import config from './config'
  */
 
 /**
- * The position of an object on a Timeline in Milliseconds.
+ * The position of an object on a Timeline in milliseconds.
  *
  * @typedef {Object} MsTimelinePosition
  *
@@ -38,7 +38,7 @@ import config from './config'
  */
 
 /**
- * A set of Timeline Shapes and their total duration.
+ * A TimelineShape array and their total duration.
  *
  * @typedef {Object} TimelineShapesAndDuration
  *
@@ -47,8 +47,7 @@ import config from './config'
  */
 
 /**
- * The options required to calculate the current playback position
- * between 0 to 1, at any point in time.
+ * The options required to calculate the current playback Position.
  *
  * @typedef {Object} PlaybackOptions
  *
@@ -62,7 +61,7 @@ import config from './config'
  */
 
 /**
- * Playback Options and tween middleware.
+ * PlaybackOptions and tween middleware.
  *
  * @typedef {Object} TimelineOptions
  *
@@ -82,7 +81,7 @@ import config from './config'
  */
 
 /**
- * An object containing Shapes With Options and Timeline Options.
+ * An object containing ShapesWithOptions and TimelineOptions.
  *
  * @typedef {Object} SortedTimelineProps
  *
@@ -100,7 +99,7 @@ import config from './config'
  */
 
 /**
- * Extracts Playback Options from Timeline Options.
+ * Extracts PlaybackOptions from TimelineOptions.
  *
  * @param {TimelineOptions} opts
  *
@@ -136,7 +135,7 @@ const playbackOptions = ({
 }
 
 /**
- * Calculate the start position of a Shape on the timeline.
+ * Calculate the start position of a Shape on the Timeline.
  *
  * @param {Object} props
  * @param {(string|number)} [props.follow]
@@ -181,7 +180,7 @@ const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
 }
 
 /**
- * Create a Shape With Options from an array.
+ * Create a ShapeWithOptions from an array.
  *
  * @param {Object[]} arr
  * @param {Shape} arr.0
@@ -231,7 +230,7 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
 }
 
 /**
- * Sorts an array of props Shapes With Options and Timeline Options.
+ * Sorts an array of ShapesWithOptions and TimelineOptions.
  *
  * @param {(Shape|Object[]|TimelineOptions)[]} props
  *
@@ -318,7 +317,7 @@ const timeline = (...props) => {
 }
 
 /**
- * Validates Timeline Options.
+ * Validates TimelineOptions.
  *
  * @param {TimelineOptions} options
  *
@@ -386,8 +385,8 @@ const timelineOptions = options => {
 }
 
 /**
- * Converts a set of Ms Timeline Shapes to a set of Timeline Shapes
- * given the timeline's start and total duration values.
+ * Converts a set of MsTimelineShapes to a set of TimelineShapes
+ * given the Timeline start and total duration values.
  *
  * @param {Object} props
  * @param {number} props.duration
@@ -410,7 +409,7 @@ const timelineShapes = ({ duration, msTimelineShapes, start }) => (
 )
 
 /**
- * Converts a set of Shapes With Options into Timeline Shapes
+ * Converts an array of ShapesWithOptions into TimelineShapes
  * and their total duration.
  *
  * @param {ShapeWithOptions[]}
