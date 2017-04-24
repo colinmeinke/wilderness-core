@@ -80,7 +80,7 @@
     "url": "https://github.com/colinmeinke/wilderness-core.git"
   },
   "scripts": {
-    "build:examples": "BABEL_ENV=examples rollup -c examples/hello-world/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-tween/rollup.config.js",
+    "build:examples": "BABEL_ENV=examples rollup -c examples/hello-world/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-tween/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-timeline/rollup.config.js",
     "commit": "git-cz",
     "fix": "standard --fix",
     "lint": "standard --verbose | snazzy",
