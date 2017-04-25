@@ -7,7 +7,7 @@ const play = timeline => {
 }
 
 const tick = timeline => {
-  requestAnimationFrame(() => {
+  window.requestAnimationFrame(() => {
     const frameShapes = frame(timeline)
 
     timeline.timelineShapes.map(({ shape }, i) => {
