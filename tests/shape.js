@@ -18,9 +18,21 @@ describe('shape', () => {
     expect(() => shape(invalidShape)).toThrow()
   })
 
-  it('should throw when passed invalid plain shape object tween props', () => {
+  it('should throw when passed invalid plain shape object delay prop', () => {
     const validShape = { type: 'rect', width: 50, height: 50, x: 100, y: 100 }
     const invalidShape = { type: 'circle', cx: 50, cy: 50, r: 10, delay: -100 }
+    expect(() => shape(validShape, invalidShape)).toThrow()
+  })
+
+  it('should throw when passed invalid plain shape object duration prop', () => {
+    const validShape = { type: 'rect', width: 50, height: 50, x: 100, y: 100 }
+    const invalidShape = { type: 'circle', cx: 50, cy: 50, r: 10, duration: 'nope' }
+    expect(() => shape(validShape, invalidShape)).toThrow()
+  })
+
+  it('should throw when passed invalid plain shape object easing prop', () => {
+    const validShape = { type: 'rect', width: 50, height: 50, x: 100, y: 100 }
+    const invalidShape = { type: 'circle', cx: 50, cy: 50, r: 10, easing: [] }
     expect(() => shape(validShape, invalidShape)).toThrow()
   })
 

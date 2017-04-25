@@ -124,10 +124,6 @@ const plainShapeObject = shape => {
   }
 }
 
-const stylePropsValid = plainShapeObjects => {
-  return true
-}
-
 /**
  * Validates PlainShapeObjectTweenProps.
  *
@@ -145,9 +141,17 @@ const stylePropsValid = plainShapeObjects => {
 const tweenPropsValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ delay }) => {
+  plainShapeObjects.map(({ delay, duration, easing }) => {
     if (typeof delay !== 'undefined' && !(typeof delay === 'number' && delay > 0)) {
       errors.push('the delay prop must be a number greater than 0')
+    }
+
+    if (typeof duration !== 'undefined' && !(typeof duration === 'number' && duration >= 0)) {
+      errors.push('the duration prop must be a number greater than or equal to 0')
+    }
+
+    if (typeof easing !== 'undefined' && !(typeof easing === 'function' || typeof easing === 'string')) {
+      errors.push('the easing prop must be a of type function or string')
     }
   })
 
@@ -176,7 +180,6 @@ const valid = (...plainShapeObjects) => (
   namePropsValid(plainShapeObjects) &&
   corePropsValid(plainShapeObjects) &&
   manipulationPropsValid(plainShapeObjects) &&
-  stylePropsValid(plainShapeObjects) &&
   tweenPropsValid(plainShapeObjects)
 )
 
