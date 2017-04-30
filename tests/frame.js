@@ -18,6 +18,7 @@ describe('position', () => {
       started: 0
     }, 1001)).toBeCloseTo(1)
   })
+
   it('should calculate correct position if not started', () => {
     expect(position({
       alternate: false,
