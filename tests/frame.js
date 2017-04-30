@@ -157,6 +157,15 @@ describe('frame', () => {
     expect(frame(animation, 500)[ 0 ].points)
       .toEqual(toPoints({ ...keyframe1, x: 5 }))
   })
+
+  it('should tween attributes', () => {
+    const keyframe1 = { type: 'rect', width: 10, height: 10, x: 0, y: 0, 'data-foo': 0 }
+    const keyframe2 = { ...keyframe1, duration: 1000, easing: 'linear', 'data-foo': 10 }
+    const square = shape(keyframe1, keyframe2)
+    const animation = timeline(square, { started: 0 })
+
+    expect(frame(animation, 500)[ 0 ].attributes[ 'data-foo' ]).toEqual(5)
+  })
 })
 
 describe('tween', () => {

@@ -146,7 +146,35 @@ describe('keyframes', () => {
     const { frameShape } = k
 
     expect(frameShape).toHaveProperty('points')
-    expect(frameShape).toHaveProperty('styles')
+    expect(frameShape).toHaveProperty('attributes')
+  })
+
+  it('should return keyframes with the correct frameShape attributes prop', () => {
+    const plainShapeObjects = [
+      {
+        type: 'circle',
+        cx: 50,
+        cy: 50,
+        r: 20,
+        fill: 'red',
+        stroke: 'rgba(255,80,75,0.5)',
+        'stroke-dasharray': '10, 5',
+        'class': 'circle',
+        'data-foo': 5,
+        fooBar: 1
+      }
+    ]
+
+    const { keyframes } = keyframesAndDuration(plainShapeObjects)
+    const [ k ] = keyframes
+    const { frameShape: { attributes } } = k
+
+    expect(attributes.fill).toBe('red')
+    expect(attributes.stroke).toBe('rgba(255,80,75,0.5)')
+    expect(attributes['stroke-dasharray']).toBe('10, 5')
+    expect(attributes['class']).toBe('circle')
+    expect(attributes['data-foo']).toBe(5)
+    expect(attributes.fooBar).toBe(1)
   })
 
   it('should return group item with the correct frameShape props', () => {
@@ -168,7 +196,7 @@ describe('keyframes', () => {
     expect(frameShape).toHaveProperty('childFrameShapes')
     expect(frameShape.points).toBeUndefined()
     expect(childFrameShape).toHaveProperty('points')
-    expect(childFrameShape).toHaveProperty('styles')
+    expect(childFrameShape).toHaveProperty('attributes')
   })
 
   it('should return keyframes with a valid frameShape.points prop', () => {

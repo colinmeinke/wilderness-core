@@ -13,7 +13,7 @@ import { toPoints } from 'svg-points'
  * @typedef {Object} FrameShape
  *
  * @property {Points} points
- * @property {Object} styles
+ * @property {Object} attributes
  * @property {FrameShape[]} childFrameShapes
  */
 
@@ -79,19 +79,40 @@ const frame = (timeline, at) => {
  * frameShapeFromPlainShapeObject(circle)
  */
 const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...plainShapeObject }) => {
-  const k = {
-    styles: {}
+  const {
+    type,
+    height,
+    width,
+    x,
+    y,
+    cx,
+    cy,
+    r,
+    rx,
+    ry,
+    x1,
+    x2,
+    y1,
+    y2,
+    d,
+    points,
+    shapes,
+    ...attributes
+  } = plainShapeObject
+
+  if (plainShapeObject.type === 'g' && childPlainShapeObjects) {
+    return {
+      attributes,
+      childFrameShapes: childPlainShapeObjects.map(childPlainShapeObject => (
+        frameShapeFromPlainShapeObject(childPlainShapeObject)
+      ))
+    }
   }
 
-  if (plainShapeObject.type !== 'g') {
-    k.points = toPoints(plainShapeObject)
-  } else if (childPlainShapeObjects) {
-    k.childFrameShapes = childPlainShapeObjects.map(childPlainShapeObject => (
-      frameShapeFromPlainShapeObject(childPlainShapeObject)
-    ))
+  return {
+    attributes,
+    points: toPoints(plainShapeObject)
   }
-
-  return k
 }
 
 /**
