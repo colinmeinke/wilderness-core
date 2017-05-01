@@ -124,6 +124,7 @@ const playbackOptions = ({
     duration,
     initialIterations,
     iterations,
+    middleware,
     reverse
   }
 
@@ -335,6 +336,7 @@ const timelineOptions = options => {
     duration,
     initialIterations = config.defaults.timeline.initialIterations,
     iterations = config.defaults.timeline.iterations,
+    middleware = config.defaults.timeline.middleware,
     reverse = config.defaults.timeline.reverse,
     started
   } = options
@@ -362,6 +364,24 @@ const timelineOptions = options => {
   if (typeof iterations !== 'number' || iterations < 0) {
     throw new TypeError(`The timeline function iterations option must be a positive number or zero`)
   }
+
+  if (!Array.isArray(middleware)) {
+    throw new TypeError(`The timeline function middleware option must be of type array`)
+  }
+
+  middleware.map(({ name, input, output }) => {
+    if (typeof name !== 'string') {
+      throw new TypeError(`A middleware must have a name prop`)
+    }
+
+    if (typeof input !== 'function') {
+      throw new TypeError(`The ${name} middleware must have an input method`)
+    }
+
+    if (typeof output !== 'function') {
+      throw new TypeError(`The ${name} middleware must have an output method`)
+    }
+  })
 
   if (typeof reverse !== 'boolean') {
     throw new TypeError(`The timeline function reverse option must be true or false`)

@@ -4,7 +4,7 @@ import config from '../src/config'
 import shape from '../src/shape'
 import timeline from '../src/timeline'
 
-describe('shape', () => {
+describe('timeline', () => {
   it('should throw if not passed a shape', () => {
     expect(() => timeline())
       .toThrow('The timeline function must be passed at least one Shape')
@@ -305,5 +305,39 @@ describe('shape', () => {
 
     expect(() => timeline(validShape))
       .toThrow('A Shape can only be added to one timeline')
+  })
+
+  it('should throw if a middleware is not an array', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    expect(() => timeline(validShape, { middleware: 'invalid' }))
+      .toThrow('The timeline function middleware option must be of type array')
+  })
+
+  it('should throw if a middleware is not named', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    expect(() => timeline(validShape, { middleware: [
+      { input: () => ({}), output: () => ({}) }
+    ] }))
+      .toThrow('A middleware must have a name prop')
+  })
+
+  it('should throw if a middleware does not have an input method', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    expect(() => timeline(validShape, { middleware: [
+      { name: 'color', input: 'invalid', output: () => ({}) }
+    ] }))
+      .toThrow('The color middleware must have an input method')
+  })
+
+  it('should throw if a middleware does not have an input method', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    expect(() => timeline(validShape, { middleware: [
+      { name: 'color', input: () => ({}), output: 'invalid' }
+    ] }))
+      .toThrow('The color middleware must have an output method')
   })
 })

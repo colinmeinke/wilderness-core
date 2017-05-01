@@ -1,3 +1,5 @@
+import colorMiddleware from './color-middleware'
+
 const config = {
   defaults: {
     keyframe: {
@@ -9,6 +11,7 @@ const config = {
       delay: 0,
       initialIterations: 0,
       iterations: 1,
+      middleware: [ colorMiddleware ],
       queue: 0,
       reverse: false
     }

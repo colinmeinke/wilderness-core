@@ -1,3 +1,4 @@
+import { input, output } from './middleware'
 import { toPoints } from 'svg-points'
 
 /**
@@ -63,7 +64,8 @@ const frame = (timeline, at) => {
 
     return frameShapeFromShape({
       shape,
-      position: (timelinePosition - start) / (end - start)
+      position: (timelinePosition - start) / (end - start),
+      middleware: timeline.playbackOptions.middleware
     })
   })
 }
@@ -126,7 +128,7 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
  * @example
  * frameShapeFromShape({ shape, position: 0.75 })
  */
-const frameShapeFromShape = ({ shape, position }) => {
+const frameShapeFromShape = ({ shape, position, middleware = [] }) => {
   const fromIndex = shape.keyframes.reduce((currentFromIndex, { position: keyframePosition }, i) => (
     position > keyframePosition ? i : currentFromIndex
   ), 0)
@@ -136,12 +138,14 @@ const frameShapeFromShape = ({ shape, position }) => {
   const from = shape.keyframes[ fromIndex ]
   const to = shape.keyframes[ toIndex ]
 
-  return tween(
-    from.frameShape,
-    to.frameShape,
+  const frameShape = tween(
+    input(from.frameShape, middleware),
+    input(to.frameShape, middleware),
     to.tween.easing,
     (position - from.position) / (to.position - from.position)
   )
+
+  return output(frameShape, middleware)
 }
 
 /**
@@ -248,8 +252,8 @@ const tween = (from, to, easing, position) => {
     }
 
     return from.map((f, i) => (tween(f, to[ i ], easing, position)))
-  } else if (typeof from === 'object') {
-    if (typeof to !== 'object') {
+  } else if (from !== null && typeof from === 'object') {
+    if (to !== null && typeof to !== 'object') {
       throw new TypeError(errorMsg)
     }
 
