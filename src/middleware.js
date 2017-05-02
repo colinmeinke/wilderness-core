@@ -1,25 +1,70 @@
+/**
+ * A group of functions to transform/untransform a value.
+ *
+ * @typedef {Object} Middleware
+ *
+ * @property {string} name - The name of the middleware.
+ * @property {function} input - Transform.
+ * @property {function} output - Untransform.
+ */
+
+/**
+ * Run every part of a value through a function.
+ *
+ * @param {*} value
+ * @param {function} func
+ *
+ * @returns {*}
+ *
+ * @example
+ * apply(2, n => n * 2)
+ */
 const apply = (value, func) => {
-  if (Array.isArray(value)) {
-    return value.map(v => apply(v, func))
+  const v = func(value)
+
+  if (Array.isArray(v)) {
+    return v.map(x => apply(x, func))
   }
 
-  if (value !== null && typeof value === 'object') {
+  if (v !== null && typeof v === 'object') {
     const obj = {}
 
-    Object.keys(k => {
-      obj[ k ] = apply(value[ k ], func)
+    Object.keys(v).map(k => {
+      obj[ k ] = apply(v[ k ], func)
     })
 
     return obj
   }
 
-  return func(value)
+  return v
 }
 
+/**
+ * Runs each middleware input function in turn on a value.
+ *
+ * @param {*} value
+ * @param {Middleware[]} middleware
+ *
+ * @returns {*}
+ *
+ * @example
+ * input({ foo: 1, bar: [ 2, 3 ] }, middleware)
+ */
 const input = (value, middleware) => middleware.reduce((v, m) => (
   apply(v, m.input)
 ), value)
 
+/**
+ * Runs each middleware output function in reverse on a value.
+ *
+ * @param {*} value
+ * @param {Middleware[]} middleware
+ *
+ * @returns {*}
+ *
+ * @example
+ * output({ foo: 1, bar: [ 2, 3 ] }, middleware)
+ */
 const output = (value, middleware) => [ ...middleware ].reverse().reduce((v, m) => (
   apply(v, m.output)
 ), value)
