@@ -11,7 +11,7 @@ const tick = timeline => {
     const frameShapes = frame(timeline)
 
     timeline.timelineShapes.map(({ shape }, i) => {
-      shape.el.setAttribute('d', toPath(frameShapes[ i ].points))
+      update(shape.el, frameShapes[ i ])
     })
 
     tick(timeline)
@@ -29,7 +29,7 @@ const addTimeline = (svg, timeline) => {
 
   timeline.timelineShapes.map(({ shape }, i) => {
     addShape(svg, shape)
-    shape.el.setAttribute('d', toPath(frameShapes[ i ].points))
+    update(shape.el, frameShapes[ i ])
   })
 }
 
@@ -37,10 +37,18 @@ const render = (svg, ...shapesOrTimelines) => {
   shapesOrTimelines.map(x => {
     if (x.keyframes) {
       addShape(svg, x)
-      x.el.setAttribute('d', toPath(x.keyframes[ 0 ].frameShape.points))
+      update(x.el, x.keyframes[ 0 ].frameShape)
     } else {
       addTimeline(svg, x)
     }
+  })
+}
+
+const update = (el, frameShape) => {
+  el.setAttribute('d', toPath(frameShape.points))
+
+  Object.keys(frameShape.attributes).map(k => {
+    el.setAttribute(k, frameShape.attributes[ k ])
   })
 }
 
