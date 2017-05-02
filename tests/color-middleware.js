@@ -29,7 +29,7 @@ describe('input', () => {
   })
 })
 
-describe('colorOut', () => {
+describe('output', () => {
   it('converts hex color to hex string', () => {
     expect(colorMiddleware.output({
       middleware: 'color',

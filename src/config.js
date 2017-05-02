@@ -1,4 +1,5 @@
 import colorMiddleware from './color-middleware'
+import unitMiddleware from './unit-middleware'
 
 const config = {
   defaults: {
@@ -11,7 +12,7 @@ const config = {
       delay: 0,
       initialIterations: 0,
       iterations: 1,
-      middleware: [ colorMiddleware ],
+      middleware: [ colorMiddleware, unitMiddleware ],
       queue: 0,
       reverse: false
     }
