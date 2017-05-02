@@ -36,6 +36,4 @@ describe('valid', () => {
 
     expect(() => valid(plainShapeObject)).toThrow()
   })
-
-  it('should be valid when passed valid plain shape objects')
 })
