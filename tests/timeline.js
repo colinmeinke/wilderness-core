@@ -112,6 +112,14 @@ describe('timeline', () => {
     }).not.toThrow()
   })
 
+  it('should return an object with the correct props', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(validShape)
+    expect(animation).toHaveProperty('timelineShapes')
+    expect(animation).toHaveProperty('playbackOptions')
+    expect(animation).toHaveProperty('middleware')
+  })
+
   it('should return default playback options', () => {
     const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
 
@@ -305,6 +313,12 @@ describe('timeline', () => {
 
     expect(() => timeline(validShape))
       .toThrow('A Shape can only be added to one timeline')
+  })
+
+  it('should return default middleware', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(validShape)
+    expect(animation.middleware).toBe(config.defaults.timeline.middleware)
   })
 
   it('should throw if a middleware is not an array', () => {

@@ -96,6 +96,7 @@ import config from './config'
  *
  * @property {TimelineShape[]} timelineShapes
  * @property {PlaybackOptions} playbackOptions
+ * @property {Middleware[]} middleware
  */
 
 /**
@@ -114,7 +115,6 @@ const playbackOptions = ({
   duration,
   initialIterations,
   iterations,
-  middleware,
   reverse,
   started
 }) => {
@@ -124,7 +124,6 @@ const playbackOptions = ({
     duration,
     initialIterations,
     iterations,
-    middleware,
     reverse
   }
 
@@ -306,6 +305,7 @@ const timeline = (...props) => {
   }
 
   const t = {
+    middleware: timelineOptions.middleware,
     playbackOptions: opts,
     timelineShapes: timelineShapes
   }
@@ -399,6 +399,7 @@ const timelineOptions = options => {
   t.delay = delay
   t.initialIterations = initialIterations
   t.iterations = iterations
+  t.middleware = middleware
   t.reverse = reverse
 
   return t

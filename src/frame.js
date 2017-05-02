@@ -65,7 +65,7 @@ const frame = (timeline, at) => {
     return frameShapeFromShape({
       shape,
       position: (timelinePosition - start) / (end - start),
-      middleware: timeline.playbackOptions.middleware
+      middleware: timeline.middleware
     })
   })
 }
