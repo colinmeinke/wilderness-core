@@ -73,14 +73,16 @@ const errorMsg = errors => (
   `Plain Shape Object props not valid: ${errors.join('. ')}`
 )
 
-const transformsPropValid = ({ transforms }) => {
+const transformsPropValid = plainShapeObjects => {
   const errors = []
 
-  if (typeof transforms !== 'undefined') {
-    if (!Array.isArray(transforms)) {
-      errors.push('the transforms prop must be of type array')
+  plainShapeObjects.map(({ transforms }) => {
+    if (typeof transforms !== 'undefined') {
+      if (!Array.isArray(transforms)) {
+        errors.push('the transforms prop must be of type array')
+      }
     }
-  }
+  })
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))

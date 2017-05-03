@@ -36,4 +36,64 @@ describe('valid', () => {
 
     expect(() => valid(plainShapeObject)).toThrow()
   })
+
+  it('should throw when delay property is invalid', () => {
+    const plainShapeObject = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      delay: 'potato'
+    }
+
+    expect(() => valid(plainShapeObject)).toThrow()
+  })
+
+  it('should throw when duration property is invalid', () => {
+    const plainShapeObject = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      duration: 'potato'
+    }
+
+    expect(() => valid(plainShapeObject)).toThrow()
+  })
+
+  it('should throw when easing property is invalid', () => {
+    const plainShapeObject = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      easing: []
+    }
+
+    expect(() => valid(plainShapeObject)).toThrow()
+  })
+
+  it('should throw when name property is invalid', () => {
+    const plainShapeObject = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      name: () => ({})
+    }
+
+    expect(() => valid(plainShapeObject)).toThrow()
+  })
+
+  it('should throw when transforms property is invalid', () => {
+    const plainShapeObject = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      transforms: 'potato'
+    }
+
+    expect(() => valid(plainShapeObject)).toThrow()
+  })
 })
