@@ -4,6 +4,7 @@ import keyframes from './keyframe'
 import plainShapeObject from './plain-shape-object'
 import shape from './shape'
 import timeline from './timeline'
+import unitMiddleware from './unit-middleware'
 
 export {
   colorMiddleware,
@@ -11,5 +12,6 @@ export {
   keyframes,
   plainShapeObject,
   shape,
-  timeline
+  timeline,
+  unitMiddleware
 }
