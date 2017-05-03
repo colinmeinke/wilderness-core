@@ -73,12 +73,78 @@ const errorMsg = errors => (
   `Plain Shape Object props not valid: ${errors.join('. ')}`
 )
 
+/**
+ * Validates transforms prop.
+ *
+ * @param {PlainShapeObject[]} plainShapeObjects
+ *
+ * @throws {TypeError} Throws if not valid
+ *
+ * @returns {true}
+ *
+ * @example
+ * if (transformsPropValid([ circle ])) {
+ *   console.log('circle has valid transforms prop')
+ * }
+ */
 const transformsPropValid = plainShapeObjects => {
   const errors = []
 
   plainShapeObjects.map(({ transforms }) => {
     if (typeof transforms !== 'undefined') {
-      if (!Array.isArray(transforms)) {
+      if (Array.isArray(transforms)) {
+        transforms.map(([ key, ...args ]) => {
+          switch (key) {
+            case 'moveIndex':
+            case 'rotate':
+              if (args.length === 1) {
+                if (typeof args[ 0 ] !== 'number') {
+                  errors.push('moveIndex transform argument should be of type number')
+                }
+              } else {
+                errors.push('moveIndex transform takes 1 argument')
+              }
+
+              break
+
+            case 'offset':
+              if (args.length === 2) {
+                if (typeof args[ 0 ] !== 'number' || typeof args[ 1 ] !== 'number') {
+                  errors.push('both offset transform arguments should be of type number')
+                }
+              } else {
+                errors.push('offset transform takes 2 arguments (x and y)')
+              }
+
+              break
+
+            case 'reverse':
+              if (args.length > 0) {
+                errors.push('reverse transform takes no arguments')
+              }
+
+              break
+
+            case 'scale':
+              if (args.length > 0 && args.length < 3) {
+                if (typeof args[ 0 ] !== 'number') {
+                  errors.push('offset transform scaleFactor argument should be of type number')
+                }
+
+                if (typeof args[ 1 ] !== 'string') {
+                  errors.push('offset transform anchor argument should be of type string')
+                }
+              } else {
+                errors.push('offset transform takes 1 or 2 arguments')
+              }
+
+              break
+
+            default:
+              errors.push(`${key} is not a valid transform`)
+          }
+        })
+      } else {
         errors.push('the transforms prop must be of type array')
       }
     }
@@ -92,7 +158,7 @@ const transformsPropValid = plainShapeObjects => {
 }
 
 /**
- * Validates name props.
+ * Validates name prop.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *

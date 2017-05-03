@@ -4,7 +4,7 @@ import transformFunctions from 'points'
  * Applies Transforms to FrameShape Points
  *
  * @param {FrameShape} frameShape
- * @param {Transform[]} transforms
+ * @param {[][]} transforms
  *
  * @return {FrameShape}
  *
