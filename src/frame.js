@@ -269,6 +269,10 @@ const tween = (from, to, easing, position) => {
       throw new TypeError(errorMsg)
     }
 
+    if (from === to) {
+      return from
+    }
+
     return easing(position, from, to, 1)
   }
 

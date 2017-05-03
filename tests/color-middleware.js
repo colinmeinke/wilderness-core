@@ -3,59 +3,76 @@
 import colorMiddleware from '../src/color-middleware'
 
 describe('input', () => {
-  it('converts hex string to hex color', () => {
-    const { type } = colorMiddleware.input('#ffffff')
-    expect(type).toBe('hex')
+  it('converts hex string to color', () => {
+    const expectedResult = {
+      middleware: 'color',
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 1
+    }
+
+    expect(colorMiddleware.input('#ffffff')).toEqual(expectedResult)
   })
 
-  it('converts rgb string to rgb color', () => {
-    const { type } = colorMiddleware.input('rgb(255,255,255)')
-    expect(type).toBe('rgb')
+  it('converts rgb string to color', () => {
+    const expectedResult = {
+      middleware: 'color',
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 1
+    }
+
+    expect(colorMiddleware.input('rgb(255,255,255)')).toEqual(expectedResult)
   })
 
-  it('converts rgba string to rgba color', () => {
-    const { type } = colorMiddleware.input('rgba(255,255,255,1)')
-    expect(type).toBe('rgba')
+  it('converts rgba string to color', () => {
+    const expectedResult = {
+      middleware: 'color',
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 1
+    }
+
+    expect(colorMiddleware.input('rgba(255,255,255,1)')).toEqual(expectedResult)
+  })
+
+  it('converts html color string to color', () => {
+    const expectedResult = {
+      middleware: 'color',
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 1
+    }
+
+    expect(colorMiddleware.input('white')).toEqual(expectedResult)
   })
 
   it('does not convert unknown string', () => {
-    const input = 'white'
-    expect(colorMiddleware.input(input)).toBe(input)
+    const input = 'unknown'
+    expect(colorMiddleware.input(input)).toEqual(input)
   })
 
   it('accepts shorthand hex string', () => {
-    const { type } = colorMiddleware.input('#fff')
-    expect(type).toBe('hex')
+    const expectedResult = {
+      middleware: 'color',
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 1
+    }
+
+    expect(colorMiddleware.input('#fff')).toEqual(expectedResult)
   })
 })
 
 describe('output', () => {
-  it('converts hex color to hex string', () => {
+  it('converts color to rgba string', () => {
     expect(colorMiddleware.output({
       middleware: 'color',
-      type: 'hex',
-      r: 255,
-      g: 255,
-      b: 255,
-      a: 1
-    })).toBe('#ffffff')
-  })
-
-  it('converts rgb color to rgb string', () => {
-    expect(colorMiddleware.output({
-      middleware: 'color',
-      type: 'rgb',
-      r: 255,
-      g: 255,
-      b: 255,
-      a: 1
-    })).toBe('rgb(255,255,255)')
-  })
-
-  it('converts rgba color to rgba string', () => {
-    expect(colorMiddleware.output({
-      middleware: 'color',
-      type: 'rgba',
       r: 255,
       g: 255,
       b: 255,
@@ -66,7 +83,6 @@ describe('output', () => {
   it('does not convert other middleware', () => {
     const input = {
       middleware: 'other',
-      type: 'rgba',
       r: 255,
       g: 255,
       b: 255,

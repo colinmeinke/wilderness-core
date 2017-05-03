@@ -40,7 +40,6 @@ describe('input', () => {
       foo: 1,
       bar: {
         middleware: colorMiddleware.name,
-        type: 'hex',
         r: 255,
         g: 255,
         b: 255,
@@ -58,7 +57,6 @@ describe('input', () => {
     const expectedResult = [
       {
         middleware: colorMiddleware.name,
-        type: 'rgb',
         r: 255,
         g: 255,
         b: 255,
@@ -75,7 +73,6 @@ describe('input', () => {
 
     const expectedResult = {
       middleware: colorMiddleware.name,
-      type: 'rgba',
       r: 255,
       g: 255,
       b: 255,
@@ -91,7 +88,6 @@ describe('input', () => {
 
     const expectedResult = {
       middleware: colorMiddleware.name,
-      type: 'rgba',
       r: 255,
       g: { middleware: 'pointless' },
       b: 255,
@@ -115,7 +111,6 @@ describe('input', () => {
         foo: 1,
         bar: {
           middleware: colorMiddleware.name,
-          type: 'hex',
           r: 255,
           g: 255,
           b: 255,
@@ -123,7 +118,7 @@ describe('input', () => {
         }
       }
 
-      const expectedResult = { foo: 1, bar: '#ffffff' }
+      const expectedResult = { foo: 1, bar: 'rgba(255,255,255,1)' }
 
       expect(output(value, middleware)).toEqual(expectedResult)
     })
@@ -133,7 +128,6 @@ describe('input', () => {
       const value = [
         {
           middleware: colorMiddleware.name,
-          type: 'rgb',
           r: 255,
           g: 255,
           b: 255,
@@ -141,7 +135,7 @@ describe('input', () => {
         }
       ]
 
-      const expectedResult = [ 'rgb(255,255,255)' ]
+      const expectedResult = [ 'rgba(255,255,255,1)' ]
 
       expect(output(value, middleware)).toEqual(expectedResult)
     })
@@ -150,7 +144,6 @@ describe('input', () => {
       const middleware = [ colorMiddleware ]
       const value = {
         middleware: colorMiddleware.name,
-        type: 'rgba',
         r: 255,
         g: 255,
         b: 255,
@@ -166,7 +159,6 @@ describe('input', () => {
       const middleware = [ colorMiddleware, pointlessMiddleware ]
       const value = {
         middleware: colorMiddleware.name,
-        type: 'rgba',
         r: 255,
         g: { middleware: 'pointless' },
         b: 255,

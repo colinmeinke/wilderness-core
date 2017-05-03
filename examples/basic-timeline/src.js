@@ -6,8 +6,8 @@ const shapeAKeyframe2 = { type: 'rect', width: 10, height: 10, x: 90, y: 90, dur
 
 const shapeA = shape(shapeAKeyframe1, shapeAKeyframe2)
 
-const shapeBKeyframe1 = { type: 'rect', width: 10, height: 10, x: 90, y: 0, fill: '#000' }
-const shapeBKeyframe2 = { type: 'rect', width: 10, height: 10, x: 0, y: 90, duration: 2000, easing: 'easeInOutElastic', fill: 'rgb(240,240,240)' }
+const shapeBKeyframe1 = { type: 'rect', width: 10, height: 10, x: 90, y: 0, fill: 'black' }
+const shapeBKeyframe2 = { type: 'rect', width: 10, height: 10, x: 0, y: 90, duration: 2000, easing: 'easeInOutElastic', fill: 'rgba(0,0,0,0.1)' }
 
 const shapeB = shape(shapeBKeyframe1, shapeBKeyframe2)
 
