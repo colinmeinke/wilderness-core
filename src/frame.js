@@ -1,4 +1,4 @@
-import { input, output } from './middleware'
+import { output } from './middleware'
 import { toPoints } from 'svg-points'
 
 /**
@@ -57,9 +57,9 @@ const frame = (timeline, at) => {
 
   return timeline.timelineShapes.map(({ shape, timelinePosition: { start, end } }) => {
     if (timelinePosition <= start) {
-      return shape.keyframes[ 0 ].frameShape
+      return output(shape.keyframes[ 0 ].frameShape, timeline.middleware)
     } else if (timelinePosition >= end) {
-      return shape.keyframes[ shape.keyframes.length - 1 ].frameShape
+      return output(shape.keyframes[ shape.keyframes.length - 1 ].frameShape, timeline.middleware)
     }
 
     return frameShapeFromShape({
@@ -139,8 +139,8 @@ const frameShapeFromShape = ({ shape, position, middleware = [] }) => {
   const to = shape.keyframes[ toIndex ]
 
   const frameShape = tween(
-    input(from.frameShape, middleware),
-    input(to.frameShape, middleware),
+    from.frameShape,
+    to.frameShape,
     to.tween.easing,
     (position - from.position) / (to.position - from.position)
   )

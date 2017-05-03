@@ -1,4 +1,5 @@
 import config from './config'
+import { input } from './middleware'
 
 /**
  * The position of an object on a Timeline
@@ -98,6 +99,22 @@ import config from './config'
  * @property {PlaybackOptions} playbackOptions
  * @property {Middleware[]} middleware
  */
+
+/**
+ * Runs each Middleware input function on every Keyframe's
+ * FrameShape.
+ *
+ * @param {Shape} shape
+ * @param {Middleware[]} middleware
+ *
+ * @example
+ * apply(shape, middleware)
+ */
+const apply = ({ keyframes }, middleware) => {
+ keyframes.map(keyframe => {
+   keyframe.frameShape = input(keyframe.frameShape, middleware)
+ })
+}
 
 /**
  * Extracts PlaybackOptions from TimelineOptions.
@@ -296,16 +313,17 @@ const sort = props => {
  */
 const timeline = (...props) => {
   const { shapesWithOptions, timelineOptions } = sort(props)
+  const middleware = timelineOptions.middleware
 
   const opts = playbackOptions(timelineOptions)
-  const { duration, timelineShapes } = timelineShapesAndDuration(shapesWithOptions)
+  const { duration, timelineShapes } = timelineShapesAndDuration(shapesWithOptions, middleware)
 
   if (typeof opts.duration === 'undefined') {
     opts.duration = duration
   }
 
   const t = {
-    middleware: timelineOptions.middleware,
+    middleware,
     playbackOptions: opts,
     timelineShapes: timelineShapes
   }
@@ -433,14 +451,15 @@ const timelineShapes = ({ duration, msTimelineShapes, start }) => (
  * Converts an array of ShapesWithOptions into TimelineShapes
  * and their total duration.
  *
- * @param {ShapeWithOptions[]}
+ * @param {ShapeWithOptions[]} shapesWithOptions
+ * @param {Middleware[]} middleware
  *
  * @returns {TimelineShapesAndDuration}
  *
  * @example
  * timelineShapes(shapesWithOptions)
  */
-const timelineShapesAndDuration = shapesWithOptions => {
+const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
   let timelineStart = 0
   let timelineEnd = 0
 
@@ -450,6 +469,8 @@ const timelineShapesAndDuration = shapesWithOptions => {
     if (typeof shape.timeline !== 'undefined') {
       throw new Error(`A Shape can only be added to one timeline`)
     }
+
+    apply(shape, middleware)
 
     if (typeof name !== 'undefined') {
       shape.name = name

@@ -40,7 +40,7 @@ const apply = (value, func) => {
 }
 
 /**
- * Runs each middleware input function in turn on a value.
+ * Runs each Middleware input function in turn on a value.
  *
  * @param {*} value
  * @param {Middleware[]} middleware
@@ -55,7 +55,7 @@ const input = (value, middleware) => middleware.reduce((v, m) => (
 ), value)
 
 /**
- * Runs each middleware output function in reverse on a value.
+ * Runs each Middleware output function in reverse on a value.
  *
  * @param {*} value
  * @param {Middleware[]} middleware
