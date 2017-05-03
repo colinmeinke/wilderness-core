@@ -1,5 +1,6 @@
 import config from './config'
 import { frameShapeFromPlainShapeObject } from './frame'
+import transform from './transform'
 import tweenFunctions from 'tween-functions'
 
 /**
@@ -69,11 +70,14 @@ const keyframesAndDuration = plainShapeObjects => {
     duration,
     easing,
     name,
+    transforms = [],
     ...plainShapeObject
   }, i) => {
+    const frameShape = frameShapeFromPlainShapeObject(plainShapeObject)
+
     const keyframe = {
       name: typeof name !== 'undefined' ? name : i,
-      frameShape: frameShapeFromPlainShapeObject(plainShapeObject)
+      frameShape: transform(frameShape, transforms)
     }
 
     if (i > 0) {

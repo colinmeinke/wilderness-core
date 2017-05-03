@@ -73,7 +73,19 @@ const errorMsg = errors => (
   `Plain Shape Object props not valid: ${errors.join('. ')}`
 )
 
-const manipulationPropsValid = plainShapeObjects => {
+const transformsPropValid = ({ transforms }) => {
+  const errors = []
+
+  if (typeof transforms !== 'undefined') {
+    if (!Array.isArray(transforms)) {
+      errors.push('the transforms prop must be of type array')
+    }
+  }
+
+  if (errors.length) {
+    throw new TypeError(errorMsg(errors))
+  }
+
   return true
 }
 
@@ -87,11 +99,11 @@ const manipulationPropsValid = plainShapeObjects => {
  * @returns {true}
  *
  * @example
- * if (namePropsValid([ circle ])) {
+ * if (namePropValid([ circle ])) {
  *   console.log('circle has a valid name prop')
  * }
  */
-const namePropsValid = plainShapeObjects => {
+const namePropValid = plainShapeObjects => {
   const errors = []
 
   plainShapeObjects.map(({ name }) => {
@@ -177,9 +189,9 @@ const tweenPropsValid = plainShapeObjects => {
  * }
  */
 const valid = (...plainShapeObjects) => (
-  namePropsValid(plainShapeObjects) &&
+  namePropValid(plainShapeObjects) &&
   corePropsValid(plainShapeObjects) &&
-  manipulationPropsValid(plainShapeObjects) &&
+  transformsPropValid(plainShapeObjects) &&
   tweenPropsValid(plainShapeObjects)
 )
 

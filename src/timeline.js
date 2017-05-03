@@ -111,9 +111,9 @@ import { input } from './middleware'
  * apply(shape, middleware)
  */
 const apply = ({ keyframes }, middleware) => {
- keyframes.map(keyframe => {
-   keyframe.frameShape = input(keyframe.frameShape, middleware)
- })
+  keyframes.map(keyframe => {
+    keyframe.frameShape = input(keyframe.frameShape, middleware)
+  })
 }
 
 /**
