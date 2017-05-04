@@ -128,14 +128,14 @@ const transformsPropValid = plainShapeObjects => {
             case 'scale':
               if (args.length > 0 && args.length < 3) {
                 if (typeof args[ 0 ] !== 'number') {
-                  errors.push('offset transform scaleFactor argument should be of type number')
+                  errors.push('scale transform scaleFactor argument should be of type number')
                 }
 
-                if (typeof args[ 1 ] !== 'string') {
-                  errors.push('offset transform anchor argument should be of type string')
+                if (typeof args[ 1 ] !== 'undefined' && typeof args[ 1 ] !== 'string') {
+                  errors.push('scale transform anchor argument should be of type string')
                 }
               } else {
-                errors.push('offset transform takes 1 or 2 arguments')
+                errors.push('scale transform takes 1 or 2 arguments')
               }
 
               break
