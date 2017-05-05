@@ -38,24 +38,6 @@ import { shape } from 'wilderness-core'
 const morph = shape(circle, square)
 ```
 
-The plainShapeObject function does the reverse, creating a *Plain
-Shape Object* from a *Shape*.
-
-```js
-const { shape, plainShapeObject } from 'wilderness-core'
-const morph = shape(circle, square)
-
-// At some point in time later
-// after playback has started
-console.log(plainShapeObject(morph))
-
-// {
-//   type: 'path',
-//   d: '...' // A shape somewhere between a circle and a square
-//   fill: '#E54'
-// }
-```
-
 ### Timeline
 
 Before a *Shape* can start animating, it needs to be queued on
