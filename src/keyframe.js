@@ -53,6 +53,21 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
 }
 
 /**
+ * Adds Points to FrameShapes so each Keyframe has an equal number
+ * of Points and is therefore tweenable.
+ *
+ * @property {Keyframe[]} keyframes
+ *
+ * @returns {Keyframe[]}
+ *
+ * @example
+ * equaliseKeyframes(keyframes)
+ */
+const equaliseKeyframes = keyframes => {
+  return keyframes
+}
+
+/**
  * Creates a Keyframe array from a PlainShapeObject array.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
@@ -63,7 +78,7 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
  * keyframes([ circle, square ])
  */
 const keyframesAndDuration = plainShapeObjects => {
-  const k = []
+  const keyframes = []
 
   plainShapeObjects.map(({
     delay,
@@ -89,7 +104,7 @@ const keyframesAndDuration = plainShapeObjects => {
       }
 
       if (delay) {
-        const previousKeyframe = k[ k.length - 1 ]
+        const previousKeyframe = keyframes[ keyframes.length - 1 ]
 
         const delayKeyframe = {
           ...previousKeyframe,
@@ -97,18 +112,19 @@ const keyframesAndDuration = plainShapeObjects => {
           tween: { duration: delay }
         }
 
-        k.push(delayKeyframe)
+        keyframes.push(delayKeyframe)
       }
     }
 
-    k.push(keyframe)
+    keyframes.push(keyframe)
   })
 
-  const totalDuration = keyframesTotalDuration(k)
+  const equalisedKeyframes = equaliseKeyframes(keyframes)
+  const totalDuration = keyframesTotalDuration(keyframes)
 
   return {
     duration: totalDuration,
-    keyframes: positionedKeyframes(k, totalDuration)
+    keyframes: positionKeyframes(equalisedKeyframes, totalDuration)
   }
 }
 
@@ -121,9 +137,9 @@ const keyframesAndDuration = plainShapeObjects => {
  * @returns {Keyframe[]}
  *
  * @example
- * positionedKeyframes(keyframes)
+ * positionKeyframes(keyframes)
  */
-const positionedKeyframes = (k, totalDuration) => {
+const positionKeyframes = (k, totalDuration) => {
   let durationAtKeyframe = 0
 
   return k.map(keyframe => {
