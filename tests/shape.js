@@ -105,17 +105,4 @@ describe('shape', () => {
 
     expect(duration).toEqual(d)
   })
-
-  it('...', () => {
-    const square = {
-      type: 'rect',
-      width: 10,
-      height: 10,
-      x: 0,
-      y: 0,
-      transforms: [[ 'rotate', 45 ]]
-    }
-
-    console.log(shape(square).keyframes[ 0 ].frameShape)
-  })
 })
