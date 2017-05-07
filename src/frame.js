@@ -1,5 +1,5 @@
 import { add } from 'points'
-import clone from 'clone'
+import clone from './clone'
 import { output } from './middleware'
 import { toPoints } from 'svg-points'
 
