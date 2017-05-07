@@ -1,6 +1,13 @@
 /* globals describe it expect */
 
-import frame, { position, tween } from '../src/frame'
+import frame, {
+  commonPointsStructure,
+  pointsStructure,
+  position,
+  restructureFrameShape,
+  splitLines,
+  tween
+} from '../src/frame'
 import shape from '../src/shape'
 import { toPoints } from 'svg-points'
 import timeline from '../src/timeline'
@@ -209,5 +216,188 @@ describe('tween', () => {
     expect(result[ 1 ]).toBe(expected[ 1 ])
     expect(result[ 2 ][ 0 ]).toBeCloseTo(expected[ 2 ][ 0 ])
     expect(result[ 3 ].bar).toBe(expected[ 3 ].bar)
+  })
+})
+
+describe('pointsStructure', () => {
+  it('should return correct structure for basic frame shape', () => {
+    const points = [ { moveTo: true }, {}, {} ]
+    expect(pointsStructure({ points })).toEqual([ 3 ])
+  })
+
+  it('should return correct structure for multi-line frame shape', () => {
+    const points = [ { moveTo: true }, {}, {}, { moveTo: true }, {} ]
+    expect(pointsStructure({ points })).toEqual([ 3, 2 ])
+  })
+
+  it('should return correct structure for group frame shape', () => {
+    const points1 = [ { moveTo: true }, {}, {}, { moveTo: true }, {} ]
+    const points2 = [ { moveTo: true }, {}, {}, {}, {}, {} ]
+
+    const frameShape = {
+      childFrameShapes: [
+        { points: points1 },
+        { points: points2 }
+      ]
+    }
+    expect(pointsStructure(frameShape)).toEqual([[ 3, 2 ], [ 6 ]])
+  })
+
+  it('should return correct structure for deep group frame shape', () => {
+    const points1 = [ { moveTo: true }, {}, {}, { moveTo: true }, {} ]
+    const points2 = [ { moveTo: true }, {}, {}, {}, {}, {} ]
+    const points3 = [ { moveTo: true }, {} ]
+
+    const frameShape = {
+      childFrameShapes: [
+        { points: points1 },
+        { childFrameShapes: [
+          { points: points2 },
+          { points: points3 }
+        ] }
+      ]
+    }
+    expect(pointsStructure(frameShape)).toEqual([[ 3, 2 ], [[ 6 ], [ 2 ]]])
+  })
+})
+
+describe('commonPointsStructure', () => {
+  it('should return correct structure for basic structures', () => {
+    const structures = [[ 2 ], [ 9 ], [ 4 ]]
+    expect(commonPointsStructure(structures)).toEqual([ 9 ])
+  })
+
+  it('should return correct structure for multi-line structures', () => {
+    const structures = [[ 5 ], [ 2, 9 ]]
+    expect(commonPointsStructure(structures)).toEqual([ 5, 9 ])
+  })
+
+  it('should return correct structure for group structures', () => {
+    const structures = [[ 5 ], [[ 3 ], [ 2, 7, 1 ]]]
+    expect(commonPointsStructure(structures)).toEqual([[ 5 ], [ 2, 7, 1 ]])
+  })
+
+  it('should return correct stucture for deep group structures', () => {
+    const structures = [[ 5 ], [[[ 3 ], [ 9 ]], [ 2, 7, 1 ]]]
+    expect(commonPointsStructure(structures)).toEqual([[[ 5 ], [ 9 ]], [ 2, 7, 1 ]])
+  })
+})
+
+describe('restructureFrameShape', () => {
+  it('should restructure a basic frameShape with additional points', () => {
+    const frameShape = {
+      attributes: {},
+      points: [
+        { x: 0, y: 0, moveTo: true },
+        { x: 10, y: 10 }
+      ]
+    }
+
+    const structure = [ 9 ]
+
+    expect(restructureFrameShape(frameShape, structure).points.length).toBe(9)
+  })
+
+  it('should restructure a basic frameShape with additional lines', () => {
+    const frameShape = {
+      attributes: {},
+      points: [
+        { x: 0, y: 0, moveTo: true },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+        { x: 0, y: 0 }
+      ]
+    }
+
+    const structure = [ 9, 4 ]
+
+    const lines = splitLines(restructureFrameShape(frameShape, structure).points)
+
+    expect(lines[ 0 ].length).toBe(9)
+    expect(lines[ 1 ].length).toBe(4)
+  })
+
+  it('should restructure a basic frameShape to a group', () => {
+    const frameShape = {
+      attributes: {},
+      points: [
+        { x: 0, y: 0, moveTo: true },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+        { x: 0, y: 0 }
+      ]
+    }
+
+    const structure = [[ 9 ], [ 4 ]]
+
+    const restructuredFrameShape = restructureFrameShape(frameShape, structure)
+
+    expect(restructuredFrameShape.points).toBeUndefined()
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].points.length).toBe(9)
+    expect(restructuredFrameShape.childFrameShapes[ 1 ].points.length).toBe(4)
+  })
+
+  it('should restructure a complex frameShape', () => {
+    const frameShape = {
+      attributes: {},
+      points: [
+        { x: 0, y: 0, moveTo: true },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+        { x: 0, y: 0 }
+      ]
+    }
+
+    const structure = [[[ 9 ], [[ 2 ], [ 15 ]]], [ 4 ]]
+
+    const restructuredFrameShape = restructureFrameShape(frameShape, structure)
+
+    expect(restructuredFrameShape.points).toBeUndefined()
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].points).toBeUndefined()
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].childFrameShapes[ 0 ].points.length).toBe(9)
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].childFrameShapes[ 1 ].points).toBeUndefined()
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].childFrameShapes[ 1 ].childFrameShapes[ 0 ].points.length).toBe(2)
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].childFrameShapes[ 1 ].childFrameShapes[ 1 ].points.length).toBe(15)
+    expect(restructuredFrameShape.childFrameShapes[ 1 ].points.length).toBe(4)
+  })
+
+  it('should restructure a group frameShape', () => {
+    const frameShape = {
+      attributes: {},
+      childFrameShapes: [
+        {
+          attributes: {},
+          points: [
+            { x: 0, y: 0, moveTo: true },
+            { x: 10, y: 0 },
+            { x: 10, y: 10 },
+            { x: 0, y: 10 },
+            { x: 0, y: 0 }
+          ]
+        },
+        {
+          attributes: {},
+          points: [
+            { x: 0, y: 0, moveTo: true },
+            { x: 10, y: 0 }
+          ]
+        }
+      ]
+    }
+
+    const structure = [[ 5 ], [[ 24, 3 ], [ 9 ]]]
+
+    const restructuredFrameShape = restructureFrameShape(frameShape, structure)
+    const lines = splitLines(restructuredFrameShape.childFrameShapes[ 1 ].childFrameShapes[ 0 ].points)
+
+    expect(restructuredFrameShape.points).toBeUndefined()
+    expect(restructuredFrameShape.childFrameShapes[ 0 ].points.length).toBe(5)
+    expect(restructuredFrameShape.childFrameShapes[ 1 ].points).toBeUndefined()
+    expect(lines[ 0 ].length).toBe(24)
+    expect(lines[ 1 ].length).toBe(3)
+    expect(restructuredFrameShape.childFrameShapes[ 1 ].childFrameShapes[ 1 ].points.length).toBe(9)
   })
 })

@@ -49,6 +49,7 @@
     }
   },
   "dependencies": {
+    "clone": "^2.1.1",
     "points": "^2.0.3",
     "svg-points": "^4.0.0",
     "tween-functions": "^1.2.0"
@@ -81,7 +82,7 @@
     "url": "https://github.com/colinmeinke/wilderness-core.git"
   },
   "scripts": {
-    "build:examples": "BABEL_ENV=examples rollup -c examples/hello-world/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-tween/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-timeline/rollup.config.js",
+    "build:examples": "BABEL_ENV=examples rollup -c examples/hello-world/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-tween/rollup.config.js && BABEL_ENV=examples rollup -c examples/basic-timeline/rollup.config.js && BABEL_ENV=examples rollup -c examples/morph/rollup.config.js",
     "commit": "git-cz",
     "fix": "standard --fix",
     "lint": "standard --verbose | snazzy",

@@ -1,3 +1,5 @@
+import { add } from 'points'
+import clone from 'clone'
 import { output } from './middleware'
 import { toPoints } from 'svg-points'
 
@@ -29,6 +31,52 @@ import { toPoints } from 'svg-points'
  *
  * @typedef {number} Position
  */
+
+/**
+ * A format to represent the Points structure of a FrameShape.
+ * An array represents a shape. A number represents a line.
+ * An array that has nested arrays represents a group of shapes.
+ *
+ * @typedef {(number|number[])[]} PointsStructure
+ */
+
+/**
+ * Add a value to a PointsStucture at a defined position.
+ *
+ * @param {PointsStructure} structure
+ * @param {(number|number[])} value - Value to add to PointsStructure.
+ * @param {number} i - Position to add value at.
+ *
+ * @example
+ * addToPointsStructure([], 9, 0)
+ */
+const addToPointsStructure = (structure, value, i) => {
+  if (Array.isArray(value)) {
+    if (!Array.isArray(structure[ i ])) {
+      structure[ i ] = [ structure[ i ] ]
+    }
+
+    value.reduce(addToPointsStructure, structure[ i ])
+  } else {
+    structure[ i ] = Math.max(structure[ i ] || 0, value)
+  }
+
+  return structure
+}
+
+/**
+ * Creates a common PointsStructure from an array of Stuctures.
+ *
+ * @param {PointsStructure[]} structures
+ *
+ * @returns {PointsStructure}
+ *
+ * @example
+ * commonPointsStructure(structures)
+ */
+const commonPointsStructure = structures => structures.reduce((structure, s) => (
+  s.reduce(addToPointsStructure, structure)
+), [])
 
 /**
  * The the current Frame of a Timeline.
@@ -199,6 +247,44 @@ const iterationsComplete = ({ at, delay, duration, iterations, started }) => {
 }
 
 /**
+ * Joins an array of Points into Points.
+ *
+ * @param {Points[]} lines
+ *
+ * @returns {Points}
+ *
+ * @example
+ * joinLines([ shape1, shape2 ])
+ */
+const joinLines = lines => [].concat(...lines)
+
+/**
+ * Creates a PointsStructure from a FrameShape.
+ *
+ * @param {FrameShape} frameShape
+ *
+ * @returns {PointsStructure}
+ *
+ * @example
+ * pointsStructure(frameShape)
+ */
+const pointsStructure = ({ points, childFrameShapes }) => {
+  if (childFrameShapes) {
+    return childFrameShapes.map(pointsStructure)
+  }
+
+  return points.reduce((structure, { moveTo }) => {
+    if (moveTo) {
+      structure.push(1)
+    } else {
+      structure[ structure.length - 1 ]++
+    }
+
+    return structure
+  }, [])
+}
+
+/**
  * A Position at a given time.
  *
  * @param {PlaybackOptions} playbackOptions
@@ -228,6 +314,91 @@ const position = ({
   return initialDirection(alternate, totalIterations)
     ? reverse ? relativeIteration : 1 - relativeIteration
     : reverse ? 1 - relativeIteration : relativeIteration
+}
+
+/**
+ * Restructures a FrameShape based on a PointsStructure.
+ *
+ * @param {FrameShape} frameShape
+ * @param {PointsStructure} structure
+ *
+ * @returns {FrameShape}
+ *
+ * @example
+ * restructureFrameShape()
+ */
+const restructureFrameShape = (frameShape, structure) => {
+  if (Array.isArray(structure[ 0 ])) {
+    if (!frameShape.childFrameShapes) {
+      frameShape.childFrameShapes = [ clone(frameShape) ]
+      delete frameShape.points
+    }
+
+    if (frameShape.childFrameShapes.length !== structure.length) {
+      structure.map((x, i) => {
+        if (i >= frameShape.childFrameShapes.length) {
+          const previous = frameShape.childFrameShapes[ i - 1 ].points
+
+          frameShape.childFrameShapes.push({
+            attributes: clone(frameShape.attributes),
+            points: [
+              { ...clone(previous[ previous.length - 1 ]), moveTo: true },
+              clone(previous[ previous.length - 1 ])
+            ]
+          })
+        }
+      })
+    }
+
+    frameShape.childFrameShapes = frameShape.childFrameShapes.map((childFrameShape, i) => (
+      restructureFrameShape(childFrameShape, structure[ i ])
+    ))
+  } else {
+    const lines = splitLines(frameShape.points)
+
+    structure.map((desiredPoints, i) => {
+      if (!lines[ i ]) {
+        const previousLine = lines[ i - 1 ]
+
+        lines[ i ] = [
+          { ...clone(previousLine[ previousLine.length - 1 ]), moveTo: true },
+          clone(previousLine[ previousLine.length - 1 ])
+        ]
+      }
+
+      if (desiredPoints > lines[ i ].length) {
+        lines[ i ] = add(lines[ i ], desiredPoints)
+      }
+    })
+
+    frameShape.points = joinLines(lines)
+  }
+
+  return frameShape
+}
+
+/**
+ * Splits Points at moveTo commands.
+ *
+ * @param {Points} points
+ *
+ * @return {Points[]}
+ *
+ * @example
+ * splitLines(points)
+ */
+const splitLines = points => {
+  const lines = []
+
+  points.map(point => {
+    if (point.moveTo) {
+      lines.push([ point ])
+    } else {
+      lines[ lines.length - 1 ].push(point)
+    }
+  })
+
+  return lines
 }
 
 /**
@@ -279,5 +450,15 @@ const tween = (from, to, easing, position) => {
   return from
 }
 
-export { frameShapeFromPlainShapeObject, position, tween }
+export {
+  commonPointsStructure,
+  frameShapeFromPlainShapeObject,
+  joinLines,
+  pointsStructure,
+  position,
+  restructureFrameShape,
+  splitLines,
+  tween
+}
+
 export default frame

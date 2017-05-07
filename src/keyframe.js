@@ -1,15 +1,12 @@
+import {
+  commonPointsStructure,
+  frameShapeFromPlainShapeObject,
+  pointsStructure,
+  restructureFrameShape
+} from './frame'
 import config from './config'
-import { frameShapeFromPlainShapeObject } from './frame'
 import transform from './transform'
 import tweenFunctions from 'tween-functions'
-
-/**
- * A format to represent the structure of a FrameShape.
- * An array represents a shape. A number represents a line.
- * An array that has nested arrays represents a group of shapes.
- *
- * @typedef {(number|number[])[]} Structure
- */
 
 /**
  * The data required to render and tween to a shape.
@@ -30,44 +27,6 @@ import tweenFunctions from 'tween-functions'
  * @property {Keyframe[]} keyframes
  * @property {number} duration
  */
-
-/**
- * Adds a value to a Stucture at the defined position.
- *
- * @param {Structure} s
- * @param {(number|number[])} v - Value to add to Structure.
- * @param {number} i - Position to add value at.
- *
- * @example
- * addToStructure([], 9, 0)
- */
-const addToStructure = (s, v, i) => {
-  if (Array.isArray(v)) {
-    if (!Array.isArray(s[ i ])) {
-      s[ i ] = [ s[ i ] ]
-    }
-
-    v.reduce(addToStructure, s[ i ])
-  } else {
-    s[ i ] = Math.max(s[ i ] || 0, v)
-  }
-
-  return s
-}
-
-/**
- * Creates a common Structure from an array of Stuctures.
- *
- * @param {Structure[]} structures
- *
- * @returns {Structure}
- *
- * @example
- * commonStructure(structures)
- */
-const commonStructure = structures => structures.reduce((commonStructure, s) => (
-  s.reduce(addToStructure, commonStructure)
-), [])
 
 /**
  * An easing function.
@@ -99,8 +58,8 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
 }
 
 /**
- * Adds Points to FrameShapes so each Keyframe has an equal number
- * of Points and is therefore tweenable.
+ * Converts Keyframes so each has the same Structure
+ * and the same number of Points.
  *
  * @param {Keyframe[]} keyframes
  *
@@ -110,10 +69,15 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
  * equaliseKeyframes(keyframes)
  */
 const equaliseKeyframes = keyframes => {
-  const structures = keyframes.map(({ frameShape }) => structure(frameShape))
-  const s = commonStructure(structures)
+  const structures = keyframes.map(({ frameShape }) => pointsStructure(frameShape))
+  const structure = commonPointsStructure(structures)
 
-  return keyframes
+  const restructuredKeyframes = keyframes.map(keyframe => {
+    keyframe.frameShape = restructureFrameShape(keyframe.frameShape, structure)
+    return keyframe
+  })
+
+  return restructuredKeyframes
 }
 
 /**
@@ -220,31 +184,4 @@ const keyframesTotalDuration = k => k.reduce((
   { tween: { duration = 0 } = {} }
 ) => (currentDuration += duration), 0)
 
-/**
- * Creates a Structure from a FrameShape.
- *
- * @param {FrameShape} frameShape
- *
- * @returns {Structure}
- *
- * @example
- * structure(frameShape)
- */
-const structure = ({ points, childFrameShapes }) => {
-  if (childFrameShapes) {
-    return childFrameShapes.map(structure)
-  }
-
-  return points.reduce((s, { moveTo }) => {
-    if (moveTo) {
-      s.push(1)
-    } else {
-      s[ s.length - 1 ]++
-    }
-
-    return s
-  }, [])
-}
-
-export { commonStructure, structure }
 export default keyframesAndDuration

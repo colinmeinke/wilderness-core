@@ -1,7 +1,7 @@
 /* globals describe it expect */
 
 import config from '../src/config'
-import keyframesAndDuration, { commonStructure, structure } from '../src/keyframe'
+import keyframesAndDuration from '../src/keyframe'
 
 describe('keyframes', () => {
   it('should return keyframes with the correct props', () => {
@@ -281,69 +281,5 @@ describe('keyframes', () => {
     const { duration } = keyframesAndDuration(plainShapeObjects)
 
     expect(duration).toBe(duration1 + duration2)
-  })
-})
-
-describe('structure', () => {
-  it('should return correct structure for basic frame shape', () => {
-    const points = [ { moveTo: true }, {}, {} ]
-    expect(structure({ points })).toEqual([ 3 ])
-  })
-
-  it('should return correct structure for multi-line frame shape', () => {
-    const points = [ { moveTo: true }, {}, {}, { moveTo: true }, {} ]
-    expect(structure({ points })).toEqual([ 3, 2 ])
-  })
-
-  it('should return correct structure for group frame shape', () => {
-    const points1 = [ { moveTo: true }, {}, {}, { moveTo: true }, {} ]
-    const points2 = [ { moveTo: true }, {}, {}, {}, {}, {} ]
-
-    const frameShape = {
-      childFrameShapes: [
-        { points: points1 },
-        { points: points2 }
-      ]
-    }
-    expect(structure(frameShape)).toEqual([[ 3, 2 ], [ 6 ]])
-  })
-
-  it('should return correct structure for deep group frame shape', () => {
-    const points1 = [ { moveTo: true }, {}, {}, { moveTo: true }, {} ]
-    const points2 = [ { moveTo: true }, {}, {}, {}, {}, {} ]
-    const points3 = [ { moveTo: true }, {} ]
-
-    const frameShape = {
-      childFrameShapes: [
-        { points: points1 },
-        { childFrameShapes: [
-          { points: points2 },
-          { points: points3 }
-        ] }
-      ]
-    }
-    expect(structure(frameShape)).toEqual([[ 3, 2 ], [[ 6 ], [ 2 ]]])
-  })
-})
-
-describe('commonStructure', () => {
-  it('should return correct structure for basic structures', () => {
-    const structures = [[ 2 ], [ 9 ], [ 4 ]]
-    expect(commonStructure(structures)).toEqual([ 9 ])
-  })
-
-  it('should return correct structure for multi-line structures', () => {
-    const structures = [[ 5 ], [ 2, 9 ]]
-    expect(commonStructure(structures)).toEqual([ 5, 9 ])
-  })
-
-  it('should return correct structure for group structures', () => {
-    const structures = [[ 5 ], [[ 3 ], [ 2, 7, 1 ]]]
-    expect(commonStructure(structures)).toEqual([[ 5 ], [ 2, 7, 1 ]])
-  })
-
-  it('should return correct stucture for deep group structures', () => {
-    const structures = [[ 5 ], [[[ 3 ], [ 9 ]], [ 2, 7, 1 ]]]
-    expect(commonStructure(structures)).toEqual([[[ 5 ], [ 9 ]], [ 2, 7, 1 ]])
   })
 })

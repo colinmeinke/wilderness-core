@@ -9,7 +9,7 @@ const square = shape(keyframe1, keyframe2)
 const animation = timeline(square, {
   alternate: true,
   duration: 2000,
-  iterations: 10
+  iterations: Infinity
 })
 
 render(document.querySelector('svg'), animation)
