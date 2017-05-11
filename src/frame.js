@@ -1,3 +1,5 @@
+/* globals __DEV__ */
+
 import { add } from 'points'
 import clone from './clone'
 import { output } from './middleware'
@@ -90,11 +92,11 @@ const commonPointsStructure = structures => structures.reduce((structure, s) => 
  * frame(timeline)
  */
 const frame = (timeline, at) => {
-  if (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions) {
+  if (__DEV__ && (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions)) {
     throw new TypeError(`The frame function's first argument must be a Timeline`)
   }
 
-  if (typeof at !== 'undefined' && typeof at !== 'number') {
+  if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'number')) {
     throw new TypeError(`The frame function's second argument must be of type number`)
   }
 
@@ -418,7 +420,7 @@ const tween = (from, to, easing, position) => {
   const errorMsg = `The tween function's from and to arguments must be of an identicle structure`
 
   if (Array.isArray(from)) {
-    if (!Array.isArray(to)) {
+    if (__DEV__ && !Array.isArray(to)) {
       throw new TypeError(errorMsg)
     }
 
@@ -436,7 +438,7 @@ const tween = (from, to, easing, position) => {
 
     return obj
   } else if (typeof from === 'number') {
-    if (typeof to !== 'number') {
+    if (__DEV__ && typeof to !== 'number') {
       throw new TypeError(errorMsg)
     }
 

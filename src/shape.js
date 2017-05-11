@@ -1,3 +1,5 @@
+/* globals __DEV__ */
+
 import keyframesAndDuration from './keyframe'
 import { valid } from './plain-shape-object'
 
@@ -55,7 +57,7 @@ const shape = (...props) => {
  */
 const sort = props => {
   const plainShapeObjects = props.map(prop => {
-    if (typeof prop !== 'object') {
+    if (__DEV__ && typeof prop !== 'object') {
       throw new TypeError(`The shape function must only be passed objects`)
     }
 
@@ -86,21 +88,21 @@ const sort = props => {
  * validProps({ plainShapeObjects, options })
  */
 const validProps = ({ plainShapeObjects, options: { name } }) => {
-  if (plainShapeObjects.length === 0) {
+  if (__DEV__ && plainShapeObjects.length === 0) {
     throw new TypeError(
       `The shape function must be passed at least one Plain Shape Object`
     )
   }
 
-  if (valid(...plainShapeObjects)) {
+  if (__DEV__ && valid(...plainShapeObjects)) {
     if (typeof name !== 'undefined' && (typeof name !== 'string' && typeof name !== 'number')) {
       throw new TypeError(
         `The name option passed to the shape function must be of type string or number`
       )
     }
-
-    return true
   }
+
+  return true
 }
 
 export default shape

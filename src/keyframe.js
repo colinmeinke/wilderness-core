@@ -1,3 +1,5 @@
+/* globals __DEV__ */
+
 import {
   commonPointsStructure,
   frameShapeFromPlainShapeObject,
@@ -45,15 +47,23 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
         return tweenFunctions[ easing ]
       }
 
-      throw new TypeError(
-        `Easing must match one of the options defined by https://github.com/chenglou/tween-functions`
-      )
+      if (__DEV__) {
+        throw new TypeError(
+          `Easing must match one of the options defined by https://github.com/chenglou/tween-functions`
+        )
+      }
+
+      break
 
     case 'function':
       return easing
 
     default:
-      throw new TypeError(`Easing must be of type function or string`)
+      if (__DEV__) {
+        throw new TypeError(`Easing must be of type function or string`)
+      }
+
+      break
   }
 }
 

@@ -1,3 +1,5 @@
+/* globals __DEV__ */
+
 import config from './config'
 import { input } from './middleware'
 
@@ -190,7 +192,9 @@ const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
       }
     }
 
-    throw new Error(`No Shape or Keyframe matching name '${follow}'`)
+    if (__DEV__) {
+      throw new Error(`No Shape or Keyframe matching name '${follow}'`)
+    }
   }
 
   return timelineEnd + offset
@@ -209,27 +213,27 @@ const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
  * shapeWithOptionsFromArray(arr, i)
  */
 const shapeWithOptionsFromArray = ([ shape, options ], i) => {
-  if (typeof shape !== 'object' || !shape.keyframes) {
+  if (__DEV__ && (typeof shape !== 'object' || !shape.keyframes)) {
     throw new TypeError(`When an array is passed to the timeline function the first item must be a Shape`)
   }
 
-  if (typeof options !== 'object') {
+  if (__DEV__ && (typeof options !== 'object')) {
     throw new TypeError(`When an array is passed to the timeline function the second item must be an object`)
   }
 
   const { name = i, queue = config.defaults.timeline.queue } = options
 
-  if (typeof name !== 'string' && typeof name !== 'number') {
+  if (__DEV__ && (typeof name !== 'string' && typeof name !== 'number')) {
     throw new TypeError(`The name prop must be of type string or number`)
   }
 
   if (typeof queue !== 'undefined') {
     if (Array.isArray(queue)) {
-      if (typeof queue[ 0 ] !== 'string' && typeof queue[ 0 ] !== 'number') {
+      if (__DEV__ && (typeof queue[ 0 ] !== 'string' && typeof queue[ 0 ] !== 'number')) {
         throw new TypeError(`The queue prop first array item must be of type string or number`)
       }
 
-      if (typeof queue[ 1 ] !== 'number') {
+      if (__DEV__ && (typeof queue[ 1 ] !== 'number')) {
         throw new TypeError(`The queue prop second array item must be of type number`)
       }
 
@@ -240,7 +244,11 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
       return { follow: queue, name, offset: 0, shape }
     }
 
-    throw new TypeError(`The queue prop must be of type number, string or array`)
+    if (__DEV__) {
+      throw new TypeError(`The queue prop must be of type number, string or array`)
+    }
+
+    return
   }
 
   return { name, offset: 0, shape }
@@ -257,7 +265,7 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
  * sort(props)
  */
 const sort = props => {
-  if (props.length === 0) {
+  if (__DEV__ && props.length === 0) {
     throw new TypeError(
       `The timeline function must be passed at least one Shape`
     )
@@ -269,7 +277,7 @@ const sort = props => {
         shapeWithOptionsFromArray(prop, i)
       )
     } else {
-      if (typeof prop !== 'object') {
+      if (__DEV__ && typeof prop !== 'object') {
         throw new TypeError(`The timeline function must only be passed objects and arrays`)
       }
 
@@ -280,10 +288,12 @@ const sort = props => {
           shape: prop
         })
       } else {
-        if (i === 0) {
-          throw new TypeError(`The timeline function must receive a Shape as the first argument`)
-        } else if (i !== props.length - 1) {
-          throw new TypeError(`The timeline function must receive options as the final argument`)
+        if (__DEV__) {
+          if (i === 0) {
+            throw new TypeError(`The timeline function must receive a Shape as the first argument`)
+          } else if (i !== props.length - 1) {
+            throw new TypeError(`The timeline function must receive options as the final argument`)
+          }
         }
 
         current.options = { ...prop }
@@ -359,54 +369,56 @@ const timelineOptions = options => {
     started
   } = options
 
-  if (typeof alternate !== 'boolean') {
-    throw new TypeError(`The timeline function alternate option must be true or false`)
-  }
-
-  if (typeof delay !== 'number' || delay < 0) {
-    throw new TypeError(`The timeline function delay option must be a positive number or zero`)
-  }
-
   if (typeof duration !== 'undefined') {
-    if (typeof duration !== 'number' || duration < 0) {
+    if (__DEV__ && (typeof duration !== 'number' || duration < 0)) {
       throw new TypeError(`The timeline function duration option must be a positive number or zero`)
     } else {
       t.duration = duration
     }
   }
 
-  if (typeof initialIterations !== 'number' || initialIterations < 0) {
-    throw new TypeError(`The timeline function initialIterations option must be a positive number or zero`)
-  }
-
-  if (typeof iterations !== 'number' || iterations < 0) {
-    throw new TypeError(`The timeline function iterations option must be a positive number or zero`)
-  }
-
-  if (!Array.isArray(middleware)) {
-    throw new TypeError(`The timeline function middleware option must be of type array`)
-  }
-
-  middleware.map(({ name, input, output }) => {
-    if (typeof name !== 'string') {
-      throw new TypeError(`A middleware must have a name prop`)
+  if (__DEV__) {
+    if (typeof alternate !== 'boolean') {
+      throw new TypeError(`The timeline function alternate option must be true or false`)
     }
 
-    if (typeof input !== 'function') {
-      throw new TypeError(`The ${name} middleware must have an input method`)
+    if (typeof delay !== 'number' || delay < 0) {
+      throw new TypeError(`The timeline function delay option must be a positive number or zero`)
     }
 
-    if (typeof output !== 'function') {
-      throw new TypeError(`The ${name} middleware must have an output method`)
+    if (typeof initialIterations !== 'number' || initialIterations < 0) {
+      throw new TypeError(`The timeline function initialIterations option must be a positive number or zero`)
     }
-  })
 
-  if (typeof reverse !== 'boolean') {
-    throw new TypeError(`The timeline function reverse option must be true or false`)
+    if (typeof iterations !== 'number' || iterations < 0) {
+      throw new TypeError(`The timeline function iterations option must be a positive number or zero`)
+    }
+
+    if (!Array.isArray(middleware)) {
+      throw new TypeError(`The timeline function middleware option must be of type array`)
+    }
+
+    middleware.map(({ name, input, output }) => {
+      if (typeof name !== 'string') {
+        throw new TypeError(`A middleware must have a name prop`)
+      }
+
+      if (typeof input !== 'function') {
+        throw new TypeError(`The ${name} middleware must have an input method`)
+      }
+
+      if (typeof output !== 'function') {
+        throw new TypeError(`The ${name} middleware must have an output method`)
+      }
+    })
+
+    if (typeof reverse !== 'boolean') {
+      throw new TypeError(`The timeline function reverse option must be true or false`)
+    }
   }
 
   if (typeof started !== 'undefined') {
-    if (typeof started !== 'number' || started < 0) {
+    if (__DEV__ && (typeof started !== 'number' || started < 0)) {
       throw new TypeError(`The timeline function started option must be a positive number or zero`)
     }
 
@@ -466,7 +478,7 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
   const msTimelineShapes = []
 
   shapesWithOptions.map(({ follow, name, offset, shape }, i) => {
-    if (typeof shape.timeline !== 'undefined') {
+    if (__DEV__ && typeof shape.timeline !== 'undefined') {
       throw new Error(`A Shape can only be added to one timeline`)
     }
 
