@@ -14,9 +14,7 @@ const to = {
   transforms: [[ 'reverse' ]],
 }
 
-const shape1 = shape(from, to)
-
-const animation = timeline(shape1, {
+const animation = timeline(shape(from, to), {
   alternate: true,
   duration: 1500,
   iterations: Infinity
