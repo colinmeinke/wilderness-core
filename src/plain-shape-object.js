@@ -1,3 +1,5 @@
+import frame from './frame'
+import { toPath } from 'svg-points'
 import { valid as shapeValid } from 'svg-points'
 
 /**
@@ -198,9 +200,15 @@ const namePropValid = plainShapeObjects => {
  * plainShapeObject(circle)
  */
 const plainShapeObject = shape => {
+  const frameShape = typeof shape.timeline === 'undefined'
+    ? shape.keyframes[ 0 ].frameShape
+    // @todo this assumes the shape is the first in the timline
+    : frame(shape.timeline)[ 0 ]
+
   return {
+    ...frameShape.attributes,
     type: 'path',
-    d: ''
+    d: toPath(frameShape.points)
   }
 }
 
