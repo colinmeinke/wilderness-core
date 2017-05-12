@@ -1,10 +1,13 @@
 /* globals __DEV__ */
 
 import {
-  commonPointsStructure,
+  applyCurveStructure,
+  applyPointStructure,
+  commonCurveStructure,
+  commonPointStructure,
+  curveStructure,
   frameShapeFromPlainShapeObject,
-  pointsStructure,
-  restructureFrameShape
+  pointStructure
 } from './frame'
 import config from './config'
 import transform from './transform'
@@ -68,8 +71,8 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
 }
 
 /**
- * Converts Keyframes so each has the same Structure
- * and the same number of Points.
+ * Converts Keyframes so each has the same
+ * PointStructure and CurveStructure.
  *
  * @param {Keyframe[]} keyframes
  *
@@ -79,15 +82,21 @@ const easingFunction = (easing = config.defaults.keyframe.easing) => {
  * equaliseKeyframes(keyframes)
  */
 const equaliseKeyframes = keyframes => {
-  const structures = keyframes.map(({ frameShape }) => pointsStructure(frameShape))
-  const structure = commonPointsStructure(structures)
+  const pointStrucs = keyframes.map(({ frameShape }) => pointStructure(frameShape))
+  const pointStruc = commonPointStructure(pointStrucs)
 
-  const restructuredKeyframes = keyframes.map(keyframe => {
-    keyframe.frameShape = restructureFrameShape(keyframe.frameShape, structure)
+  const k = keyframes.map(keyframe => {
+    keyframe.frameShape = applyPointStructure(keyframe.frameShape, pointStruc)
     return keyframe
   })
 
-  return restructuredKeyframes
+  const curveStrucs = k.map(({ frameShape }) => curveStructure(frameShape))
+  const curveStruc = commonCurveStructure(curveStrucs)
+
+  return k.map(keyframe => {
+    keyframe.frameShape = applyCurveStructure(keyframe.frameShape, curveStruc)
+    return keyframe
+  })
 }
 
 /**

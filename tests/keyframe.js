@@ -201,10 +201,11 @@ describe('keyframes', () => {
 
   it('should return keyframes with a valid frameShape.points prop', () => {
     const plainShapeObjects = [{
-      type: 'circle',
-      cx: 50,
-      cy: 50,
-      r: 20
+      type: 'rect',
+      x: 50,
+      y: 50,
+      width: 20,
+      height: 30
     }]
 
     const { keyframes } = keyframesAndDuration(plainShapeObjects)
@@ -212,9 +213,11 @@ describe('keyframes', () => {
     const { frameShape: { points } } = k
 
     const expectedPoints = [
-      { x: 50, y: 30, moveTo: true },
-      { x: 50, y: 70, curve: { type: 'arc', rx: 20, ry: 20, sweepFlag: 1 } },
-      { x: 50, y: 30, curve: { type: 'arc', rx: 20, ry: 20, sweepFlag: 1 } }
+      { x: 50, y: 50, moveTo: true },
+      { x: 70, y: 50 },
+      { x: 70, y: 80 },
+      { x: 50, y: 80 },
+      { x: 50, y: 50 }
     ]
 
     expect(points).toEqual(expectedPoints)

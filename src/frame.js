@@ -1,6 +1,6 @@
 /* globals __DEV__ */
 
-import { add } from 'points'
+import { add, cubify } from 'points'
 import clone from './clone'
 import { output } from './middleware'
 import { toPoints } from 'svg-points'
@@ -35,30 +35,142 @@ import { toPoints } from 'svg-points'
  */
 
 /**
- * A format to represent the Points structure of a FrameShape.
+ * The structure of FrameShape Points.
  * An array represents a shape. A number represents a line.
  * An array that has nested arrays represents a group of shapes.
  *
- * @typedef {(number|number[])[]} PointsStructure
+ * @typedef {(number|number[])[]} PointStructure
  */
 
 /**
- * Add a value to a PointsStucture at a defined position.
+ * The curve structure of FrameShape Points.
+ * A boolean represents a point, and designates if the point is a curve.
  *
- * @param {PointsStructure} structure
- * @param {(number|number[])} value - Value to add to PointsStructure.
+ * @typedef {(boolean|boolean[])[]} CurveStructure
+ */
+
+/**
+ * Converts FrameShape Points to curves based on a CurveStructure.
+ *
+ * @param {FrameShape} frameShape
+ * @param {CurveStructure} structure
+ *
+ * @returns {FrameShape}
+ *
+ * @example
+ * applyCurveStructure(frameShape, stucture)
+ */
+const applyCurveStructure = (frameShape, structure) => {
+  const { points, childFrameShapes } = frameShape
+
+  if (childFrameShapes) {
+    frameShape.childFrameShapes = childFrameShapes.map((childFrameShape, i) => (
+      applyCurveStructure(childFrameShape, structure[ i ])
+    ))
+  } else {
+    const curves = structure.reduce((a, b) => a || b)
+
+    if (curves) {
+      frameShape.points = cubify(points).map((point, i) => {
+        if (structure[ i ] && !point.curve) {
+          return {
+            ...point,
+            curve: {
+              type: 'cubic',
+              x1: points[ i - 1 ].x,
+              y1: points[ i - 1 ].y,
+              x2: points[ i ].x,
+              y2: points[ i ].y
+            }
+          }
+        }
+
+        return point
+      })
+    }
+  }
+
+  return frameShape
+}
+
+/**
+ * Restructures a FrameShape's Points based on a PointStructure.
+ *
+ * @param {FrameShape} frameShape
+ * @param {PointStructure} structure
+ *
+ * @returns {FrameShape}
+ *
+ * @example
+ * applyPointStructure(frameShape, stucture)
+ */
+const applyPointStructure = (frameShape, structure) => {
+  if (Array.isArray(structure[ 0 ])) {
+    if (!frameShape.childFrameShapes) {
+      frameShape.childFrameShapes = [ clone(frameShape) ]
+      delete frameShape.points
+    }
+
+    if (frameShape.childFrameShapes.length !== structure.length) {
+      structure.map((x, i) => {
+        if (i >= frameShape.childFrameShapes.length) {
+          const previous = frameShape.childFrameShapes[ i - 1 ].points
+
+          frameShape.childFrameShapes.push({
+            attributes: clone(frameShape.attributes),
+            points: [
+              { ...clone(previous[ previous.length - 1 ]), moveTo: true },
+              clone(previous[ previous.length - 1 ])
+            ]
+          })
+        }
+      })
+    }
+
+    frameShape.childFrameShapes = frameShape.childFrameShapes.map((childFrameShape, i) => (
+      applyPointStructure(childFrameShape, structure[ i ])
+    ))
+  } else {
+    const lines = splitLines(frameShape.points)
+
+    structure.map((desiredPoints, i) => {
+      if (!lines[ i ]) {
+        const previousLine = lines[ i - 1 ]
+
+        lines[ i ] = [
+          { ...clone(previousLine[ previousLine.length - 1 ]), moveTo: true },
+          clone(previousLine[ previousLine.length - 1 ])
+        ]
+      }
+
+      if (desiredPoints > lines[ i ].length) {
+        lines[ i ] = add(lines[ i ], desiredPoints)
+      }
+    })
+
+    frameShape.points = joinLines(lines)
+  }
+
+  return frameShape
+}
+
+/**
+ * Add a value to a PointStucture at a defined position.
+ *
+ * @param {PointStructure} structure
+ * @param {(number|number[])} value - Value to add to PointStructure.
  * @param {number} i - Position to add value at.
  *
  * @example
- * addToPointsStructure([], 9, 0)
+ * addToPointStructure([], 9, 0)
  */
-const addToPointsStructure = (structure, value, i) => {
+const addToPointStructure = (structure, value, i) => {
   if (Array.isArray(value)) {
     if (!Array.isArray(structure[ i ])) {
       structure[ i ] = [ structure[ i ] ]
     }
 
-    value.reduce(addToPointsStructure, structure[ i ])
+    value.reduce(addToPointStructure, structure[ i ])
   } else {
     structure[ i ] = Math.max(structure[ i ] || 0, value)
   }
@@ -67,17 +179,37 @@ const addToPointsStructure = (structure, value, i) => {
 }
 
 /**
- * Creates a common PointsStructure from an array of Stuctures.
+ * Creates a common CurveStructure from an array of CurveStructures.
  *
- * @param {PointsStructure[]} structures
+ * @param {CurveStructure[]} structures
  *
- * @returns {PointsStructure}
+ * @returns {CurveStructure}
  *
  * @example
- * commonPointsStructure(structures)
+ * commonCurveStructure(structures)
  */
-const commonPointsStructure = structures => structures.reduce((structure, s) => (
-  s.reduce(addToPointsStructure, structure)
+const commonCurveStructure = structures => structures.reduce((structure, s) => (
+  structure.map((x, i) => {
+    if (Array.isArray(x)) {
+      return commonCurveStructure([ x, s[ i ] ])
+    }
+
+    return x || s[ i ]
+  })
+))
+
+/**
+ * Creates a common PointStructure from an array of PointStructures.
+ *
+ * @param {PointStructure[]} structures
+ *
+ * @returns {PointStructure}
+ *
+ * @example
+ * commonPointStructure(structures)
+ */
+const commonPointStructure = structures => structures.reduce((structure, s) => (
+  s.reduce(addToPointStructure, structure)
 ), [])
 
 /**
@@ -261,18 +393,36 @@ const iterationsComplete = ({ at, delay, duration, iterations, started }) => {
 const joinLines = lines => [].concat(...lines)
 
 /**
- * Creates a PointsStructure from a FrameShape.
+ * Creates a CurveStructure from a FrameShape.
  *
  * @param {FrameShape} frameShape
  *
- * @returns {PointsStructure}
+ * @returns {CurveStructure}
  *
  * @example
- * pointsStructure(frameShape)
+ * curveStructure(frameShape)
  */
-const pointsStructure = ({ points, childFrameShapes }) => {
+const curveStructure = ({ points, childFrameShapes }) => {
   if (childFrameShapes) {
-    return childFrameShapes.map(pointsStructure)
+    return childFrameShapes.map(curveStructure)
+  }
+
+  return points.map(({ curve }) => typeof curve !== 'undefined')
+}
+
+/**
+ * Creates a PointStructure from a FrameShape.
+ *
+ * @param {FrameShape} frameShape
+ *
+ * @returns {PointStructure}
+ *
+ * @example
+ * pointStructure(frameShape)
+ */
+const pointStructure = ({ points, childFrameShapes }) => {
+  if (childFrameShapes) {
+    return childFrameShapes.map(pointStructure)
   }
 
   return points.reduce((structure, { moveTo }) => {
@@ -316,67 +466,6 @@ const position = ({
   return initialDirection(alternate, totalIterations)
     ? reverse ? relativeIteration : 1 - relativeIteration
     : reverse ? 1 - relativeIteration : relativeIteration
-}
-
-/**
- * Restructures a FrameShape based on a PointsStructure.
- *
- * @param {FrameShape} frameShape
- * @param {PointsStructure} structure
- *
- * @returns {FrameShape}
- *
- * @example
- * restructureFrameShape()
- */
-const restructureFrameShape = (frameShape, structure) => {
-  if (Array.isArray(structure[ 0 ])) {
-    if (!frameShape.childFrameShapes) {
-      frameShape.childFrameShapes = [ clone(frameShape) ]
-      delete frameShape.points
-    }
-
-    if (frameShape.childFrameShapes.length !== structure.length) {
-      structure.map((x, i) => {
-        if (i >= frameShape.childFrameShapes.length) {
-          const previous = frameShape.childFrameShapes[ i - 1 ].points
-
-          frameShape.childFrameShapes.push({
-            attributes: clone(frameShape.attributes),
-            points: [
-              { ...clone(previous[ previous.length - 1 ]), moveTo: true },
-              clone(previous[ previous.length - 1 ])
-            ]
-          })
-        }
-      })
-    }
-
-    frameShape.childFrameShapes = frameShape.childFrameShapes.map((childFrameShape, i) => (
-      restructureFrameShape(childFrameShape, structure[ i ])
-    ))
-  } else {
-    const lines = splitLines(frameShape.points)
-
-    structure.map((desiredPoints, i) => {
-      if (!lines[ i ]) {
-        const previousLine = lines[ i - 1 ]
-
-        lines[ i ] = [
-          { ...clone(previousLine[ previousLine.length - 1 ]), moveTo: true },
-          clone(previousLine[ previousLine.length - 1 ])
-        ]
-      }
-
-      if (desiredPoints > lines[ i ].length) {
-        lines[ i ] = add(lines[ i ], desiredPoints)
-      }
-    })
-
-    frameShape.points = joinLines(lines)
-  }
-
-  return frameShape
 }
 
 /**
@@ -453,12 +542,15 @@ const tween = (from, to, easing, position) => {
 }
 
 export {
-  commonPointsStructure,
+  applyCurveStructure,
+  applyPointStructure,
+  commonCurveStructure,
+  commonPointStructure,
+  curveStructure,
   frameShapeFromPlainShapeObject,
   joinLines,
-  pointsStructure,
+  pointStructure,
   position,
-  restructureFrameShape,
   splitLines,
   tween
 }
