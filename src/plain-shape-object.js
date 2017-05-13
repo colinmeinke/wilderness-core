@@ -202,13 +202,34 @@ const namePropValid = plainShapeObjects => {
 const plainShapeObject = shape => {
   const frameShape = typeof shape.timeline === 'undefined'
     ? shape.keyframes[ 0 ].frameShape
-    // @todo this assumes the shape is the first in the timline
-    : frame(shape.timeline)[ 0 ]
+    : frame(shape.timeline)[ shape.timelineIndex ]
+
+  return plainShapeObjectFromFrameShape(frameShape)
+}
+
+/**
+ * Creates a PlainShapeObject from a FrameShape.
+ *
+ * @param {FrameShape} frameShape
+ *
+ * @returns {PlainShapeObject}
+ *
+ * @example
+ * plainShapeObjectFromFrameShape(frameShape)
+ */
+const plainShapeObjectFromFrameShape = ({ attributes, points, childFrameShapes }) => {
+  if (childFrameShapes) {
+    return {
+      ...attributes,
+      type: 'g',
+      shapes: childFrameShapes.map(plainShapeObjectFromFrameShape)
+    }
+  }
 
   return {
-    ...frameShape.attributes,
+    ...attributes,
     type: 'path',
-    d: toPath(frameShape.points)
+    d: toPath(points)
   }
 }
 

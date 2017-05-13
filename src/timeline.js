@@ -338,8 +338,9 @@ const timeline = (...props) => {
     timelineShapes: timelineShapes
   }
 
-  timelineShapes.map(({ shape }) => {
+  timelineShapes.map(({ shape }, i) => {
     shape.timeline = t
+    shape.timelineIndex = i
   })
 
   return t
