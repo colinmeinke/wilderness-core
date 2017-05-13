@@ -1,3 +1,5 @@
+/* globals __DEV__ */
+
 import frame from './frame'
 import { toPath, valid as shapeValid } from 'svg-points'
 
@@ -192,16 +194,25 @@ const namePropValid = plainShapeObjects => {
  * Creates a PlainShapeObject from a Shape.
  *
  * @param {Shape} shape
+ * @param {number} [at]
  *
  * @returns {PlainShapeObject}
  *
  * @example
  * plainShapeObject(circle)
  */
-const plainShapeObject = shape => {
+const plainShapeObject = (shape, at) => {
+  if (__DEV__ && (typeof shape !== 'object' || !shape.keyframes)) {
+    throw new Error(`The plainShapeObject function's first argument must be a Shape`)
+  }
+
+  if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'number')) {
+    throw new TypeError(`The plainShapeObject function's second argument must be of type number`)
+  }
+
   const frameShape = typeof shape.timeline === 'undefined'
     ? shape.keyframes[ 0 ].frameShape
-    : frame(shape.timeline)[ shape.timelineIndex ]
+    : frame(shape.timeline, at)[ shape.timelineIndex ]
 
   return plainShapeObjectFromFrameShape(frameShape)
 }
