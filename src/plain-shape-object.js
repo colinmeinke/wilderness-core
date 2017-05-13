@@ -1,6 +1,5 @@
 import frame from './frame'
-import { toPath } from 'svg-points'
-import { valid as shapeValid } from 'svg-points'
+import { toPath, valid as shapeValid } from 'svg-points'
 
 /**
  * An SVG shape as defined by https://github.com/colinmeinke/svg-points.
