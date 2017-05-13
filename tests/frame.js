@@ -1,6 +1,7 @@
 /* globals describe it expect */
 
 import frame, {
+  addToPointStructure,
   applyCurveStructure,
   applyPointStructure,
   commonCurveStructure,
@@ -264,6 +265,24 @@ describe('pointStructure', () => {
   })
 })
 
+describe('addToPointStructure', () => {
+  it('should insert point into empty structure', () => {
+    expect(addToPointStructure([], 5, 0)).toEqual([ 5 ])
+  })
+
+  it('should insert point at correct index', () => {
+    expect(addToPointStructure([ 10, 4, 1 ], 5, 2)).toEqual([ 10, 4, 5 ])
+  })
+
+  it('should insert array correctly', () => {
+    expect(addToPointStructure([ 9 ], [ 5, 2 ], 0)).toEqual([[ 9, 2 ]])
+  })
+
+  it('should insert into array of arrays correctly', () => {
+    expect(addToPointStructure([[ 5 ], [ 5 ], [ 5 ], [ 5 ]], 7, 0)).toEqual([[ 7 ], [ 5 ], [ 5 ], [ 5 ]])
+  })
+})
+
 describe('commonPointStructure', () => {
   it('should return correct structure for basic structures', () => {
     const structures = [[ 2 ], [ 9 ], [ 4 ]]
@@ -283,6 +302,11 @@ describe('commonPointStructure', () => {
   it('should return correct stucture for deep group structures', () => {
     const structures = [[ 5 ], [[[ 3 ], [ 9 ]], [ 2, 7, 1 ]]]
     expect(commonPointStructure(structures)).toEqual([[[ 5 ], [ 9 ]], [ 2, 7, 1 ]])
+  })
+
+  it('should return correct structure when mixed basic and group structures', () => {
+    const structures = [[[ 5 ], [ 5 ], [ 5 ], [ 5 ]], [ 5 ]]
+    expect(commonPointStructure(structures)).toEqual([[ 5 ], [ 5 ], [ 5 ], [ 5 ]])
   })
 })
 

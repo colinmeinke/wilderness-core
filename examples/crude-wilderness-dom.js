@@ -11,45 +11,57 @@ const tick = timeline => {
     const frameShapes = frame(timeline)
 
     timeline.timelineShapes.map(({ shape }, i) => {
-      update(shape.el, frameShapes[ i ])
+      updateEls(shape.els, frameShapes[ i ])
     })
 
     tick(timeline)
   })
 }
 
-const addShape = (svg, shape) => {
-  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-  shape.el = el
-  svg.appendChild(el)
-}
-
 const addTimeline = (svg, timeline) => {
   const frameShapes = frame(timeline)
 
   timeline.timelineShapes.map(({ shape }, i) => {
-    addShape(svg, shape)
-    update(shape.el, frameShapes[ i ])
+    shape.els = createEls(svg, frameShapes[ i ])
+    updateEls(shape.els, frameShapes[ i ])
   })
 }
 
 const render = (svg, ...shapesOrTimelines) => {
-  shapesOrTimelines.map(x => {
+  shapesOrTimelines.map((x, i) => {
     if (x.keyframes) {
-      addShape(svg, x)
-      update(x.el, x.keyframes[ 0 ].frameShape)
+      x.els = createEls(svg, x.keyframes[ 0 ].frameShape)
+      updateEls(x.els, x.keyframes[ 0 ].frameShape)
     } else {
       addTimeline(svg, x)
     }
   })
 }
 
-const update = (el, frameShape) => {
-  el.setAttribute('d', toPath(frameShape.points))
+const createEls = (svg, frameShape) => {
+  if (frameShape.childFrameShapes) {
+    return frameShape.childFrameShapes.map(childFrameShape => (
+      createEls(svg, childFrameShape)
+    ))
+  }
 
-  Object.keys(frameShape.attributes).map(k => {
-    el.setAttribute(k, frameShape.attributes[ k ])
-  })
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  svg.appendChild(el)
+  return el
+}
+
+const updateEls = (els, frameShape) => {
+  if (frameShape.childFrameShapes) {
+    frameShape.childFrameShapes.map((childFrameShape, i) => {
+      updateEls(els[ i ], childFrameShape)
+    })
+  } else {
+    els.setAttribute('d', toPath(frameShape.points))
+
+    Object.keys(frameShape.attributes).map(k => {
+      els.setAttribute(k, frameShape.attributes[ k ])
+    })
+  }
 }
 
 export { play, render }

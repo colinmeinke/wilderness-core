@@ -105,4 +105,58 @@ describe('shape', () => {
 
     expect(duration).toEqual(d)
   })
+
+  it('should equalise keyframes when mixed group and non-group shapes', () => {
+    const group = {
+      type: 'g',
+      shapes: [
+        {
+          type: 'rect',
+          x: 0,
+          y: 0,
+          width: 10,
+          height: 10,
+          fill: 'yellow'
+        },
+        {
+          type: 'rect',
+          x: 90,
+          y: 0,
+          width: 10,
+          height: 10,
+          fill: 'red'
+        },
+        {
+          type: 'rect',
+          x: 0,
+          y: 90,
+          width: 10,
+          height: 10,
+          fill: 'blue'
+        },
+        {
+          type: 'rect',
+          x: 90,
+          y: 90,
+          width: 10,
+          height: 10,
+          fill: 'green'
+        }
+      ]
+    }
+
+    const square = {
+      type: 'rect',
+      x: 40,
+      y: 40,
+      width: 20,
+      height: 20,
+      fill: '#3C9632'
+    }
+
+    const { keyframes } = shape(group, square)
+
+    expect(keyframes[ 0 ].frameShape.childFrameShapes.length).toBe(4)
+    expect(keyframes[ 1 ].frameShape.childFrameShapes.length).toBe(4)
+  })
 })

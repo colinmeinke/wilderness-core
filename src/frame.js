@@ -172,7 +172,11 @@ const addToPointStructure = (structure, value, i) => {
 
     value.reduce(addToPointStructure, structure[ i ])
   } else {
-    structure[ i ] = Math.max(structure[ i ] || 0, value)
+    if (Array.isArray(structure[ i ])) {
+      addToPointStructure(structure[ i ], value, 0)
+    } else {
+      structure[ i ] = Math.max(structure[ i ] || 0, value)
+    }
   }
 
   return structure
@@ -542,6 +546,7 @@ const tween = (from, to, easing, position) => {
 }
 
 export {
+  addToPointStructure,
   applyCurveStructure,
   applyPointStructure,
   commonCurveStructure,
