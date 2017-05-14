@@ -1,5 +1,6 @@
 /* globals __DEV__ */
 
+import clone from './clone'
 import config from './config'
 import { input } from './middleware'
 
@@ -55,7 +56,6 @@ import { input } from './middleware'
  * @typedef {Object} PlaybackOptions
  *
  * @property {boolean} alternate - Should the next iteration reverse current direction?
- * @property {number} delay - Milliseconds before playback starts.
  * @property {number} duration - Milliseconds that each iteration lasts.
  * @property {number} initialIterations - The starting number of iterations.
  * @property {number} iterations - The number of playback interations (additional to initialIterations).
@@ -84,12 +84,13 @@ import { input } from './middleware'
  */
 
 /**
- * An object containing ShapesWithOptions and TimelineOptions.
+ * An object containing Middlware, PlaybackOptions and ShapesWithOptions.
  *
  * @typedef {Object} SortedTimelineProps
  *
+ * @property {Middleware[]} middleware
+ * @property {PlaybackOptions} playbackOptions
  * @property {ShapeWithOptions[]} shapesWithOptions
- * @property {TimelineOptions} timelineOptions
  */
 
 /**
@@ -97,14 +98,13 @@ import { input } from './middleware'
  *
  * @typedef {Object} Timeline
  *
- * @property {TimelineShape[]} timelineShapes
- * @property {PlaybackOptions} playbackOptions
  * @property {Middleware[]} middleware
+ * @property {PlaybackOptions} playbackOptions
+ * @property {TimelineShape[]} timelineShapes
  */
 
 /**
- * Runs each Middleware input function on every Keyframe's
- * FrameShape.
+ * Runs each Middleware input function on every Keyframe's FrameShape.
  *
  * @param {Shape} shape
  * @param {Middleware[]} middleware
@@ -119,38 +119,146 @@ const apply = ({ keyframes }, middleware) => {
 }
 
 /**
- * Extracts PlaybackOptions from TimelineOptions.
+ * Is the direction same as initial direction?
  *
- * @param {TimelineOptions} opts
+ * @param {boolean} alternate
+ * @param {number} totalIterations
  *
- * @returns {PlaybackOptions}
+ * @return {boolean}
  *
  * @example
- * playbackOptions(timelineOptions)
+ * initialDirection(true, 3.25)
  */
-const playbackOptions = ({
+const initialDirection = (alternate, totalIterations) => (
+  alternate &&
+  (totalIterations % 2 > 1 ||
+    (totalIterations % 2 === 0 && totalIterations >= 2)
+  )
+)
+
+/**
+ * The number of iterations a Timeline has completed.
+ *
+ * @param {Object} opts
+ * @param {number} opts.at
+ * @param {number} opts.duration
+ * @param {number} opts.iterations
+ * @param {number} [opts.started]
+ *
+ * @returns {number}
+ *
+ * @example
+ * iterations(opts)
+ */
+const iterationsComplete = ({ at, duration, iterations, started }) => {
+  if (typeof started === 'undefined' || at <= started) {
+    return 0
+  }
+
+  const ms = at - started
+  const maxDuration = duration * iterations
+
+  if (ms >= maxDuration) {
+    return iterations
+  }
+
+  return ms / duration
+}
+
+/**
+ * Stops playback and adjusts PlaybackOptions of a Timeline.
+ *
+ * @param {Timeline} timeline
+ * @param {PlaybackOptions} playbackOptions
+ * @param {number} [at]
+ *
+ * @example
+ * pause(timeline, { initialIterations: 0 })
+ */
+const pause = (timeline, playbackOptions = {}, at) => {
+
+}
+
+/**
+ * Starts playback and adjusts PlaybackOptions of a Timeline.
+ *
+ * @param {Timeline} timeline
+ * @param {PlaybackOptions} playbackOptions
+ * @param {number} [at]
+ *
+ * @example
+ * play(timeline, { initialIterations: 0 })
+ */
+const play = (timeline, playbackOptions = {}, at) => {
+  if (__DEV__ && (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions)) {
+    throw new TypeError(`The play function's first argument must be a Timeline`)
+  }
+
+  if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'number')) {
+    throw new TypeError(`The play function's third argument must be of type number`)
+  }
+
+  const nextPlaybackOptions = validPlaybackOptions({
+    ...timeline.playbackOptions,
+    ...playbackOptions,
+    started: typeof at !== 'undefined' ? at : Date.now()
+  })
+
+  if (typeof timeline.playbackOptions.started !== 'undefined') {
+    const i = iterationsComplete({
+      at: nextPlaybackOptions.started,
+      duration: timeline.playbackOptions.duration,
+      iterations: timeline.playbackOptions.iterations,
+      started: timeline.playbackOptions.started
+    })
+
+    nextPlaybackOptions.initialIterations = playbackOptions.initialIterations ||
+      timeline.playbackOptions.initialIterations + i
+
+    nextPlaybackOptions.iterations = playbackOptions.iterations ||
+      timeline.playbackOptions.iterations - i
+
+    if (
+      typeof playbackOptions.reverse === 'undefined' &&
+      timeline.playbackOptions.alternate &&
+      i % 2 >= 1
+    ) {
+      nextPlaybackOptions.reverse = !timeline.playbackOptions.reverse
+    }
+  }
+
+  timeline.playbackOptions = nextPlaybackOptions
+}
+
+/**
+ * A Position at a given time.
+ *
+ * @param {PlaybackOptions} playbackOptions
+ * @param {number} at
+ *
+ * @returns {Position}
+ *
+ * @example
+ * position(playbackOptions, Date.now())
+ */
+const position = ({
   alternate,
-  delay,
   duration,
   initialIterations,
   iterations,
   reverse,
   started
-}) => {
-  const opts = {
-    alternate,
-    delay,
-    duration,
-    initialIterations,
-    iterations,
-    reverse
-  }
+}, at) => {
+  const totalIterations = initialIterations +
+    iterationsComplete({ at, duration, iterations, started })
 
-  if (typeof started !== 'undefined') {
-    opts.started = started
-  }
+  const relativeIteration = totalIterations >= 1 && totalIterations % 1 === 0
+    ? 1
+    : totalIterations % 1
 
-  return opts
+  return initialDirection(alternate, totalIterations)
+    ? reverse ? relativeIteration : 1 - relativeIteration
+    : reverse ? 1 - relativeIteration : relativeIteration
 }
 
 /**
@@ -255,7 +363,7 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
 }
 
 /**
- * Sorts an array of ShapesWithOptions and TimelineOptions.
+ * Sorts an array of Shapes, ShapesWithOptions and TimelineOptions.
  *
  * @param {(Shape|Object[]|TimelineOptions)[]} props
  *
@@ -271,7 +379,7 @@ const sort = props => {
     )
   }
 
-  const { shapesWithOptions, options } = props.reduce((current, prop, i) => {
+  const { options, shapesWithOptions } = props.reduce((current, prop, i) => {
     if (Array.isArray(prop)) {
       current.shapesWithOptions.push(
         shapeWithOptionsFromArray(prop, i)
@@ -296,16 +404,17 @@ const sort = props => {
           }
         }
 
-        current.options = { ...prop }
+        current.options = clone(prop)
       }
     }
 
     return current
-  }, { shapesWithOptions: [], options: {} })
+  }, { options: {}, shapesWithOptions: [] })
 
   return {
-    shapesWithOptions,
-    timelineOptions: timelineOptions(options)
+    middleware: validMiddleware(options),
+    playbackOptions: validPlaybackOptions(options),
+    shapesWithOptions
   }
 }
 
@@ -322,116 +431,19 @@ const sort = props => {
  * timeline(circle, [ square, { queue: -200 } ], { duration: 5000 })
  */
 const timeline = (...props) => {
-  const { shapesWithOptions, timelineOptions } = sort(props)
-  const middleware = timelineOptions.middleware
-
-  const opts = playbackOptions(timelineOptions)
+  const { middleware, playbackOptions, shapesWithOptions } = sort(props)
   const { duration, timelineShapes } = timelineShapesAndDuration(shapesWithOptions, middleware)
 
-  if (typeof opts.duration === 'undefined') {
-    opts.duration = duration
+  if (typeof playbackOptions.duration === 'undefined') {
+    playbackOptions.duration = duration
   }
 
-  const t = {
-    middleware,
-    playbackOptions: opts,
-    timelineShapes: timelineShapes
-  }
+  const t = { middleware, playbackOptions, timelineShapes }
 
   timelineShapes.map(({ shape }, i) => {
     shape.timeline = t
     shape.timelineIndex = i
   })
-
-  return t
-}
-
-/**
- * Validates TimelineOptions.
- *
- * @param {TimelineOptions} options
- *
- * @returns {TimelineOptions}
- *
- * @example
- * timelineOptions(options)
- */
-const timelineOptions = options => {
-  const t = {}
-
-  const {
-    alternate = config.defaults.timeline.alternate,
-    delay = config.defaults.timeline.delay,
-    duration,
-    initialIterations = config.defaults.timeline.initialIterations,
-    iterations = config.defaults.timeline.iterations,
-    middleware = config.defaults.timeline.middleware,
-    reverse = config.defaults.timeline.reverse,
-    started
-  } = options
-
-  if (typeof duration !== 'undefined') {
-    if (__DEV__ && (typeof duration !== 'number' || duration < 0)) {
-      throw new TypeError(`The timeline function duration option must be a positive number or zero`)
-    } else {
-      t.duration = duration
-    }
-  }
-
-  if (__DEV__) {
-    if (typeof alternate !== 'boolean') {
-      throw new TypeError(`The timeline function alternate option must be true or false`)
-    }
-
-    if (typeof delay !== 'number' || delay < 0) {
-      throw new TypeError(`The timeline function delay option must be a positive number or zero`)
-    }
-
-    if (typeof initialIterations !== 'number' || initialIterations < 0) {
-      throw new TypeError(`The timeline function initialIterations option must be a positive number or zero`)
-    }
-
-    if (typeof iterations !== 'number' || iterations < 0) {
-      throw new TypeError(`The timeline function iterations option must be a positive number or zero`)
-    }
-
-    if (!Array.isArray(middleware)) {
-      throw new TypeError(`The timeline function middleware option must be of type array`)
-    }
-
-    middleware.map(({ name, input, output }) => {
-      if (typeof name !== 'string') {
-        throw new TypeError(`A middleware must have a name prop`)
-      }
-
-      if (typeof input !== 'function') {
-        throw new TypeError(`The ${name} middleware must have an input method`)
-      }
-
-      if (typeof output !== 'function') {
-        throw new TypeError(`The ${name} middleware must have an output method`)
-      }
-    })
-
-    if (typeof reverse !== 'boolean') {
-      throw new TypeError(`The timeline function reverse option must be true or false`)
-    }
-  }
-
-  if (typeof started !== 'undefined') {
-    if (__DEV__ && (typeof started !== 'number' || started < 0)) {
-      throw new TypeError(`The timeline function started option must be a positive number or zero`)
-    }
-
-    t.started = started
-  }
-
-  t.alternate = alternate
-  t.delay = delay
-  t.initialIterations = initialIterations
-  t.iterations = iterations
-  t.middleware = middleware
-  t.reverse = reverse
 
   return t
 }
@@ -518,4 +530,100 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
   }
 }
 
+/**
+ * Extracts and validates Middlware from an object.
+ *
+ * @param {Object} opts
+ *
+ * @returns {Middleware[]}
+ *
+ * @example
+ * validMiddleware(opts)
+ */
+const validMiddleware = ({ middleware = config.defaults.timeline.middleware }) => {
+  if (!Array.isArray(middleware)) {
+    throw new TypeError(`The timeline function middleware option must be of type array`)
+  }
+
+  middleware.map(({ name, input, output }) => {
+    if (typeof name !== 'string') {
+      throw new TypeError(`A middleware must have a name prop`)
+    }
+
+    if (typeof input !== 'function') {
+      throw new TypeError(`The ${name} middleware must have an input method`)
+    }
+
+    if (typeof output !== 'function') {
+      throw new TypeError(`The ${name} middleware must have an output method`)
+    }
+  })
+
+  return middleware
+}
+
+/**
+ * Extracts and validates PlaybackOptions from an object.
+ *
+ * @param {Object} opts
+ *
+ * @returns {PlaybackOptions}
+ *
+ * @example
+ * validPlaybackOptions(opts)
+ */
+const validPlaybackOptions = ({
+  alternate = config.defaults.timeline.alternate,
+  duration,
+  initialIterations = config.defaults.timeline.initialIterations,
+  iterations = config.defaults.timeline.iterations,
+  reverse = config.defaults.timeline.reverse,
+  started
+}) => {
+  const playbackOptions = {}
+
+  if (typeof duration !== 'undefined') {
+    if (__DEV__ && (typeof duration !== 'number' || duration < 0)) {
+      throw new TypeError(`The timeline function duration option must be a positive number or zero`)
+    }
+
+    playbackOptions.duration = duration
+  }
+
+  if (__DEV__) {
+    if (typeof alternate !== 'boolean') {
+      throw new TypeError(`The timeline function alternate option must be true or false`)
+    }
+
+    if (typeof initialIterations !== 'number' || initialIterations < 0) {
+      throw new TypeError(`The timeline function initialIterations option must be a positive number or zero`)
+    }
+
+    if (typeof iterations !== 'number' || iterations < 0) {
+      throw new TypeError(`The timeline function iterations option must be a positive number or zero`)
+    }
+
+    if (typeof reverse !== 'boolean') {
+      throw new TypeError(`The timeline function reverse option must be true or false`)
+    }
+  }
+
+  if (typeof started !== 'undefined') {
+    if (__DEV__ && (typeof started !== 'number' || started < 0)) {
+      throw new TypeError(`The timeline function started option must be a positive number or zero`)
+    }
+
+    playbackOptions.started = started
+  }
+
+  return {
+    ...playbackOptions,
+    alternate,
+    initialIterations,
+    iterations,
+    reverse
+  }
+}
+
+export { pause, play, position }
 export default timeline

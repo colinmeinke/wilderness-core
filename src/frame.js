@@ -3,6 +3,7 @@
 import { add, cubify } from 'points'
 import clone from './clone'
 import { output } from './middleware'
+import { position } from './timeline'
 import { toPoints } from 'svg-points'
 
 /**
@@ -335,56 +336,6 @@ const frameShapeFromShape = ({ shape, position, middleware = [] }) => {
 }
 
 /**
- * Is the direction same as initial direction?
- *
- * @param {boolean} alternate
- * @param {number} totalIterations
- *
- * @return {boolean}
- *
- * @example
- * initialDirection(true, 3.25)
- */
-const initialDirection = (alternate, totalIterations) => (
-  alternate &&
-  (totalIterations % 2 > 1 ||
-    (totalIterations % 2 === 0 && totalIterations >= 2)
-  )
-)
-
-/**
- * The number of iterations a Timeline has completed.
- *
- * @param {Object} opts
- * @param {number} opts.at
- * @param {number} opts.delay
- * @param {number} opts.duration
- * @param {number} opts.iterations
- * @param {number} [opts.started]
- *
- * @returns {number}
- *
- * @example
- * iterations(opts)
- */
-const iterationsComplete = ({ at, delay, duration, iterations, started }) => {
-  const start = started + delay
-
-  if (typeof started === 'undefined' || at <= start) {
-    return 0
-  }
-
-  const ms = at - start
-  const maxDuration = duration * iterations
-
-  if (ms >= maxDuration) {
-    return iterations
-  }
-
-  return ms / duration
-}
-
-/**
  * Joins an array of Points into Points.
  *
  * @param {Points[]} lines
@@ -438,38 +389,6 @@ const pointStructure = ({ points, childFrameShapes }) => {
 
     return structure
   }, [])
-}
-
-/**
- * A Position at a given time.
- *
- * @param {PlaybackOptions} playbackOptions
- * @param {number} at
- *
- * @returns {Position}
- *
- * @example
- * position(playbackOptions, Date.now())
- */
-const position = ({
-  alternate,
-  delay,
-  duration,
-  initialIterations,
-  iterations,
-  reverse,
-  started
-}, at) => {
-  const totalIterations = initialIterations +
-    iterationsComplete({ at, delay, duration, iterations, started })
-
-  const relativeIteration = totalIterations >= 1 && totalIterations % 1 === 0
-    ? 1
-    : totalIterations % 1
-
-  return initialDirection(alternate, totalIterations)
-    ? reverse ? relativeIteration : 1 - relativeIteration
-    : reverse ? 1 - relativeIteration : relativeIteration
 }
 
 /**
@@ -555,7 +474,6 @@ export {
   frameShapeFromPlainShapeObject,
   joinLines,
   pointStructure,
-  position,
   splitLines,
   tween
 }

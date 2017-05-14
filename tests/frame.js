@@ -8,7 +8,6 @@ import frame, {
   commonPointStructure,
   curveStructure,
   pointStructure,
-  position,
   splitLines,
   tween
 } from '../src/frame'
@@ -16,115 +15,6 @@ import shape from '../src/shape'
 import { toPoints } from 'svg-points'
 import timeline from '../src/timeline'
 import { linear } from 'tween-functions'
-
-describe('position', () => {
-  it('should calculate the correct position if finished', () => {
-    expect(position({
-      alternate: false,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 0,
-      iterations: 1,
-      reverse: false,
-      started: 0
-    }, 1001)).toBeCloseTo(1)
-  })
-
-  it('should calculate correct position if not started', () => {
-    expect(position({
-      alternate: false,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 1.8,
-      iterations: 1,
-      reverse: false
-    }, 1000)).toBeCloseTo(0.8)
-  })
-
-  it('should calculate correct position if not started and in reverse', () => {
-    expect(position({
-      alternate: false,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 1.8,
-      iterations: 1,
-      reverse: true
-    }, 1000)).toBeCloseTo(0.2)
-  })
-
-  it('should calculate correct position if not started and alternating', () => {
-    expect(position({
-      alternate: true,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 1.8,
-      iterations: 1,
-      reverse: false
-    }, 1000)).toBeCloseTo(0.2)
-  })
-
-  it('should calculate correct position if not started and alternating in reverse', () => {
-    expect(position({
-      alternate: true,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 1.8,
-      iterations: 1,
-      reverse: true
-    }, 1000)).toBeCloseTo(0.8)
-  })
-
-  it('should calculate the correct position during first iteration', () => {
-    expect(position({
-      alternate: false,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 0,
-      iterations: 1,
-      reverse: false,
-      started: 0
-    }, 600)).toBeCloseTo(0.6)
-  })
-
-  it('should calculate the correct position after multiple iterations', () => {
-    expect(position({
-      alternate: false,
-      delay: 0,
-      duration: 1000,
-      initialIterations: 0,
-      iterations: 5,
-      reverse: false,
-      started: 0
-    }, 2600)).toBeCloseTo(0.6)
-  })
-
-  it('should calculate the correct position with delay', () => {
-    expect(position({
-      alternate: false,
-      delay: 500,
-      duration: 1000,
-      initialIterations: 0,
-      iterations: 1,
-      reverse: false,
-      started: 0
-    }, 750)).toBeCloseTo(0.25)
-  })
-
-  it('should calculate the correct position with complex options', () => {
-    const options = {
-      alternate: true,
-      delay: 500,
-      duration: 1000,
-      initialIterations: 1.75,
-      iterations: 7,
-      reverse: true,
-      started: 250
-    }
-
-    expect(position(options, 3000)).toBeCloseTo(1)
-    expect(position(options, 3250)).toBeCloseTo(0.75)
-  })
-})
 
 describe('frame', () => {
   it('should throw if not passed a timeline', () => {

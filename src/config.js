@@ -9,7 +9,6 @@ const config = {
     },
     timeline: {
       alternate: false,
-      delay: 0,
       initialIterations: 0,
       iterations: 1,
       middleware: [ colorMiddleware, unitMiddleware ],

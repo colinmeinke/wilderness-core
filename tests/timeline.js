@@ -2,7 +2,7 @@
 
 import config from '../src/config'
 import shape from '../src/shape'
-import timeline from '../src/timeline'
+import timeline, { play, position } from '../src/timeline'
 
 describe('timeline', () => {
   it('should throw if not passed a shape', () => {
@@ -46,12 +46,6 @@ describe('timeline', () => {
     const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
     expect(() => timeline(validShape, { alternate: 'invalid' }))
       .toThrow('The timeline function alternate option must be true or false')
-  })
-
-  it('should throw if passed delay option that is not a positive number', () => {
-    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
-    expect(() => timeline(validShape, { delay: -50 }))
-      .toThrow('The timeline function delay option must be a positive number or zero')
   })
 
   it('should throw if passed duration option that is not a positive number', () => {
@@ -102,7 +96,6 @@ describe('timeline', () => {
     expect(() => {
       timeline([ validShape, { queue: 200 } ], {
         alternate: true,
-        delay: 200,
         duration: 5000,
         initialIterations: 0.5,
         iterations: 3,
@@ -125,7 +118,6 @@ describe('timeline', () => {
 
     const { playbackOptions: {
       alternate,
-      delay,
       duration,
       initialIterations,
       iterations,
@@ -134,7 +126,6 @@ describe('timeline', () => {
     } } = timeline(validShape)
 
     expect(alternate).toBe(config.defaults.timeline.alternate)
-    expect(delay).toBe(config.defaults.timeline.delay)
     expect(duration).toBe(0)
     expect(initialIterations).toBe(config.defaults.timeline.initialIterations)
     expect(iterations).toBe(config.defaults.timeline.iterations)
@@ -353,5 +344,185 @@ describe('timeline', () => {
       { name: 'color', input: () => ({}), output: 'invalid' }
     ] }))
       .toThrow('The color middleware must have an output method')
+  })
+})
+
+describe('position', () => {
+  it('should calculate the correct position if finished', () => {
+    expect(position({
+      alternate: false,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: false,
+      started: 0
+    }, 1001)).toBeCloseTo(1)
+  })
+
+  it('should calculate correct position if not started', () => {
+    expect(position({
+      alternate: false,
+      duration: 1000,
+      initialIterations: 1.8,
+      iterations: 1,
+      reverse: false
+    }, 1000)).toBeCloseTo(0.8)
+  })
+
+  it('should calculate correct position if not started and in reverse', () => {
+    expect(position({
+      alternate: false,
+      duration: 1000,
+      initialIterations: 1.8,
+      iterations: 1,
+      reverse: true
+    }, 1000)).toBeCloseTo(0.2)
+  })
+
+  it('should calculate correct position if not started and alternating', () => {
+    expect(position({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 1.8,
+      iterations: 1,
+      reverse: false
+    }, 1000)).toBeCloseTo(0.2)
+  })
+
+  it('should calculate correct position if not started and alternating in reverse', () => {
+    expect(position({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 1.8,
+      iterations: 1,
+      reverse: true
+    }, 1000)).toBeCloseTo(0.8)
+  })
+
+  it('should calculate the correct position during first iteration', () => {
+    expect(position({
+      alternate: false,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: false,
+      started: 0
+    }, 600)).toBeCloseTo(0.6)
+  })
+
+  it('should calculate the correct position after multiple iterations', () => {
+    expect(position({
+      alternate: false,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 5,
+      reverse: false,
+      started: 0
+    }, 2600)).toBeCloseTo(0.6)
+  })
+
+  it('should calculate the correct position with complex options', () => {
+    const options = {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 1.75,
+      iterations: 7,
+      reverse: true,
+      started: 250
+    }
+
+    expect(position(options, 2500)).toBeCloseTo(1)
+    expect(position(options, 2750)).toBeCloseTo(0.75)
+  })
+})
+
+describe('play', () => {
+  it('should throw when not passed a timeline', () => {
+    expect(() => { play('invalid', { duration: 5000 }) })
+      .toThrow(`The play function's first argument must be a Timeline`)
+  })
+
+  it('should throw if playback options are invalid', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    expect(() => { play(timeline(square), { duration: 'invalid' }) }).toThrow()
+  })
+
+  it('should set a started playback option', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(square)
+    play(animation, {}, 500)
+    expect(animation.playbackOptions.started).toBe(500)
+  })
+
+  it('should not overwrite existing playback options', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 3000,
+      initialIterations: 2,
+      iterations: 10,
+      reverse: true
+    })
+
+    play(animation, {}, 500)
+
+    expect(animation.playbackOptions.alternate).toBe(true)
+    expect(animation.playbackOptions.duration).toBe(3000)
+    expect(animation.playbackOptions.initialIterations).toBe(2)
+    expect(animation.playbackOptions.iterations).toBe(10)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
+
+  it('should update initialIterations and iterations if already started', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      duration: 1000,
+      initialIterations: 3,
+      iterations: 10,
+      started: 0
+    })
+
+    play(animation, {}, 4000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(7)
+    expect(animation.playbackOptions.iterations).toBe(6)
+    expect(animation.playbackOptions.reverse).toBe(false)
+  })
+
+  it('should not exceed max iterations', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      duration: 1000,
+      initialIterations: 3,
+      iterations: 10,
+      started: 0
+    })
+
+    play(animation, {}, 100000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(13)
+    expect(animation.playbackOptions.iterations).toBe(0)
+  })
+
+  it('should update reverse playback option if alternating', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 2,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, {}, 1000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(1)
+    expect(animation.playbackOptions.iterations).toBe(1)
+    expect(animation.playbackOptions.reverse).toBe(true)
   })
 })

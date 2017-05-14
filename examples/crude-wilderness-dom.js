@@ -1,8 +1,8 @@
 import { toPath } from 'svg-points'
-import { frame } from '../src'
+import { frame, pause, play as corePlay } from '../src'
 
 const play = timeline => {
-  timeline.playbackOptions.started = Date.now()
+  corePlay(timeline)
   tick(timeline)
 }
 
@@ -64,4 +64,4 @@ const updateEls = (els, frameShape) => {
   }
 }
 
-export { play, render }
+export { pause, play, render }
