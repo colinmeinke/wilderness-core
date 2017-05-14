@@ -165,7 +165,19 @@ play(animation, { initialIterations: 0.75 })
 The pause function stops playback of a timeline.
 
 ```js
-pause(animation)
+import { shape, timeline, play, pause } from 'wilderness-core'
+
+const shape1 = shape()
+const shape2 = shape()
+
+const animation = timeline(shape1, shape2, {
+  duration: 2000,
+  iterations: Infinity
+})
+
+play(animation)
+
+setTimeout(() => pause(animation), 1000)
 ```
 
 As with the play function, the pause function can also optionally
