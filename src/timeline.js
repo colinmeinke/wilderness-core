@@ -166,21 +166,22 @@ const iterationsComplete = ({ at, duration, iterations, started }) => {
 }
 
 /**
- * Stops playback and adjusts PlaybackOptions of a Timeline.
+ * Stops playback of a Timeline.
  *
  * @param {Timeline} timeline
  * @param {PlaybackOptions} playbackOptions
  * @param {number} [at]
  *
  * @example
- * pause(timeline, { initialIterations: 0 })
+ * pause(timeline)
  */
 const pause = (timeline, playbackOptions = {}, at) => {
-
+  timeline.playbackOptions = updatePlaybackOptions(timeline, playbackOptions, at)
+  delete timeline.playbackOptions.started
 }
 
 /**
- * Starts playback and adjusts PlaybackOptions of a Timeline.
+ * Starts playback of a Timeline.
  *
  * @param {Timeline} timeline
  * @param {PlaybackOptions} playbackOptions
@@ -190,44 +191,7 @@ const pause = (timeline, playbackOptions = {}, at) => {
  * play(timeline, { initialIterations: 0 })
  */
 const play = (timeline, playbackOptions = {}, at) => {
-  if (__DEV__ && (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions)) {
-    throw new TypeError(`The play function's first argument must be a Timeline`)
-  }
-
-  if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'number')) {
-    throw new TypeError(`The play function's third argument must be of type number`)
-  }
-
-  const nextPlaybackOptions = validPlaybackOptions({
-    ...timeline.playbackOptions,
-    ...playbackOptions,
-    started: typeof at !== 'undefined' ? at : Date.now()
-  })
-
-  if (typeof timeline.playbackOptions.started !== 'undefined') {
-    const i = iterationsComplete({
-      at: nextPlaybackOptions.started,
-      duration: timeline.playbackOptions.duration,
-      iterations: timeline.playbackOptions.iterations,
-      started: timeline.playbackOptions.started
-    })
-
-    nextPlaybackOptions.initialIterations = playbackOptions.initialIterations ||
-      timeline.playbackOptions.initialIterations + i
-
-    nextPlaybackOptions.iterations = playbackOptions.iterations ||
-      timeline.playbackOptions.iterations - i
-
-    if (
-      typeof playbackOptions.reverse === 'undefined' &&
-      timeline.playbackOptions.alternate &&
-      i % 2 >= 1
-    ) {
-      nextPlaybackOptions.reverse = !timeline.playbackOptions.reverse
-    }
-  }
-
-  timeline.playbackOptions = nextPlaybackOptions
+  timeline.playbackOptions = updatePlaybackOptions(timeline, playbackOptions, at)
 }
 
 /**
@@ -528,6 +492,57 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
       start: timelineStart
     })
   }
+}
+
+/**
+ * Updates the PlaybackOptions of a Timeline.
+ *
+ * @param {Timeline} timeline
+ * @param {PlaybackOptions} playbackOptions
+ * @param {number} [at]
+ *
+ * @example
+ * updatePlaybackOptions(timeline, { initialIterations: 0 })
+ */
+const updatePlaybackOptions = (timeline, playbackOptions, at) => {
+  if (__DEV__ && (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions)) {
+    throw new TypeError(`The play function's first argument must be a Timeline`)
+  }
+
+  if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'number')) {
+    throw new TypeError(`The play function's third argument must be of type number`)
+  }
+
+  const nextPlaybackOptions = validPlaybackOptions({
+    ...timeline.playbackOptions,
+    ...playbackOptions,
+    started: typeof at !== 'undefined' ? at : Date.now()
+  })
+
+  if (typeof timeline.playbackOptions.started !== 'undefined') {
+    const i = iterationsComplete({
+      at: nextPlaybackOptions.started,
+      duration: timeline.playbackOptions.duration,
+      iterations: timeline.playbackOptions.iterations,
+      started: timeline.playbackOptions.started
+    })
+
+    nextPlaybackOptions.initialIterations = playbackOptions.initialIterations ||
+      timeline.playbackOptions.initialIterations + i
+
+    nextPlaybackOptions.iterations = playbackOptions.iterations ||
+      timeline.playbackOptions.iterations - i
+
+    if (
+      typeof playbackOptions.reverse === 'undefined' &&
+      timeline.playbackOptions.alternate &&
+      i % 2 >= 1
+    ) {
+      nextPlaybackOptions.reverse = !timeline.playbackOptions.reverse
+    }
+  }
+
+  return nextPlaybackOptions
 }
 
 /**
