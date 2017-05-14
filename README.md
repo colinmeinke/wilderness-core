@@ -130,16 +130,46 @@ frame(timeline).map(frameShape => {
 
 ### Play
 
+The play function starts playback of a timeline.
+
 ```js
 import { shape, timeline, play } from 'wilderness-core'
 
 const shape1 = shape()
 const shape2 = shape()
 
-const animation = timeline(shape1, shape2)
+const animation = timeline(shape1, shape2, {
+  duration: 2000,
+  iterations: Infinity
+})
 
 play(animation)
 ```
+
+The play function can be applied to an already playing timeline.
+This by itself isn't of much use, but the play function optionally
+takes playback options as it's second argument.
+
+```js
+// Restart playback
+play(animation, { initialIterations: 0 })
+```
+
+```js
+// Seek to 75%
+play(animation, { initialIterations: 0.75 })
+```
+
+### Pause
+
+The pause function stops playback of a timeline.
+
+```js
+pause(animation)
+```
+
+As with the play function, the pause function can also optionally
+take playback options as it's second argument.
 
 ### Events
 
