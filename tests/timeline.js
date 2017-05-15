@@ -525,31 +525,31 @@ describe('play', () => {
     expect(animation.playbackOptions.iterations).toBe(1)
     expect(animation.playbackOptions.reverse).toBe(true)
   })
+})
 
-  describe('pause', () => {
-    it('should throw when not passed a timeline', () => {
-      expect(() => { pause('invalid', { duration: 5000 }) })
-        .toThrow(`The play function's first argument must be a Timeline`)
-    })
+describe('pause', () => {
+  it('should throw when not passed a timeline', () => {
+    expect(() => { pause('invalid', { duration: 5000 }) })
+      .toThrow(`The play function's first argument must be a Timeline`)
+  })
 
-    it('should throw if playback options are invalid', () => {
-      const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
-      expect(() => { pause(timeline(square), { duration: 'invalid' }) }).toThrow()
-    })
+  it('should throw if playback options are invalid', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    expect(() => { pause(timeline(square), { duration: 'invalid' }) }).toThrow()
+  })
 
-    it('should remove the started playback option', () => {
-      const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
-      const animation = timeline(square, { started: 0, duration: 1000 })
-      pause(animation, {}, 500)
-      expect(animation.playbackOptions.started).toBeUndefined()
-    })
+  it('should remove the started playback option', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(square, { started: 0, duration: 1000 })
+    pause(animation, {}, 500)
+    expect(animation.playbackOptions.started).toBeUndefined()
+  })
 
-    it('should update initialIterations and iterations if already started', () => {
-      const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
-      const animation = timeline(square, { started: 0, duration: 1000 })
-      pause(animation, {}, 750)
-      expect(animation.playbackOptions.initialIterations).toBe(0.75)
-      expect(animation.playbackOptions.iterations).toBe(0.25)
-    })
+  it('should update initialIterations and iterations if already started', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(square, { started: 0, duration: 1000 })
+    pause(animation, {}, 750)
+    expect(animation.playbackOptions.initialIterations).toBe(0.75)
+    expect(animation.playbackOptions.iterations).toBe(0.25)
   })
 })
