@@ -525,6 +525,75 @@ describe('play', () => {
     expect(animation.playbackOptions.iterations).toBe(1)
     expect(animation.playbackOptions.reverse).toBe(true)
   })
+
+  it('should reset playback options correctly', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 2,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, {}, 1000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(1)
+    expect(animation.playbackOptions.iterations).toBe(1)
+    expect(animation.playbackOptions.reverse).toBe(true)
+
+    play(animation, { initialIterations: 0 }, 2000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(0)
+    expect(animation.playbackOptions.iterations).toBe(2)
+    expect(animation.playbackOptions.reverse).toBe(false)
+  })
+
+  it('should reset playback options correctly when initialIterations less than initial value', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0.25,
+      iterations: 2.75,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, {}, 1000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(1.25)
+    expect(animation.playbackOptions.iterations).toBe(1.75)
+    expect(animation.playbackOptions.reverse).toBe(true)
+
+    play(animation, { initialIterations: 0.125 }, 2000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(0.125)
+    expect(animation.playbackOptions.iterations).toBe(2.875)
+    expect(animation.playbackOptions.reverse).toBe(false)
+  })
+
+  it('should not allow iterations playback option to be less than zero', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 3,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, { initialIterations: 51 }, 5000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(51)
+    expect(animation.playbackOptions.iterations).toBe(0)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
 })
 
 describe('pause', () => {

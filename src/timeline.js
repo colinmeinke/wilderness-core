@@ -527,11 +527,15 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
       started: timeline.playbackOptions.started
     })
 
-    nextPlaybackOptions.initialIterations = playbackOptions.initialIterations ||
-      timeline.playbackOptions.initialIterations + i
+    nextPlaybackOptions.initialIterations = typeof playbackOptions.initialIterations !== 'undefined'
+      ? playbackOptions.initialIterations
+      : timeline.playbackOptions.initialIterations + i
 
-    nextPlaybackOptions.iterations = playbackOptions.iterations ||
-      timeline.playbackOptions.iterations - i
+    nextPlaybackOptions.iterations = typeof playbackOptions.iterations !== 'undefined'
+      ? playbackOptions.iterations
+      : typeof playbackOptions.initialIterations !== 'undefined'
+        ? Math.max(0, timeline.playbackOptions.initialIterations + timeline.playbackOptions.iterations - playbackOptions.initialIterations)
+        : timeline.playbackOptions.iterations - i
 
     if (
       typeof playbackOptions.reverse === 'undefined' &&
