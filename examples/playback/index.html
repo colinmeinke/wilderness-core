@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+  <title>Playback</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    svg {
+      height: 100%;
+      width: 100%;
+    }
+
+    .controls {
+      background-color: rgb(230,230,230);
+      bottom: 0;
+      box-sizing: border-box;
+      padding: 15px 20px;
+      position: absolute;
+      width: 100%;
+    }
+
+    .play,
+    .pause {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <svg
+    height="100"
+    preserveAspectRatio="xMidYMid meet"
+    width="100"
+    viewBox="0 0 100 100"
+  >
+  </svg>
+  <section class="controls">
+    <button class="play" type="button">Play</button>
+    <button class="pause" type="button">Pause</button>
+  </section>
+  <script src="dist.js"></script>
+</body>

@@ -1,5 +1,5 @@
 import { toPath } from 'svg-points'
-import { frame, pause, play as corePlay } from '../src'
+import { frame, play as corePlay } from '../src'
 
 const play = timeline => {
   corePlay(timeline)
@@ -64,4 +64,4 @@ const updateEls = (els, frameShape) => {
   }
 }
 
-export { pause, play, render }
+export { play, render }
