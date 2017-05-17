@@ -386,7 +386,7 @@ describe('position', () => {
       initialIterations: 1.8,
       iterations: 1,
       reverse: false
-    }, 1000)).toBeCloseTo(0.2)
+    }, 1000)).toBeCloseTo(0.8)
   })
 
   it('should calculate correct position if not started and alternating in reverse', () => {
@@ -396,7 +396,7 @@ describe('position', () => {
       initialIterations: 1.8,
       iterations: 1,
       reverse: true
-    }, 1000)).toBeCloseTo(0.8)
+    }, 1000)).toBeCloseTo(0.2)
   })
 
   it('should calculate the correct position during first iteration', () => {
@@ -431,8 +431,19 @@ describe('position', () => {
       started: 250
     }
 
-    expect(position(options, 2500)).toBeCloseTo(1)
-    expect(position(options, 2750)).toBeCloseTo(0.75)
+    expect(position(options, 2500)).toBeCloseTo(0)
+    expect(position(options, 2750)).toBeCloseTo(0.25)
+  })
+
+  it('should calculate the correct position with inifine iterations', () => {
+    expect(position({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0.75,
+      iterations: Infinity,
+      reverse: true,
+      started: 0
+    }, 0)).toBeCloseTo(0.25)
   })
 })
 
@@ -592,6 +603,44 @@ describe('play', () => {
 
     expect(animation.playbackOptions.initialIterations).toBe(51)
     expect(animation.playbackOptions.iterations).toBe(0)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
+
+  it('should reverse inifinite iterations correctly', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: false,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: Infinity,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, { reverse: true }, 250)
+
+    expect(animation.playbackOptions.initialIterations).toBe(0.75)
+    expect(animation.playbackOptions.iterations).toBe(Infinity)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
+
+  it('should reverse inifinite iterations correctly when in reverse', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: Infinity,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, { reverse: true }, 1200)
+
+    expect(animation.playbackOptions.initialIterations).toBeCloseTo(0.2)
+    expect(animation.playbackOptions.iterations).toBe(Infinity)
     expect(animation.playbackOptions.reverse).toBe(true)
   })
 })

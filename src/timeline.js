@@ -119,24 +119,6 @@ const apply = ({ keyframes }, middleware) => {
 }
 
 /**
- * Is the direction same as initial direction?
- *
- * @param {boolean} alternate
- * @param {number} totalIterations
- *
- * @return {boolean}
- *
- * @example
- * initialDirection(true, 3.25)
- */
-const initialDirection = (alternate, totalIterations) => (
-  alternate &&
-  (totalIterations % 2 > 1 ||
-    (totalIterations % 2 === 0 && totalIterations >= 2)
-  )
-)
-
-/**
  * The number of iterations a Timeline has completed.
  *
  * @param {Object} opts
@@ -220,10 +202,31 @@ const position = ({
     ? 1
     : totalIterations % 1
 
-  return initialDirection(alternate, totalIterations)
-    ? reverse ? relativeIteration : 1 - relativeIteration
-    : reverse ? 1 - relativeIteration : relativeIteration
+  const initialReverse = sameDirection(alternate, initialIterations)
+    ? reverse
+    : !reverse
+
+  const currentReverse = sameDirection(alternate, totalIterations)
+    ? initialReverse
+    : !initialReverse
+
+  return currentReverse ? 1 - relativeIteration : relativeIteration
 }
+
+/**
+ * Is the direction same as initial direction?
+ *
+ * @param {boolean} alternate
+ * @param {number} iterations
+ *
+ * @return {boolean}
+ *
+ * @example
+ * sameDirection(true, 3.25)
+ */
+const sameDirection = (alternate, iterations) => (
+  !alternate || iterations % 2 >= 1
+)
 
 /**
  * Calculate the start position of a Shape on the Timeline.
@@ -520,29 +523,45 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
   })
 
   if (typeof timeline.playbackOptions.started !== 'undefined') {
-    const i = iterationsComplete({
+    const iterationsComp = iterationsComplete({
       at: nextPlaybackOptions.started,
       duration: timeline.playbackOptions.duration,
       iterations: timeline.playbackOptions.iterations,
       started: timeline.playbackOptions.started
     })
 
+    const totalIterations = timeline.playbackOptions.initialIterations + iterationsComp
+
+    const initialReverse = sameDirection(timeline.playbackOptions.alternate, timeline.playbackOptions.initialIterations)
+      ? timeline.playbackOptions.reverse
+      : !timeline.playbackOptions.reverse
+
+    const currentReverse = sameDirection(timeline.playbackOptions.alternate, totalIterations)
+      ? initialReverse
+      : !initialReverse
+
     nextPlaybackOptions.initialIterations = typeof playbackOptions.initialIterations !== 'undefined'
       ? playbackOptions.initialIterations
-      : timeline.playbackOptions.initialIterations + i
+      : totalIterations
 
     nextPlaybackOptions.iterations = typeof playbackOptions.iterations !== 'undefined'
       ? playbackOptions.iterations
       : typeof playbackOptions.initialIterations !== 'undefined'
         ? Math.max(0, timeline.playbackOptions.initialIterations + timeline.playbackOptions.iterations - playbackOptions.initialIterations)
-        : timeline.playbackOptions.iterations - i
+        : timeline.playbackOptions.iterations - iterationsComp
 
-    if (
-      typeof playbackOptions.reverse === 'undefined' &&
-      timeline.playbackOptions.alternate &&
-      i % 2 >= 1
-    ) {
-      nextPlaybackOptions.reverse = !timeline.playbackOptions.reverse
+    if (typeof playbackOptions.reverse === 'undefined') {
+      nextPlaybackOptions.reverse = currentReverse
+    } else {
+      if (nextPlaybackOptions.iterations === Infinity) {
+        nextPlaybackOptions.initialIterations = playbackOptions.reverse === currentReverse
+          ? nextPlaybackOptions.initialIterations % 1
+          : 1 - nextPlaybackOptions.initialIterations % 1
+      } else {
+        const nextIterations = nextPlaybackOptions.initialIterations
+        nextPlaybackOptions.initialIterations = nextPlaybackOptions.iterations
+        nextPlaybackOptions.iterations = nextIterations
+      }
     }
   }
 

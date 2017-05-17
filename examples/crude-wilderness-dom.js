@@ -1,8 +1,8 @@
 import { toPath } from 'svg-points'
 import { frame, play as corePlay } from '../src'
 
-const play = timeline => {
-  corePlay(timeline)
+const play = (timeline, playbackOptions = {}) => {
+  corePlay(timeline, playbackOptions)
   tick(timeline)
 }
 
