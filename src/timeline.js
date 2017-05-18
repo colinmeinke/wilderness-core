@@ -69,7 +69,7 @@ import { input } from './middleware'
  * @typedef {Object} TimelineOptions
  *
  * @extends PlaybackOptions
- * @property {Object[]} middleware
+ * @property {Middleware[]} middleware
  */
 
 /**
@@ -104,6 +104,15 @@ import { input } from './middleware'
  */
 
 /**
+ * The options for the currentReverse function.
+ *
+ * @typedef {Object} CurrentReverseOptions
+ *
+ * @extends PlaybackOptions
+ * @property {Object[]} totalIterations
+ */
+
+/**
  * Runs each Middleware input function on every Keyframe's FrameShape.
  *
  * @param {Shape} shape
@@ -116,6 +125,24 @@ const apply = ({ keyframes }, middleware) => {
   keyframes.map(keyframe => {
     keyframe.frameShape = input(keyframe.frameShape, middleware)
   })
+}
+
+/**
+ * Is playback currently in reverse?
+ *
+ * @param {CurrentReverseOptions} opts
+ *
+ * @example
+ * currentReverse({ ...playbackOptions, totalIterations })
+ */
+const currentReverse = ({ alternate, initialIterations, reverse, totalIterations }) => {
+  const initialReverse = sameDirection(alternate, initialIterations)
+    ? reverse
+    : !reverse
+
+  return sameDirection(alternate, totalIterations)
+    ? initialReverse
+    : !initialReverse
 }
 
 /**
@@ -187,30 +214,17 @@ const play = (timeline, playbackOptions = {}, at) => {
  * @example
  * position(playbackOptions, Date.now())
  */
-const position = ({
-  alternate,
-  duration,
-  initialIterations,
-  iterations,
-  reverse,
-  started
-}, at) => {
-  const totalIterations = initialIterations +
-    iterationsComplete({ at, duration, iterations, started })
+const position = (playbackOptions, at) => {
+  const totalIterations = playbackOptions.initialIterations +
+    iterationsComplete({ ...playbackOptions, at })
 
   const relativeIteration = totalIterations >= 1 && totalIterations % 1 === 0
     ? 1
     : totalIterations % 1
 
-  const initialReverse = sameDirection(alternate, initialIterations)
-    ? reverse
-    : !reverse
-
-  const currentReverse = sameDirection(alternate, totalIterations)
-    ? initialReverse
-    : !initialReverse
-
-  return currentReverse ? 1 - relativeIteration : relativeIteration
+  return currentReverse({ ...playbackOptions, totalIterations })
+    ? 1 - relativeIteration
+    : relativeIteration
 }
 
 /**
@@ -516,56 +530,45 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
     throw new TypeError(`The play function's third argument must be of type number`)
   }
 
-  const nextPlaybackOptions = validPlaybackOptions({
-    ...timeline.playbackOptions,
+  const previous = timeline.playbackOptions
+
+  const next = validPlaybackOptions({
+    ...previous,
     ...playbackOptions,
     started: typeof at !== 'undefined' ? at : Date.now()
   })
 
-  if (typeof timeline.playbackOptions.started !== 'undefined') {
-    const iterationsComp = iterationsComplete({
-      at: nextPlaybackOptions.started,
-      duration: timeline.playbackOptions.duration,
-      iterations: timeline.playbackOptions.iterations,
-      started: timeline.playbackOptions.started
-    })
+  if (typeof previous.started !== 'undefined') {
+    const iterationsComp = iterationsComplete({ ...previous, at: next.started })
+    const totalIterations = previous.initialIterations + iterationsComp
+    const currReverse = currentReverse({ ...previous, totalIterations })
 
-    const totalIterations = timeline.playbackOptions.initialIterations + iterationsComp
-
-    const initialReverse = sameDirection(timeline.playbackOptions.alternate, timeline.playbackOptions.initialIterations)
-      ? timeline.playbackOptions.reverse
-      : !timeline.playbackOptions.reverse
-
-    const currentReverse = sameDirection(timeline.playbackOptions.alternate, totalIterations)
-      ? initialReverse
-      : !initialReverse
-
-    nextPlaybackOptions.initialIterations = typeof playbackOptions.initialIterations !== 'undefined'
+    next.initialIterations = typeof playbackOptions.initialIterations !== 'undefined'
       ? playbackOptions.initialIterations
       : totalIterations
 
-    nextPlaybackOptions.iterations = typeof playbackOptions.iterations !== 'undefined'
+    next.iterations = typeof playbackOptions.iterations !== 'undefined'
       ? playbackOptions.iterations
       : typeof playbackOptions.initialIterations !== 'undefined'
-        ? Math.max(0, timeline.playbackOptions.initialIterations + timeline.playbackOptions.iterations - playbackOptions.initialIterations)
-        : timeline.playbackOptions.iterations - iterationsComp
+        ? Math.max(0, previous.initialIterations + previous.iterations - playbackOptions.initialIterations)
+        : previous.iterations - iterationsComp
 
     if (typeof playbackOptions.reverse === 'undefined') {
-      nextPlaybackOptions.reverse = currentReverse
+      next.reverse = currReverse
     } else {
-      if (nextPlaybackOptions.iterations === Infinity) {
-        nextPlaybackOptions.initialIterations = playbackOptions.reverse === currentReverse
-          ? nextPlaybackOptions.initialIterations % 1
-          : 1 - nextPlaybackOptions.initialIterations % 1
+      if (next.iterations === Infinity) {
+        next.initialIterations = playbackOptions.reverse === currReverse
+          ? next.initialIterations % 1
+          : 1 - next.initialIterations % 1
       } else {
-        const nextIterations = nextPlaybackOptions.initialIterations
-        nextPlaybackOptions.initialIterations = nextPlaybackOptions.iterations
-        nextPlaybackOptions.iterations = nextIterations
+        const nextIterations = next.initialIterations
+        next.initialIterations = next.iterations
+        next.iterations = nextIterations
       }
     }
   }
 
-  return nextPlaybackOptions
+  return next
 }
 
 /**
@@ -663,5 +666,5 @@ const validPlaybackOptions = ({
   }
 }
 
-export { pause, play, position }
+export { currentReverse, pause, play, position }
 export default timeline
