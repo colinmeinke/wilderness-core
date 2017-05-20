@@ -109,7 +109,7 @@ import { input } from './middleware'
  * @typedef {Object} CurrentReverseOptions
  *
  * @extends PlaybackOptions
- * @property {Object[]} totalIterations
+ * @property {Object[]} complete - The number of iterations complete.
  */
 
 /**
@@ -133,14 +133,24 @@ const apply = ({ keyframes }, middleware) => {
  * @param {CurrentReverseOptions} opts
  *
  * @example
- * currentReverse({ ...playbackOptions, totalIterations })
+ * currentReverse({ ...playbackOptions, complete })
  */
-const currentReverse = ({ alternate, initialIterations, reverse, totalIterations }) => {
+const currentReverse = ({
+  alternate,
+  complete,
+  initialIterations,
+  iterations,
+  reverse
+}) => {
+  if (complete === 0) {
+    return reverse
+  }
+
   const initialReverse = sameDirection(alternate, initialIterations)
     ? reverse
     : !reverse
 
-  return sameDirection(alternate, totalIterations)
+  return sameDirection(alternate, initialIterations + complete)
     ? initialReverse
     : !initialReverse
 }
@@ -215,32 +225,27 @@ const play = (timeline, playbackOptions = {}, at) => {
  * position(playbackOptions, Date.now())
  */
 const position = (playbackOptions, at) => {
-  const totalIterations = playbackOptions.initialIterations +
-    iterationsComplete({ ...playbackOptions, at })
-
-  const relativeIteration = totalIterations >= 1 && totalIterations % 1 === 0
-    ? 1
-    : totalIterations % 1
-
-  return currentReverse({ ...playbackOptions, totalIterations })
-    ? 1 - relativeIteration
-    : relativeIteration
+  const complete = iterationsComplete({ ...playbackOptions, at })
+  const total = playbackOptions.initialIterations + complete
+  const i = total >= 1 && total % 1 === 0 ? 1 : total % 1
+  return currentReverse({ ...playbackOptions, complete }) ? 1 - i : i
 }
 
 /**
  * Is the direction same as initial direction?
  *
- * @param {boolean} alternate
- * @param {number} iterations
+ * @param {boolean} alternate - Is iteration direction alternating?
+ * @param {number} iterations - The number of iterations complete.
  *
  * @return {boolean}
  *
  * @example
  * sameDirection(true, 3.25)
  */
-const sameDirection = (alternate, iterations) => (
-  !alternate || iterations % 2 >= 1
-)
+const sameDirection = (alternate, iterations) => {
+  const x = iterations % 2
+  return !alternate || iterations === 0 || (x <= 1 && x % 2 > 0)
+}
 
 /**
  * Calculate the start position of a Shape on the Timeline.
@@ -539,25 +544,25 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
   })
 
   if (typeof previous.started !== 'undefined') {
-    const iterationsComp = iterationsComplete({ ...previous, at: next.started })
-    const totalIterations = previous.initialIterations + iterationsComp
-    const currReverse = currentReverse({ ...previous, totalIterations })
+    const complete = iterationsComplete({ ...previous, at: next.started })
+    const total = previous.initialIterations + complete
+    const reverse = currentReverse({ ...previous, complete })
 
     next.initialIterations = typeof playbackOptions.initialIterations !== 'undefined'
       ? playbackOptions.initialIterations
-      : totalIterations
+      : total
 
     next.iterations = typeof playbackOptions.iterations !== 'undefined'
       ? playbackOptions.iterations
       : typeof playbackOptions.initialIterations !== 'undefined'
         ? Math.max(0, previous.initialIterations + previous.iterations - playbackOptions.initialIterations)
-        : previous.iterations - iterationsComp
+        : previous.iterations - complete
 
     if (typeof playbackOptions.reverse === 'undefined') {
-      next.reverse = currReverse
+      next.reverse = reverse
     } else {
       if (next.iterations === Infinity) {
-        next.initialIterations = playbackOptions.reverse === currReverse
+        next.initialIterations = playbackOptions.reverse === reverse
           ? next.initialIterations % 1
           : 1 - next.initialIterations % 1
       } else {
@@ -666,5 +671,5 @@ const validPlaybackOptions = ({
   }
 }
 
-export { currentReverse, pause, play, position }
+export { currentReverse, pause, play, position, sameDirection }
 export default timeline

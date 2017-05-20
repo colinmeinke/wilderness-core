@@ -2,7 +2,13 @@
 
 import config from '../src/config'
 import shape from '../src/shape'
-import timeline, { pause, play, position } from '../src/timeline'
+import timeline, {
+  currentReverse,
+  pause,
+  play,
+  position,
+  sameDirection
+} from '../src/timeline'
 
 describe('timeline', () => {
   it('should throw if not passed a shape', () => {
@@ -347,6 +353,90 @@ describe('timeline', () => {
   })
 })
 
+describe('sameDirection', () => {
+  it('should return true when completed zero iterations', () => {
+    expect(sameDirection(true, 0)).toBe(true)
+  })
+
+  it('should return true during first iteration', () => {
+    expect(sameDirection(true, 0.35)).toBe(true)
+  })
+
+  it('should return true when completed first iteration', () => {
+    expect(sameDirection(true, 1)).toBe(true)
+  })
+
+  it('should return false during second iteration', () => {
+    expect(sameDirection(true, 1.1)).toBe(false)
+  })
+
+  it('should return false when completed second iteration', () => {
+    expect(sameDirection(true, 2)).toBe(false)
+  })
+
+  it('should return true during third iteration', () => {
+    expect(sameDirection(true, 2.8)).toBe(true)
+  })
+
+  it('should return true when completed third iteration', () => {
+    expect(sameDirection(true, 3)).toBe(true)
+  })
+
+  it('should return true when not alternating', () => {
+    expect(sameDirection(false, 1.1)).toBe(true)
+  })
+})
+
+describe('currentReverse', () => {
+  it('should calculate correct reverse when not started', () => {
+    expect(currentReverse({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: false,
+      started: 0,
+      complete: 0
+    })).toBe(false)
+  })
+
+  it('should calculate correct reverse when not started in reverse', () => {
+    expect(currentReverse({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: true,
+      started: 0,
+      complete: 0
+    })).toBe(true)
+  })
+
+  it('should calculate correct reverse when complete', () => {
+    expect(currentReverse({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: false,
+      started: 0,
+      complete: 1
+    })).toBe(false)
+  })
+
+  it('should calculate correct reverse when complete in reverse', () => {
+    expect(currentReverse({
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: true,
+      started: 0,
+      complete: 1
+    })).toBe(true)
+  })
+})
+
 describe('position', () => {
   it('should calculate the correct position if finished', () => {
     expect(position({
@@ -534,7 +624,7 @@ describe('play', () => {
 
     expect(animation.playbackOptions.initialIterations).toBe(1)
     expect(animation.playbackOptions.iterations).toBe(1)
-    expect(animation.playbackOptions.reverse).toBe(true)
+    expect(animation.playbackOptions.reverse).toBe(false)
   })
 
   it('should reset playback options correctly', () => {
@@ -550,11 +640,6 @@ describe('play', () => {
     })
 
     play(animation, {}, 1000)
-
-    expect(animation.playbackOptions.initialIterations).toBe(1)
-    expect(animation.playbackOptions.iterations).toBe(1)
-    expect(animation.playbackOptions.reverse).toBe(true)
-
     play(animation, { initialIterations: 0 }, 2000)
 
     expect(animation.playbackOptions.initialIterations).toBe(0)
@@ -603,7 +688,7 @@ describe('play', () => {
 
     expect(animation.playbackOptions.initialIterations).toBe(51)
     expect(animation.playbackOptions.iterations).toBe(0)
-    expect(animation.playbackOptions.reverse).toBe(true)
+    expect(animation.playbackOptions.reverse).toBe(false)
   })
 
   it('should reverse inifinite iterations correctly', () => {
