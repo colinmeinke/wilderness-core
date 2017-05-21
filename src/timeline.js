@@ -548,19 +548,32 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
     const total = previous.initialIterations + complete
     const reverse = currentReverse({ ...previous, complete })
 
-    next.initialIterations = typeof playbackOptions.initialIterations !== 'undefined'
-      ? playbackOptions.initialIterations
-      : total
+    if (typeof playbackOptions.initialIterations !== 'undefined') {
+      if (typeof playbackOptions.reverse === 'undefined') {
+        next.reverse = currentReverse({
+          ...previous,
+          complete: playbackOptions.initialIterations - previous.initialIterations
+        })
+      }
 
-    next.iterations = typeof playbackOptions.iterations !== 'undefined'
-      ? playbackOptions.iterations
-      : typeof playbackOptions.initialIterations !== 'undefined'
-        ? Math.max(0, previous.initialIterations + previous.iterations - playbackOptions.initialIterations)
-        : previous.iterations - complete
+      next.initialIterations = playbackOptions.initialIterations
 
-    if (typeof playbackOptions.reverse === 'undefined') {
-      next.reverse = reverse
+      next.iterations = typeof playbackOptions.iterations !== 'undefined'
+        ? playbackOptions.iterations
+        : Math.max(0, previous.initialIterations + previous.iterations - playbackOptions.initialIterations)
     } else {
+      if (typeof playbackOptions.reverse === 'undefined') {
+        next.reverse = reverse
+      }
+
+      next.initialIterations = total
+
+      next.iterations = typeof playbackOptions.iterations !== 'undefined'
+        ? playbackOptions.iterations
+        : previous.iterations - complete
+    }
+
+    if (typeof playbackOptions.reverse !== 'undefined') {
       if (next.iterations === Infinity) {
         next.initialIterations = playbackOptions.reverse === reverse
           ? next.initialIterations % 1

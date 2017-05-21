@@ -639,7 +639,6 @@ describe('play', () => {
       started: 0
     })
 
-    play(animation, {}, 1000)
     play(animation, { initialIterations: 0 }, 2000)
 
     expect(animation.playbackOptions.initialIterations).toBe(0)
