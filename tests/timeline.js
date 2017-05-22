@@ -820,6 +820,25 @@ describe('play', () => {
     expect(animation.playbackOptions.iterations).toBe(Infinity)
     expect(animation.playbackOptions.reverse).toBe(true)
   })
+
+  it('should not replay if finished', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: false,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 1,
+      reverse: true,
+      started: 0
+    })
+
+    play(animation, { reverse: true }, 2000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(1)
+    expect(animation.playbackOptions.iterations).toBe(0)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
 })
 
 describe('pause', () => {
