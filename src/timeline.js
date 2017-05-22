@@ -543,46 +543,50 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
     started: typeof at !== 'undefined' ? at : Date.now()
   })
 
-  if (typeof previous.started !== 'undefined') {
-    const complete = iterationsComplete({ ...previous, at: next.started })
-    const total = previous.initialIterations + complete
-    const reverse = currentReverse({ ...previous, complete })
-
-    if (typeof playbackOptions.initialIterations !== 'undefined') {
-      if (typeof playbackOptions.reverse === 'undefined') {
-        next.reverse = currentReverse({
-          ...previous,
-          complete: playbackOptions.initialIterations - previous.initialIterations
-        })
-      }
-
-      next.initialIterations = playbackOptions.initialIterations
-
-      next.iterations = typeof playbackOptions.iterations !== 'undefined'
-        ? playbackOptions.iterations
-        : Math.max(0, previous.initialIterations + previous.iterations - playbackOptions.initialIterations)
-    } else {
-      if (typeof playbackOptions.reverse === 'undefined') {
-        next.reverse = reverse
-      }
-
-      next.initialIterations = total
-
-      next.iterations = typeof playbackOptions.iterations !== 'undefined'
-        ? playbackOptions.iterations
-        : previous.iterations - complete
+  if (typeof playbackOptions.initialIterations !== 'undefined') {
+    if (typeof playbackOptions.reverse === 'undefined') {
+      next.reverse = currentReverse({
+        ...previous,
+        complete: next.initialIterations - previous.initialIterations
+      })
     }
 
-    if (typeof playbackOptions.reverse !== 'undefined') {
-      if (next.iterations === Infinity) {
-        next.initialIterations = playbackOptions.reverse === reverse
-          ? next.initialIterations % 1
-          : 1 - next.initialIterations % 1
-      } else {
+    if (
+      typeof playbackOptions.iterations === 'undefined' &&
+      previous.iterations !== Infinity
+    ) {
+      next.iterations = Math.max(0, previous.initialIterations + previous.iterations - next.initialIterations)
+    }
+  } else {
+    const complete = iterationsComplete({ ...previous, at: next.started })
+    const reverse = currentReverse({ ...previous, complete })
+
+    next.initialIterations = previous.initialIterations + complete
+
+    if (typeof playbackOptions.iterations === 'undefined') {
+      next.iterations = previous.iterations - complete
+
+      if (typeof playbackOptions.reverse !== 'undefined' && next.iterations !== Infinity) {
         const nextIterations = next.initialIterations
         next.initialIterations = next.iterations
         next.iterations = nextIterations
       }
+    } else {
+      if (
+        typeof playbackOptions.reverse !== 'undefined' &&
+        playbackOptions.reverse !== reverse &&
+        next.iterations !== Infinity
+      ) {
+        next.initialIterations = previous.iterations - complete
+      }
+    }
+
+    if (typeof playbackOptions.reverse === 'undefined') {
+      next.reverse = reverse
+    } else if (next.iterations === Infinity) {
+      next.initialIterations = playbackOptions.reverse === reverse
+        ? next.initialIterations % 1
+        : 1 - next.initialIterations % 1
     }
   }
 

@@ -627,7 +627,7 @@ describe('play', () => {
     expect(animation.playbackOptions.reverse).toBe(false)
   })
 
-  it('should updated playback options correctly when initialIterations changed', () => {
+  it('should updated playback options correctly when initialIterations', () => {
     const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
 
     const animation = timeline(square, {
@@ -646,7 +646,7 @@ describe('play', () => {
     expect(animation.playbackOptions.reverse).toBe(false)
   })
 
-  it('should update playback options correctly when initialIterations changed to less than previous initialIterations', () => {
+  it('should update playback options correctly when initialIterations less than previous initialIterations', () => {
     const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
 
     const animation = timeline(square, {
@@ -709,6 +709,25 @@ describe('play', () => {
     expect(animation.playbackOptions.reverse).toBe(true)
   })
 
+  it('should update playback options correctly when iterations and reverse changed (but reverse same as it would have been)', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0,
+      iterations: 10,
+      reverse: false,
+      started: 0
+    })
+
+    play(animation, { iterations: 15, reverse: false }, 2250)
+
+    expect(animation.playbackOptions.initialIterations).toBe(2.25)
+    expect(animation.playbackOptions.iterations).toBe(15)
+    expect(animation.playbackOptions.reverse).toBe(false)
+  })
+
   it('should not allow iterations playback option to be less than zero', () => {
     const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
 
@@ -762,6 +781,42 @@ describe('play', () => {
     play(animation, { reverse: true }, 1200)
 
     expect(animation.playbackOptions.initialIterations).toBeCloseTo(0.2)
+    expect(animation.playbackOptions.iterations).toBe(Infinity)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
+
+  it('should calculate correct playback options if not started', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0.2,
+      iterations: 9.8,
+      reverse: false
+    })
+
+    play(animation, { reverse: true }, 2250)
+
+    expect(animation.playbackOptions.initialIterations).toBe(9.8)
+    expect(animation.playbackOptions.iterations).toBe(0.2)
+    expect(animation.playbackOptions.reverse).toBe(true)
+  })
+
+  it('should calculate calculate correct playback options if not started and iterations are infinite', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(square, {
+      alternate: true,
+      duration: 1000,
+      initialIterations: 0.2,
+      iterations: Infinity,
+      reverse: false
+    })
+
+    play(animation, { reverse: true }, 9000)
+
+    expect(animation.playbackOptions.initialIterations).toBe(0.8)
     expect(animation.playbackOptions.iterations).toBe(Infinity)
     expect(animation.playbackOptions.reverse).toBe(true)
   })
