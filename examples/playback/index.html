@@ -9,6 +9,7 @@
 
     body {
       margin: 0;
+      font-family: sans-serif;
     }
 
     svg {
@@ -27,8 +28,23 @@
 
     .play,
     .pause,
-    .reverse {
+    .reverse,
+    label,
+    input {
       font-size: 24px;
+    }
+
+    label + label {
+      margin-left: 10px;
+    }
+
+    input {
+      width: 80px;
+    }
+
+    .options {
+      display: flex;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -43,7 +59,33 @@
   <section class="controls">
     <button class="play" type="button">Play</button>
     <button class="pause" type="button">Pause</button>
-    <button class="reverse" type="button">Reverse</button>
+
+    <div class="options">
+      <label for="initialIterations">
+        Initial iterations:
+        <input name="initialIterations" id="initialIterations" type="text" />
+      </label>
+
+      <label for="iterations">
+        Iterations:
+        <input name="iterations" id="iterations" type="text" />
+      </label>
+
+      <label for="alternate">
+        Alternate:
+        <input name="alternate" id="alternate" type="text" />
+      </label>
+
+      <label for="reverse">
+        Reverse:
+        <input name="reverse" id="reverse" type="text" />
+      </label>
+
+      <label for="duration">
+        Duration:
+        <input name="duration" id="duration" type="text" />
+      </label>
+    </div>
   </section>
   <script src="dist.js"></script>
 </body>
