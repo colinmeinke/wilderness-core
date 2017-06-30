@@ -566,7 +566,7 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
     if (typeof playbackOptions.iterations === 'undefined') {
       next.iterations = previous.iterations - complete
 
-      if (typeof playbackOptions.reverse !== 'undefined' && next.iterations !== Infinity) {
+      if (typeof playbackOptions.reverse !== 'undefined' && next.reverse !== previous.reverse && next.iterations !== Infinity) {
         const nextIterations = next.initialIterations
         next.initialIterations = next.iterations
         next.iterations = nextIterations
