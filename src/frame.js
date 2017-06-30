@@ -305,17 +305,19 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
 }
 
 /**
- * Creates a FrameShape from a Shape given the position.
+ * Creates a FrameShape from a Shape given the Position.
  *
- * @param {Shape} shape
- * @param {Position} position
+ * @param {Object} opts
+ * @param {Middleware[]} opts.middleware
+ * @param {Position} opts.position
+ * @param {Shape} opts.shape
  *
  * @returns {FrameShape}
  *
  * @example
- * frameShapeFromShape({ shape, position: 0.75 })
+ * frameShapeFromShape({ position: 0.75, shape })
  */
-const frameShapeFromShape = ({ shape, position, middleware = [] }) => {
+const frameShapeFromShape = ({ middleware = [], position, shape }) => {
   const fromIndex = shape.keyframes.reduce((currentFromIndex, { position: keyframePosition }, i) => (
     position > keyframePosition ? i : currentFromIndex
   ), 0)
