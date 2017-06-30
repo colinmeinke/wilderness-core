@@ -15,6 +15,8 @@ import { toPath, valid as shapeValid } from 'svg-points'
  * @typedef {Object} PlainShapeObjectTweenProps
  *
  * @property {number} delay - Milliseconds before the tween starts.
+ * @property {number} duration - Milliseconds until tween ends.
+ * @property {string|function} easing - The name of an easing function, or an easing function.
  */
 
 /**
