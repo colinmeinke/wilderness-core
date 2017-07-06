@@ -31,8 +31,10 @@ describe('keyframes', () => {
     expect(k2).toHaveProperty('tween')
     expect(k2.tween).toHaveProperty('duration')
     expect(k2.tween).toHaveProperty('easing')
+    expect(k2.tween).toHaveProperty('forces')
     expect(k2.tween.duration).toBe(config.defaults.keyframe.duration)
     expect(typeof k2.tween.easing).toBe('function')
+    expect(Array.isArray(k2.tween.forces)).toBe(true)
   })
 
   it('should return keyframes with the correct keyframe tween props', () => {

@@ -116,6 +116,7 @@ const keyframesAndDuration = plainShapeObjects => {
     delay,
     duration,
     easing,
+    forces = [],
     name,
     transforms = [],
     ...plainShapeObject
@@ -132,7 +133,8 @@ const keyframesAndDuration = plainShapeObjects => {
         duration: typeof duration !== 'undefined'
           ? duration
           : config.defaults.keyframe.duration,
-        easing: easingFunction(easing)
+        easing: easingFunction(easing),
+        forces
       }
 
       if (delay) {
