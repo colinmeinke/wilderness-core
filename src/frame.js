@@ -249,9 +249,11 @@ const frame = (timeline, at) => {
       return output(shape.keyframes[ shape.keyframes.length - 1 ].frameShape, timeline.middleware)
     }
 
+    const shapePosition = (timelinePosition - start) / (end - start)
+
     return frameShapeFromShape({
       shape,
-      position: (timelinePosition - start) / (end - start),
+      position: shapePosition,
       middleware: timeline.middleware
     })
   })
@@ -326,13 +328,18 @@ const frameShapeFromShape = ({ middleware = [], position, shape }) => {
 
   const from = shape.keyframes[ fromIndex ]
   const to = shape.keyframes[ toIndex ]
+  const keyframePosition = (position - from.position) / (to.position - from.position)
 
-  const frameShape = tween(
+  let frameShape = tween(
     from.frameShape,
     to.frameShape,
     to.tween.easing,
-    (position - from.position) / (to.position - from.position)
+    keyframePosition
   )
+
+  to.tween.forces.map(force => {
+    frameShape = force(frameShape, keyframePosition)
+  })
 
   return output(frameShape, middleware)
 }
