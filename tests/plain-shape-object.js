@@ -291,4 +291,28 @@ describe('valid', () => {
 
     expect(() => valid(s)).not.toThrow()
   })
+
+  it('should throw when forces property is invalid', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      forces: [ 'potato' ]
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
+  it('should not throw when forces property is valid', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      forces: [ (frameShape, position) => frameShape ]
+    }
+
+    expect(() => valid(s)).not.toThrow()
+  })
 })

@@ -79,7 +79,7 @@ const errorMsg = errors => (
 )
 
 /**
- * Validates transforms prop.
+ * Validates forces prop.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
  *
@@ -88,69 +88,23 @@ const errorMsg = errors => (
  * @returns {true}
  *
  * @example
- * if (transformsPropValid([ circle ])) {
- *   console.log('circle has valid transforms prop')
+ * if (forcesPropValid([ circle ])) {
+ *   console.log('circle has valid forces prop')
  * }
  */
-const transformsPropValid = plainShapeObjects => {
+const forcesPropValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ transforms }) => {
-    if (typeof transforms !== 'undefined') {
-      if (Array.isArray(transforms)) {
-        transforms.map(([ key, ...args ]) => {
-          switch (key) {
-            case 'moveIndex':
-            case 'rotate':
-              if (args.length === 1) {
-                if (typeof args[ 0 ] !== 'number') {
-                  errors.push('moveIndex transform argument should be of type number')
-                }
-              } else {
-                errors.push('moveIndex transform takes 1 argument')
-              }
-
-              break
-
-            case 'offset':
-              if (args.length === 2) {
-                if (typeof args[ 0 ] !== 'number' || typeof args[ 1 ] !== 'number') {
-                  errors.push('both offset transform arguments should be of type number')
-                }
-              } else {
-                errors.push('offset transform takes 2 arguments (x and y)')
-              }
-
-              break
-
-            case 'reverse':
-              if (args.length > 0) {
-                errors.push('reverse transform takes no arguments')
-              }
-
-              break
-
-            case 'scale':
-              if (args.length > 0 && args.length < 3) {
-                if (typeof args[ 0 ] !== 'number') {
-                  errors.push('scale transform scaleFactor argument should be of type number')
-                }
-
-                if (typeof args[ 1 ] !== 'undefined' && typeof args[ 1 ] !== 'string') {
-                  errors.push('scale transform anchor argument should be of type string')
-                }
-              } else {
-                errors.push('scale transform takes 1 or 2 arguments')
-              }
-
-              break
-
-            default:
-              errors.push(`${key} is not a valid transform`)
+  plainShapeObjects.map(({ forces }) => {
+    if (typeof forces !== 'undefined') {
+      if (Array.isArray(forces)) {
+        forces.map(force => {
+          if (typeof force !== 'function') {
+            errors.push('each force item should be of type function')
           }
         })
       } else {
-        errors.push('the transforms prop must be of type array')
+        errors.push('the forces prop must be of type array')
       }
     }
   })
@@ -246,6 +200,90 @@ const plainShapeObjectFromFrameShape = ({ attributes, points, childFrameShapes }
 }
 
 /**
+ * Validates transforms prop.
+ *
+ * @param {PlainShapeObject[]} plainShapeObjects
+ *
+ * @throws {TypeError} Throws if not valid
+ *
+ * @returns {true}
+ *
+ * @example
+ * if (transformsPropValid([ circle ])) {
+ *   console.log('circle has valid transforms prop')
+ * }
+ */
+const transformsPropValid = plainShapeObjects => {
+  const errors = []
+
+  plainShapeObjects.map(({ transforms }) => {
+    if (typeof transforms !== 'undefined') {
+      if (Array.isArray(transforms)) {
+        transforms.map(([ key, ...args ]) => {
+          switch (key) {
+            case 'moveIndex':
+            case 'rotate':
+              if (args.length === 1) {
+                if (typeof args[ 0 ] !== 'number') {
+                  errors.push('moveIndex transform argument should be of type number')
+                }
+              } else {
+                errors.push('moveIndex transform takes 1 argument')
+              }
+
+              break
+
+            case 'offset':
+              if (args.length === 2) {
+                if (typeof args[ 0 ] !== 'number' || typeof args[ 1 ] !== 'number') {
+                  errors.push('both offset transform arguments should be of type number')
+                }
+              } else {
+                errors.push('offset transform takes 2 arguments (x and y)')
+              }
+
+              break
+
+            case 'reverse':
+              if (args.length > 0) {
+                errors.push('reverse transform takes no arguments')
+              }
+
+              break
+
+            case 'scale':
+              if (args.length > 0 && args.length < 3) {
+                if (typeof args[ 0 ] !== 'number') {
+                  errors.push('scale transform scaleFactor argument should be of type number')
+                }
+
+                if (typeof args[ 1 ] !== 'undefined' && typeof args[ 1 ] !== 'string') {
+                  errors.push('scale transform anchor argument should be of type string')
+                }
+              } else {
+                errors.push('scale transform takes 1 or 2 arguments')
+              }
+
+              break
+
+            default:
+              errors.push(`${key} is not a valid transform`)
+          }
+        })
+      } else {
+        errors.push('the transforms prop must be of type array')
+      }
+    }
+  })
+
+  if (errors.length) {
+    throw new TypeError(errorMsg(errors))
+  }
+
+  return true
+}
+
+/**
  * Validates PlainShapeObjectTweenProps.
  *
  * @param {PlainShapeObject[]} plainShapeObjects
@@ -300,6 +338,7 @@ const tweenPropsValid = plainShapeObjects => {
 const valid = (...plainShapeObjects) => (
   namePropValid(plainShapeObjects) &&
   corePropsValid(plainShapeObjects) &&
+  forcesPropValid(plainShapeObjects) &&
   transformsPropValid(plainShapeObjects) &&
   tweenPropsValid(plainShapeObjects)
 )
