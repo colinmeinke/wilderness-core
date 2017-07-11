@@ -1,4 +1,5 @@
+cjs/
 dist/
 examples/*/dist.js
-lib/
+modules/
 node_modules/

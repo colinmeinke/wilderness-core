@@ -1,9 +1,9 @@
 const babel = require('rollup-plugin-babel')
 const commonJs = require('rollup-plugin-commonjs')
 const fs = require('fs')
-const nodeResolve = require('rollup-plugin-node-resolve')
 const Promise = require('bluebird')
 const replace = require('rollup-plugin-replace')
+const resolve = require('rollup-plugin-node-resolve')
 const rollup = require('rollup').rollup
 const uglify = require('rollup-plugin-uglify')
 
@@ -24,12 +24,12 @@ Promise.resolve(console.log('Creating UMD development bundle ...'))
     plugins: [
       babel({
         exclude: 'node_modules/**',
-        plugins: [ 'transform-object-rest-spread' ],
+        plugins: [ 'transform-object-rest-spread', 'external-helpers' ],
         presets: [[ 'es2015', { 'modules': false } ]]
       }),
       commonJs(),
-      nodeResolve(),
-      replace({ '__DEV__': true }),
+      resolve({ module: true }),
+      replace({ '__DEV__': true })
     ]
   }))
   .then(() => Promise.resolve(console.log('UMD development bundle complete')))
@@ -45,7 +45,7 @@ Promise.resolve(console.log('Creating UMD development bundle ...'))
         presets: [[ 'es2015', { 'modules': false } ]]
       }),
       commonJs(),
-      nodeResolve(),
+      resolve({ module: true }),
       replace({ '__DEV__': false }),
       uglify()
     ]
@@ -66,8 +66,8 @@ Promise.resolve(console.log('Creating UMD development bundle ...'))
           presets: [[ 'es2015', { 'modules': false } ]]
         }),
         commonJs(),
-        nodeResolve(),
-        replace({ '__DEV__': true }),
+        resolve({ module: true }),
+        replace({ '__DEV__': true })
       ]
     })
   ))))
