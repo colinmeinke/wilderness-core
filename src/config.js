@@ -7,6 +7,9 @@ const config = {
       duration: 250,
       easing: 'easeInOutQuad'
     },
+    motionPath: {
+      easing: 'easeInOutQuad'
+    },
     timeline: {
       alternate: false,
       initialIterations: 0,
