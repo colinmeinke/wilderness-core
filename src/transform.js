@@ -17,9 +17,9 @@ const apply = (frameShape, [ name, ...args ]) => {
   }
 
   if (frameShape.childFrameShapes) {
-    frameShape.childFrameShapes = frameShape.childFrameShapes.map(childFrameShape => {
+    frameShape.childFrameShapes = frameShape.childFrameShapes.map(childFrameShape => (
       apply(childFrameShape, [ name, ...args ])
-    })
+    ))
   }
 
   return frameShape

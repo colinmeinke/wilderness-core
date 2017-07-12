@@ -124,7 +124,7 @@ describe('transform', () => {
       .toEqual(expectedFrameShape)
   })
 
-  it('applies compounds multiple transforms correctly', () => {
+  it('compounds multiple transforms correctly', () => {
     const frameShape = frameShapeFromPlainShapeObject({
       type: 'rect',
       x: 0,
@@ -151,5 +151,22 @@ describe('transform', () => {
       [ 'offset', -5, 0 ]
     ]))
       .toEqual(expectedFrameShape)
+  })
+
+  it('to not destroy to child frame shapes', () => {
+    const frameShape = frameShapeFromPlainShapeObject({
+      type: 'g',
+      shapes: [
+        { type: 'path', d: 'M0,0L20,10L0,20Z' },
+        { type: 'path', d: 'M20,10L40,20L20,30Z' },
+        { type: 'path', d: 'M0,20L20,30L0,40Z' },
+      ]
+    })
+
+    const { childFrameShapes } = transform(frameShape, [[ 'scale', 0.8 ]])
+
+    expect(childFrameShapes[ 0 ]).not.toBeUndefined()
+    expect(childFrameShapes[ 1 ]).not.toBeUndefined()
+    expect(childFrameShapes[ 2 ]).not.toBeUndefined()
   })
 })
