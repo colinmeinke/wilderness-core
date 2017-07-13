@@ -75,7 +75,7 @@
     "svg-points": "^6.0.0",
     "tween-functions": "^1.2.0"
   },
-  "description": "A Javascript API for drawing and animating SVG",
+  "description": "The SVG animation engine (soon to be) behind Wilderness",
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-jest": "^20.0.3",
