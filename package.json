@@ -89,12 +89,14 @@
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "jest": "^20.0.4",
+    "rimraf": "^2.6.1",
     "rollup": "^0.45.2",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-replace": "^1.1.1",
     "rollup-plugin-uglify": "^2.0.1",
+    "semantic-release": "^6.3.6",
     "snazzy": "^7.0.0",
     "standard": "^10.0.2"
   },
@@ -118,6 +120,10 @@
     "commit": "git-cz",
     "fix": "standard --fix",
     "lint": "standard --verbose | snazzy",
-    "test": "jest"
-  }
+    "prepublish": "npm run tidy && npm run build",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "test": "jest",
+    "tidy": "rimraf modules cjs dist"
+  },
+  "version": "0.0.0-development"
 }
