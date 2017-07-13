@@ -142,12 +142,12 @@ describe('timeline', () => {
   it('should calculate correct playback duration', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const { playbackOptions: { duration } } = timeline(
@@ -161,12 +161,12 @@ describe('timeline', () => {
   it('should calculate correct keyframe positions', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const { timelineShapes } = timeline(
@@ -183,12 +183,12 @@ describe('timeline', () => {
   it('should throw when Shape queued after unknown Shape or Keyframe', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     expect(() => {
@@ -202,17 +202,17 @@ describe('timeline', () => {
   it('should correctly queue Shape after named (string) Shape', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const shape3 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const { timelineShapes } = timeline(
@@ -228,17 +228,17 @@ describe('timeline', () => {
   it('should correctly queue Shape after named (index) Shape', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const shape3 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const { timelineShapes } = timeline(
@@ -255,12 +255,12 @@ describe('timeline', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
       { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 250, name: 'foo' },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const { timelineShapes } = timeline(
@@ -276,17 +276,17 @@ describe('timeline', () => {
     const shape1 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
       { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 250, name: 'foo' },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 500 }
     )
 
     const shape2 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const shape3 = shape(
       { type: 'rect', width: 50, height: 50, x: 100, y: 100 },
-      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 },
+      { type: 'rect', width: 50, height: 50, x: 100, y: 100, duration: 350 }
     )
 
     const { timelineShapes } = timeline(
