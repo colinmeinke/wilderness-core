@@ -2,6 +2,7 @@ import config from './config'
 import easingFunction from './easing-function'
 import { offset, position, rotate } from 'points'
 import { toPoints } from 'svg-points'
+import { transformPoints } from './transform'
 
 const applyMotionPath = ({ angle, frameShape, x, y }) => {
   if (frameShape.childFrameShapes) {
@@ -23,14 +24,15 @@ const motionPath = ({
   accuracy = 1,
   easing: motionPathEasing = config.defaults.motionPath.easing,
   rotate: r = false,
+  transforms = [],
   ...plainShapeObject
 }) => {
-  // @todo apply transforms to motionPath shape
+  // @todo motion path rotation should be applied to group, not individually
   // @todo add code comments
   // @todo add validation (inc. error on group shape)
-  // @todo add tests
+  // @todo add tests (inc. motion path transform)
 
-  const motionPathPoints = toPoints(plainShapeObject)
+  const motionPathPoints = transformPoints(toPoints(plainShapeObject), transforms)
   const easing = easingFunction(motionPathEasing)
 
   return (frameShape, framePosition) => {

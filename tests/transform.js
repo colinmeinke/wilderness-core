@@ -1,7 +1,7 @@
 /* globals describe it expect */
 
 import { frameShapeFromPlainShapeObject } from '../src/frame'
-import transform from '../src/transform'
+import transform, { transformPoints } from '../src/transform'
 
 describe('transform', () => {
   it('applies moveIndex transform correctly', () => {
@@ -213,5 +213,27 @@ describe('transform', () => {
     expect(childFrameShapes[ 1 ]).toEqual(expectedChildFrameShapes[ 1 ])
     expect(childFrameShapes[ 2 ].childFrameShapes[ 0 ]).toEqual(expectedChildFrameShapes[ 2 ].childFrameShapes[ 0 ])
     expect(childFrameShapes[ 2 ].childFrameShapes[ 1 ].childFrameShapes[ 0 ]).toEqual(expectedChildFrameShapes[ 2 ].childFrameShapes[ 1 ].childFrameShapes[ 0 ])
+  })
+})
+
+describe('transformPoints', () => {
+  it('should transform points', () => {
+    const points = [
+      { x: 0, y: 0, moveTo: true },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+      { x: 0, y: 0 }
+    ]
+
+    const expectedPoints = [
+      { x: 10, y: 10, moveTo: true },
+      { x: 20, y: 10 },
+      { x: 20, y: 20 },
+      { x: 10, y: 20 },
+      { x: 10, y: 10 }
+    ]
+
+    expect(transformPoints(points, [[ 'offset', 10, 10 ]])).toEqual(expectedPoints)
   })
 })

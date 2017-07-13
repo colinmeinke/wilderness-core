@@ -94,5 +94,22 @@ const pointsToFrameShape = ({ frameShape, points, pointsMap }) => {
  */
 const transform = (frameShape, transforms) => transforms.reduce(apply, frameShape)
 
-export { flattenPoints, pointsToFrameShape }
+/**
+ * Applies an array of transforms to Points.
+ *
+ * @param {Points} points
+ * @param {(string|number)[][]} transforms
+ *
+ * @return {Points}
+ *
+ * @example
+ * transform(points, [[ 'rotate', 45 ]])
+ */
+const transformPoints = (points, transforms) => (
+  transforms.reduce((nextPoints, [ name, ...args ]) => (
+    transformFunctions[ name ](nextPoints, ...args)
+  ), points)
+)
+
+export { flattenPoints, pointsToFrameShape, transformPoints }
 export default transform
