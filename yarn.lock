@@ -2956,9 +2956,9 @@ pluralize@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-1.2.1.tgz#d1a21483fd22bb41e58a12fa3421823140897c45"
 
-points@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/points/-/points-3.0.0.tgz#7ba5b891cd5951b113b2a53147ef17ae1139d289"
+points@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/points/-/points-3.1.0.tgz#80d2e5eae4a6719848c3ad6f74bdf941ef3e4107"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
@@ -3262,9 +3262,9 @@ rollup-pluginutils@^2.0.1:
     estree-walker "^0.3.0"
     micromatch "^2.3.11"
 
-rollup@^0.45.1:
-  version "0.45.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.45.1.tgz#af67ded79974079095b5fede8817b4ec26d610e1"
+rollup@^0.45.2:
+  version "0.45.2"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.45.2.tgz#63a284c2b31234656f24e9e9717fabb6a7f0fa43"
   dependencies:
     source-map-support "^0.4.0"
 

@@ -71,7 +71,7 @@
     }
   },
   "dependencies": {
-    "points": "^3.0.0",
+    "points": "^3.1.0",
     "svg-points": "^6.0.0",
     "tween-functions": "^1.2.0"
   },
@@ -89,7 +89,7 @@
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "jest": "^20.0.4",
-    "rollup": "^0.45.1",
+    "rollup": "^0.45.2",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",

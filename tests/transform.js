@@ -159,7 +159,7 @@ describe('transform', () => {
       shapes: [
         { type: 'path', d: 'M0,0L20,10L0,20Z' },
         { type: 'path', d: 'M20,10L40,20L20,30Z' },
-        { type: 'path', d: 'M0,20L20,30L0,40Z' },
+        { type: 'path', d: 'M0,20L20,30L0,40Z' }
       ]
     })
 
@@ -168,5 +168,50 @@ describe('transform', () => {
     expect(childFrameShapes[ 0 ]).not.toBeUndefined()
     expect(childFrameShapes[ 1 ]).not.toBeUndefined()
     expect(childFrameShapes[ 2 ]).not.toBeUndefined()
+  })
+
+  it('applies transforms to a deep nested frame shape', () => {
+    const frameShape = frameShapeFromPlainShapeObject({
+      type: 'g',
+      shapes: [
+        { type: 'rect', x: 0, y: 0, width: 10, height: 10 },
+        { type: 'rect', x: 10, y: 0, width: 10, height: 10 },
+        {
+          type: 'g',
+          shapes: [
+            { type: 'rect', x: 0, y: 10, width: 10, height: 10 },
+            {
+              type: 'g',
+              shapes: [{ type: 'rect', x: 10, y: 10, width: 10, height: 10 }]
+            }
+          ]
+        }
+      ]
+    })
+
+    const { childFrameShapes: expectedChildFrameShapes } = frameShapeFromPlainShapeObject({
+      type: 'g',
+      shapes: [
+        { type: 'rect', x: 5, y: 5, width: 5, height: 5 },
+        { type: 'rect', x: 10, y: 5, width: 5, height: 5 },
+        {
+          type: 'g',
+          shapes: [
+            { type: 'rect', x: 5, y: 10, width: 5, height: 5 },
+            {
+              type: 'g',
+              shapes: [{ type: 'rect', x: 10, y: 10, width: 5, height: 5 }]
+            }
+          ]
+        }
+      ]
+    })
+
+    const { childFrameShapes } = transform(frameShape, [[ 'scale', 0.5 ]])
+
+    expect(childFrameShapes[ 0 ]).toEqual(expectedChildFrameShapes[ 0 ])
+    expect(childFrameShapes[ 1 ]).toEqual(expectedChildFrameShapes[ 1 ])
+    expect(childFrameShapes[ 2 ].childFrameShapes[ 0 ]).toEqual(expectedChildFrameShapes[ 2 ].childFrameShapes[ 0 ])
+    expect(childFrameShapes[ 2 ].childFrameShapes[ 1 ].childFrameShapes[ 0 ]).toEqual(expectedChildFrameShapes[ 2 ].childFrameShapes[ 1 ].childFrameShapes[ 0 ])
   })
 })
