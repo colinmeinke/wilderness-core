@@ -1,3 +1,5 @@
+/* globals __DEV__ */
+
 import config from './config'
 import easingFunction from './easing-function'
 import { offset, position, rotate } from 'points'
