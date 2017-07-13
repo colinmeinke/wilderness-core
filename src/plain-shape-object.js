@@ -10,6 +10,15 @@ import { toPath, valid as shapeValid } from 'svg-points'
  */
 
 /**
+ * Additional options specifically for a motion path.
+ *
+ * @typedef {Object} PlainShapeObjectMotionPathProps
+ *
+ * @property {number} accuracy - .
+ * @property {boolean|number} rotate - .
+ */
+
+/**
  * The tween options to use when transitioning from a previous shape.
  *
  * @typedef {Object} PlainShapeObjectTweenProps
@@ -25,6 +34,7 @@ import { toPath, valid as shapeValid } from 'svg-points'
  * @typedef {Object} PlainShapeObject
  *
  * @extends PlainShapeObjectCoreProps
+ * @extends PlainShapeObjectMotionPathProps
  * @extends PlainShapeObjectTweenProps
  * @property {string|number} name
  */
@@ -106,6 +116,40 @@ const forcesPropValid = plainShapeObjects => {
       } else {
         errors.push('the forces prop must be of type array')
       }
+    }
+  })
+
+  if (errors.length) {
+    throw new TypeError(errorMsg(errors))
+  }
+
+  return true
+}
+
+/**
+ * Validates PlainShapeObjectMotionPathProps.
+ *
+ * @param {PlainShapeObject[]} plainShapeObjects
+ *
+ * @throws {TypeError} Throws if not valid
+ *
+ * @returns {true}
+ *
+ * @example
+ * if (motionPathPropsValid([ circle ])) {
+ *   console.log('circle has valid motion path props')
+ * }
+ */
+const motionPathPropsValid = plainShapeObjects => {
+  const errors = []
+
+  plainShapeObjects.map(({ accuracy, rotate }) => {
+    if (typeof accuracy !== 'undefined' && !(typeof accuracy === 'number' && accuracy > 0)) {
+      errors.push('the accuracy prop must be a number greater than 0')
+    }
+
+    if (typeof rotate !== 'undefined' && !(typeof rotate === 'boolean' || typeof rotate === 'number')) {
+      errors.push('the rotate prop must be a of type boolean or number')
     }
   })
 
@@ -340,7 +384,8 @@ const valid = (...plainShapeObjects) => (
   corePropsValid(plainShapeObjects) &&
   forcesPropValid(plainShapeObjects) &&
   transformsPropValid(plainShapeObjects) &&
-  tweenPropsValid(plainShapeObjects)
+  tweenPropsValid(plainShapeObjects) &&
+  motionPathPropsValid(plainShapeObjects)
 )
 
 export { valid }

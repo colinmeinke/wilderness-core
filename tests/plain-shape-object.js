@@ -315,4 +315,28 @@ describe('valid', () => {
 
     expect(() => valid(s)).not.toThrow()
   })
+
+  it('should throw when accuracy property is invalid', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      accuracy: 0
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
+  it('should throw when rotate property is invalid', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      rotate: 'potato'
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
 })

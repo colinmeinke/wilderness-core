@@ -3,6 +3,7 @@ import easingFunction from './easing-function'
 import { offset, position, rotate } from 'points'
 import { toPoints } from 'svg-points'
 import { flattenPoints, pointsToFrameShape, transformPoints } from './transform'
+import { valid } from './plain-shape-object'
 
 /**
  * Applies a motion path's offset and rotation to a FrameShape.
@@ -40,17 +41,22 @@ const applyMotionPath = ({ angle, frameShape, x, y }) => {
  * @example
  * motionPath({ ...plainShapeObject, accuracy: 0.1, rotate: true })
  */
-const motionPath = ({
-  accuracy = 1,
-  easing: motionPathEasing = config.defaults.motionPath.easing,
-  rotate: r = false,
-  transforms = [],
-  ...plainShapeObject
-}) => {
-  // @todo add validation (inc. error on group shape)
-  // @todo add tests (inc. motion path transform)
+const motionPath = plainShapeObject => {
+  if (__DEV__ && valid(plainShapeObject)) {
+    if (plainShapeObject.type === 'g') {
+      throw new TypeError(`A motion path cannot be a group shape`)
+    }
+  }
 
-  const motionPathPoints = transformPoints(toPoints(plainShapeObject), transforms)
+  const {
+    accuracy = 1,
+    easing: motionPathEasing = config.defaults.motionPath.easing,
+    rotate: r = false,
+    transforms = [],
+    ...coreProps
+  } = plainShapeObject
+
+  const motionPathPoints = transformPoints(toPoints(coreProps), transforms)
   const easing = easingFunction(motionPathEasing)
 
   return (frameShape, framePosition) => {
