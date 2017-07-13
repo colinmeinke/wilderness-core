@@ -4,6 +4,20 @@ import { offset, position, rotate } from 'points'
 import { toPoints } from 'svg-points'
 import { flattenPoints, pointsToFrameShape, transformPoints } from './transform'
 
+/**
+ * Applies a motion path's offset and rotation to a FrameShape.
+ *
+ * @param {Object} opts
+ * @param {number} opts.angle - The angle to rotate the FrameShape
+ * @param {FrameShape} opts.frameShape
+ * @param {number} opts.x - The value to offset the FrameShape on the x axis
+ * @param {number} opts.x - The value to offset the FrameShape on the x axis
+ *
+ * @returns {FrameShape}
+ *
+ * @example
+ * applyMotionPath({ angle, frameShape, x, y })
+ */
 const applyMotionPath = ({ angle, frameShape, x, y }) => {
   const { points, pointsMap } = flattenPoints(frameShape)
   const offsetPoints = offset(points, x, y)
@@ -16,6 +30,16 @@ const applyMotionPath = ({ angle, frameShape, x, y }) => {
   })
 }
 
+/**
+ * Creates a motion path force function from a PlainShapeObject.
+ *
+ * @param {PlainShapeObject} plainShapeObject
+ *
+ * @returns {function}
+ *
+ * @example
+ * motionPath({ ...plainShapeObject, accuracy: 0.1, rotate: true })
+ */
 const motionPath = ({
   accuracy = 1,
   easing: motionPathEasing = config.defaults.motionPath.easing,
@@ -23,7 +47,6 @@ const motionPath = ({
   transforms = [],
   ...plainShapeObject
 }) => {
-  // @todo add code comments
   // @todo add validation (inc. error on group shape)
   // @todo add tests (inc. motion path transform)
 
