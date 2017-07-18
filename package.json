@@ -105,9 +105,9 @@
   "jest": {
     "testRegex": "/tests/.*.js"
   },
-  "name": "wilderness-core",
   "main": "cjs/index.js",
   "module": "modules/index.js",
+  "name": "wilderness-core",
   "repository": {
     "type": "git",
     "url": "https://github.com/colinmeinke/wilderness-core.git"
