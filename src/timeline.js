@@ -100,6 +100,7 @@ import { input } from './middleware'
  *
  * @property {Middleware[]} middleware
  * @property {PlaybackOptions} playbackOptions
+ * @property {Object} state - Holds the last known state of the timeline.
  * @property {TimelineShape[]} timelineShapes
  */
 
@@ -424,7 +425,7 @@ const timeline = (...props) => {
     playbackOptions.duration = duration
   }
 
-  const t = { middleware, playbackOptions, timelineShapes }
+  const t = { middleware, playbackOptions, state: {}, timelineShapes }
 
   timelineShapes.map(({ shape }, i) => {
     shape.timeline = t
