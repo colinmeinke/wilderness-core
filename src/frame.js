@@ -238,7 +238,7 @@ const frame = (timeline, at) => {
   }
 
   const timelinePosition = position(
-    timeline.playbackOptions,
+    timeline,
     typeof at !== 'undefined' ? at : Date.now()
   )
 

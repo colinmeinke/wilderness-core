@@ -219,19 +219,22 @@ const play = (timeline, playbackOptions = {}, at) => {
 /**
  * A Position at a given time.
  *
- * @param {PlaybackOptions} playbackOptions
+ * @param {Timeline} timeline
  * @param {number} at
  *
  * @returns {Position}
  *
  * @example
- * position(playbackOptions, Date.now())
+ * position(timeline, Date.now())
  */
-const position = (playbackOptions, at) => {
-  const complete = iterationsComplete({ ...playbackOptions, at })
-  const total = playbackOptions.initialIterations + complete
+const position = (timeline, at) => {
+  const complete = iterationsComplete({ ...timeline.playbackOptions, at })
+  const total = timeline.playbackOptions.initialIterations + complete
   const i = total >= 1 && total % 1 === 0 ? 1 : total % 1
-  return currentReverse({ ...playbackOptions, complete }) ? 1 - i : i
+
+  timeline.state.finished = timeline.playbackOptions.iterations - complete === 0
+
+  return currentReverse({ ...timeline.playbackOptions, complete }) ? 1 - i : i
 }
 
 /**
@@ -428,6 +431,7 @@ const timeline = (...props) => {
   }
 
   const state = {
+    finished: playbackOptions.iterations === 0,
     started: typeof playbackOptions.started !== 'undefined'
   }
 
@@ -596,6 +600,8 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
         : 1 - next.initialIterations % 1
     }
   }
+
+  timeline.state.finished = next.iterations === 0
 
   return next
 }
