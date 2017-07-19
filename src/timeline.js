@@ -197,6 +197,7 @@ const iterationsComplete = ({ at, duration, iterations, started }) => {
  */
 const pause = (timeline, playbackOptions = {}, at) => {
   timeline.playbackOptions = updatePlaybackOptions(timeline, playbackOptions, at)
+  timeline.state.started = false
   delete timeline.playbackOptions.started
 }
 
@@ -212,6 +213,7 @@ const pause = (timeline, playbackOptions = {}, at) => {
  */
 const play = (timeline, playbackOptions = {}, at) => {
   timeline.playbackOptions = updatePlaybackOptions(timeline, playbackOptions, at)
+  timeline.state.started = true
 }
 
 /**
@@ -425,7 +427,11 @@ const timeline = (...props) => {
     playbackOptions.duration = duration
   }
 
-  const t = { middleware, playbackOptions, state: {}, timelineShapes }
+  const state = {
+    started: typeof playbackOptions.started !== 'undefined'
+  }
+
+  const t = { middleware, playbackOptions, state, timelineShapes }
 
   timelineShapes.map(({ shape }, i) => {
     shape.timeline = t

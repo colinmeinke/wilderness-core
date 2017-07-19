@@ -352,6 +352,18 @@ describe('timeline', () => {
     ] }))
       .toThrow('The color middleware must have an output method')
   })
+
+  it('should have a started state of false when not started', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const { state } = timeline([ validShape, { queue: 200 } ])
+    expect(state.started).toBe(false)
+  })
+
+  it('should have a started state of true when started', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const { state } = timeline([ validShape, { queue: 200 } ], { started: 0 })
+    expect(state.started).toBe(true)
+  })
 })
 
 describe('sameDirection', () => {
@@ -840,6 +852,13 @@ describe('play', () => {
     expect(animation.playbackOptions.iterations).toBe(0)
     expect(animation.playbackOptions.reverse).toBe(true)
   })
+
+  it('should set the started timeline state to true', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(square)
+    play(animation, {}, 0)
+    expect(animation.state.started).toBe(true)
+  })
 })
 
 describe('pause', () => {
@@ -866,5 +885,12 @@ describe('pause', () => {
     pause(animation, {}, 750)
     expect(animation.playbackOptions.initialIterations).toBe(0.75)
     expect(animation.playbackOptions.iterations).toBe(0.25)
+  })
+
+  it('should set the started timeline state to false', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(square)
+    pause(animation, {}, 500)
+    expect(animation.state.started).toBe(false)
   })
 })
