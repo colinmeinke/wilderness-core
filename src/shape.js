@@ -56,13 +56,13 @@ const shape = (...props) => {
  * sort(props)
  */
 const sort = props => {
-  const plainShapeObjects = props.map(prop => {
+  const plainShapeObjects = props.filter(prop => {
     if (__DEV__ && typeof prop !== 'object') {
       throw new TypeError(`The shape function must only be passed objects`)
     }
 
-    return prop.type ? prop : null
-  }).filter(x => x)
+    return prop.type
+  })
 
   const options = props.length > 1 && typeof props[ props.length - 1 ].type === 'undefined'
     ? props[ props.length - 1 ]
