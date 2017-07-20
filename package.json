@@ -101,7 +101,7 @@
     "standard": "^10.0.2"
   },
   "homepage": "https://github.com/colinmeinke/wilderness-core#readme",
-  "license": "ISC",
+  "license": "MIT",
   "jest": {
     "testRegex": "/tests/.*.js"
   },
