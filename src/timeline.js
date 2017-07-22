@@ -77,10 +77,11 @@ import { input } from './middleware'
  *
  * @typedef {Object} ShapeWithOptions
  *
- * @property {Shape} shape
+ * @property {(string|number)} [after] - The name of the Shape to queue after (in sequence).
+ * @property {(string|number)} [at] - The name of the Shape to queue at (in parallel).
  * @property {(string|number)} name - A unique reference.
- * @property {(string|number)} follow - The name of the Shape to queue after.
- * @property {number} offset - Millisecond offset from end of the follow Shape to start of this Shape.
+ * @property {number} offset - The offset in milliseconds to adjust the queuing of this shape.
+ * @property {Shape} shape
  */
 
 /**
@@ -257,7 +258,8 @@ const sameDirection = (alternate, iterations) => {
  * Calculate the start position of a Shape on the Timeline.
  *
  * @param {Object} props
- * @param {(string|number)} [props.follow]
+ * @param {(string|number)} [props.after]
+ * @param {(string|number)} [props.at]
  * @param {MsTimelineShape[]} props.msTimelineShapes
  * @param {number} props.offset
  * @param {number} props.timelineEnd - The current end of the timeline.
@@ -267,13 +269,17 @@ const sameDirection = (alternate, iterations) => {
  * @example
  * shapeStart({ 'foo', msTimelineShapes, 200, 2000 })
  */
-const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
-  if (typeof follow !== 'undefined') {
+const shapeStart = ({ after, at, msTimelineShapes, offset, timelineEnd }) => {
+  if (typeof after !== 'undefined' || typeof at !== 'undefined') {
+    const reference = typeof after !== 'undefined' ? after : at
+
     for (let i = 0; i < msTimelineShapes.length; i++) {
       const s = msTimelineShapes[ i ]
 
-      if (follow === s.shape.name) {
-        return s.timelinePosition.end + offset
+      if (reference === s.shape.name) {
+        return (typeof at !== 'undefined'
+          ? s.timelinePosition.start
+          : s.timelinePosition.end) + offset
       }
     }
 
@@ -283,17 +289,15 @@ const shapeStart = ({ follow, msTimelineShapes, offset, timelineEnd }) => {
       for (let j = 0; j < s.shape.keyframes.length; j++) {
         const keyframe = s.shape.keyframes[ j ]
 
-        if (follow === keyframe.name) {
-          if (follow === keyframe.name) {
-            return s.timelinePosition.start +
-              s.shape.duration * keyframe.position + offset
-          }
+        if (reference === keyframe.name) {
+          return s.timelinePosition.start +
+            s.shape.duration * keyframe.position + offset
         }
       }
     }
 
     if (__DEV__) {
-      throw new Error(`No Shape or Keyframe matching name '${follow}'`)
+      throw new Error(`No Shape or Keyframe matching name '${reference}'`)
     }
   }
 
@@ -328,24 +332,42 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
   }
 
   if (typeof queue !== 'undefined') {
-    if (Array.isArray(queue)) {
-      if (__DEV__ && (typeof queue[ 0 ] !== 'string' && typeof queue[ 0 ] !== 'number')) {
-        throw new TypeError(`The queue prop first array item must be of type string or number`)
+    if (typeof queue === 'object' && (!Array.isArray(queue) && queue !== null)) {
+      const { after, at, offset = 0 } = queue
+
+      if (__DEV__ && (typeof offset !== 'undefined' && typeof offset !== 'number')) {
+        throw new TypeError(`The queue.offset prop must be of type number`)
       }
 
-      if (__DEV__ && (typeof queue[ 1 ] !== 'number')) {
-        throw new TypeError(`The queue prop second array item must be of type number`)
+      if (__DEV__ && (typeof at !== 'undefined' && typeof after !== 'undefined')) {
+        throw new TypeError(`You cannot pass both queue.at and queue.after props`)
       }
 
-      return { follow: queue[ 0 ], name, offset: queue[ 1 ], shape }
+      if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'string' && typeof at !== 'number')) {
+        throw new TypeError(`The queue.at prop must be of type string or number`)
+      }
+
+      if (__DEV__ && (typeof after !== 'undefined' && typeof after !== 'string' && typeof after !== 'number')) {
+        throw new TypeError(`The queue.after prop must be of type string or number`)
+      }
+
+      if (typeof at !== 'undefined') {
+        return { at, name, offset, shape }
+      }
+
+      if (typeof after !== 'undefined') {
+        return { after, name, offset, shape }
+      }
+
+      return { name, offset, shape }
     } else if (typeof queue === 'number') {
       return { name, offset: queue, shape }
     } else if (typeof queue === 'string') {
-      return { follow: queue, name, offset: 0, shape }
+      return { after: queue, name, offset: 0, shape }
     }
 
     if (__DEV__) {
-      throw new TypeError(`The queue prop must be of type number, string or array`)
+      throw new TypeError(`The queue prop must be of type number, string or object`)
     }
 
     return
@@ -487,7 +509,7 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
 
   const msTimelineShapes = []
 
-  shapesWithOptions.map(({ follow, name, offset, shape }, i) => {
+  shapesWithOptions.map(({ after, at, name, offset, shape }, i) => {
     if (__DEV__ && typeof shape.timeline !== 'undefined') {
       throw new Error(`A Shape can only be added to one timeline`)
     }
@@ -501,7 +523,8 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
     }
 
     const start = shapeStart({
-      follow,
+      after,
+      at,
       msTimelineShapes,
       offset,
       timelineEnd
