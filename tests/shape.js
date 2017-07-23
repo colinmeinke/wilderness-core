@@ -56,6 +56,7 @@ describe('shape', () => {
 
     expect(s).toHaveProperty('keyframes')
     expect(s).toHaveProperty('duration')
+    expect(s).toHaveProperty('name')
     expect(s.name).toEqual(name)
   })
 
