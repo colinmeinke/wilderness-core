@@ -368,7 +368,7 @@ const tweenPropsValid = plainShapeObjects => {
 /**
  * Validates one or more PlainShapeObject.
  *
- * @param {PlainShapeObject[]} plainShapeObjects
+ * @param {...PlainShapeObject} plainShapeObjects
  *
  * @throws {TypeError} Throws if not valid
  *

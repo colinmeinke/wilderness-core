@@ -437,7 +437,7 @@ const sort = props => {
  * Optionally can take an options object as the last argument,
  * as well as options for each Shape if passed in as an array.
  *
- * @param {(Shape|Object[]|TimelineOptions)[]} props
+ * @param {...(Shape|Object[]|TimelineOptions)} props
  *
  * @returns {Timeline}
  *
