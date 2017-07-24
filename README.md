@@ -11,5 +11,5 @@ one of the following implementations of Wilderness core:
 - [Wilderness](https://github.com/colinmeinke/wilderness) (standalone DOM). *A few days away from launch.*
 - [Wilderness React](https://github.com/colinmeinke/wilderness-react) (for use with React). *Coming soon.*
 
-Full documentation will appear shortly at
+Full documentation and examples will appear shortly at
 [wilderness.now.sh](https://wilderness.now.sh).
