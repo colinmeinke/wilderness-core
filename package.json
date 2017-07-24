@@ -75,7 +75,7 @@
     "svg-points": "^6.0.0",
     "tween-functions": "^1.2.0"
   },
-  "description": "The SVG animation engine (soon to be) behind Wilderness",
+  "description": "The SVG animation engine behind Wilderness",
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-jest": "^20.0.3",
