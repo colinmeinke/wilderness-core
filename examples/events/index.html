@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<head>
+  <title>Events</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    svg {
+      height: 100%;
+      width: 100%;
+    }
+
+    .controls {
+      background-color: rgb(230,230,230);
+      bottom: 0;
+      box-sizing: border-box;
+      padding: 15px 20px;
+      position: absolute;
+      width: 100%;
+    }
+
+    .play,
+    .pause,
+    .reverse,
+    label,
+    input {
+      font-size: 24px;
+    }
+
+    label + label {
+      margin-left: 10px;
+    }
+
+    input {
+      width: 80px;
+    }
+
+    .options {
+      display: flex;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <svg
+    height="100"
+    preserveAspectRatio="xMidYMid meet"
+    width="100"
+    viewBox="0 0 100 100"
+  >
+  </svg>
+  <section class="controls">
+    <button class="play" type="button">Play</button>
+    <button class="pause" type="button">Pause</button>
+
+    <div class="options">
+      <label for="initialIterations">
+        Initial iterations:
+        <input name="initialIterations" id="initialIterations" type="text" />
+      </label>
+
+      <label for="iterations">
+        Iterations:
+        <input name="iterations" id="iterations" type="text" />
+      </label>
+
+      <label for="alternate">
+        Alternate:
+        <input name="alternate" id="alternate" type="text" />
+      </label>
+
+      <label for="reverse">
+        Reverse:
+        <input name="reverse" id="reverse" type="text" />
+      </label>
+
+      <label for="duration">
+        Duration:
+        <input name="duration" id="duration" type="text" />
+      </label>
+    </div>
+  </section>
+  <script src="dist.js"></script>
+</body>

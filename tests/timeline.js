@@ -7,7 +7,8 @@ import timeline, {
   pause,
   play,
   position,
-  sameDirection
+  sameDirection,
+  updateState
 } from '../src/timeline'
 
 describe('timeline', () => {
@@ -132,10 +133,13 @@ describe('timeline', () => {
   it('should return an object with the correct props', () => {
     const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
     const animation = timeline(validShape)
+    expect(animation).toHaveProperty('event')
     expect(animation).toHaveProperty('middleware')
     expect(animation).toHaveProperty('playbackOptions')
     expect(animation).toHaveProperty('state')
     expect(animation).toHaveProperty('timelineShapes')
+    expect(animation.event).toHaveProperty('subscribe')
+    expect(animation.event).toHaveProperty('unsubscribe')
   })
 
   it('should return default playback options', () => {
@@ -577,173 +581,10 @@ describe('currentReverse', () => {
   })
 })
 
-describe('position', () => {
-  it('should calculate the correct position if finished', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: false,
-        duration: 1000,
-        initialIterations: 0,
-        iterations: 1,
-        reverse: false,
-        started: 0
-      },
-      state: {}
-    }, 1001)).toBeCloseTo(1)
-  })
-
-  it('should calculate correct position if not started', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: false,
-        duration: 1000,
-        initialIterations: 1.8,
-        iterations: 1,
-        reverse: false
-      },
-      state: {}
-    }, 1000)).toBeCloseTo(0.8)
-  })
-
-  it('should calculate correct position if not started and in reverse', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: false,
-        duration: 1000,
-        initialIterations: 1.8,
-        iterations: 1,
-        reverse: true
-      },
-      state: {}
-    }, 1000)).toBeCloseTo(0.2)
-  })
-
-  it('should calculate correct position if not started and alternating', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: true,
-        duration: 1000,
-        initialIterations: 1.8,
-        iterations: 1,
-        reverse: false
-      },
-      state: {}
-    }, 1000)).toBeCloseTo(0.8)
-  })
-
-  it('should calculate correct position if not started and alternating in reverse', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: true,
-        duration: 1000,
-        initialIterations: 1.8,
-        iterations: 1,
-        reverse: true
-      },
-      state: {}
-    }, 1000)).toBeCloseTo(0.2)
-  })
-
-  it('should calculate the correct position during first iteration', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: false,
-        duration: 1000,
-        initialIterations: 0,
-        iterations: 1,
-        reverse: false,
-        started: 0
-      },
-      state: {}
-    }, 600)).toBeCloseTo(0.6)
-  })
-
-  it('should calculate the correct position after multiple iterations', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: false,
-        duration: 1000,
-        initialIterations: 0,
-        iterations: 5,
-        reverse: false,
-        started: 0
-      },
-      state: {}
-    }, 2600)).toBeCloseTo(0.6)
-  })
-
-  it('should calculate the correct position with complex options', () => {
-    const t = {
-      playbackOptions: {
-        alternate: true,
-        duration: 1000,
-        initialIterations: 1.75,
-        iterations: 7,
-        reverse: true,
-        started: 250
-      },
-      state: {}
-    }
-
-    expect(position(t, 2500)).toBeCloseTo(0)
-    expect(position(t, 2750)).toBeCloseTo(0.25)
-  })
-
-  it('should calculate the correct position with inifine iterations', () => {
-    expect(position({
-      playbackOptions: {
-        alternate: true,
-        duration: 1000,
-        initialIterations: 0.75,
-        iterations: Infinity,
-        reverse: true,
-        started: 0
-      },
-      state: {}
-    }, 0)).toBeCloseTo(0.25)
-  })
-
-  it('should set finished state to false when not finished', () => {
-    const t = {
-      playbackOptions: {
-        alternate: true,
-        duration: 1000,
-        initialIterations: 1.8,
-        iterations: 1,
-        reverse: true,
-        started: 0
-      },
-      state: {}
-    }
-
-    position(t, 999)
-
-    expect(t.state.finished).toBe(false)
-  })
-
-  it('should set finished state to true when finished', () => {
-    const t = {
-      playbackOptions: {
-        alternate: true,
-        duration: 1000,
-        initialIterations: 1.8,
-        iterations: 1,
-        reverse: true,
-        started: 0
-      },
-      state: {}
-    }
-
-    position(t, 1000)
-
-    expect(t.state.finished).toBe(true)
-  })
-})
-
 describe('play', () => {
   it('should throw when not passed a timeline', () => {
     expect(() => { play('invalid', { duration: 5000 }) })
-      .toThrow(`The play function's first argument must be a Timeline`)
+      .toThrow(`The updatePlaybackOptions function must be passed a Timeline`)
   })
 
   it('should throw if playback options are invalid', () => {
@@ -1068,7 +909,7 @@ describe('play', () => {
 describe('pause', () => {
   it('should throw when not passed a timeline', () => {
     expect(() => { pause('invalid', { duration: 5000 }) })
-      .toThrow(`The play function's first argument must be a Timeline`)
+      .toThrow(`The updatePlaybackOptions function must be passed a Timeline`)
   })
 
   it('should throw if playback options are invalid', () => {
@@ -1096,5 +937,221 @@ describe('pause', () => {
     const animation = timeline(square)
     pause(animation, {}, 500)
     expect(animation.state.started).toBe(false)
+  })
+})
+
+describe('position', () => {
+  it('should calculate the correct position when not in reverse', () => {
+    expect(position(0.5, false)).toBe(0.5)
+  })
+
+  it('should calculate the correct position when in reverse', () => {
+    expect(position(4.75, true)).toBe(0.25)
+  })
+})
+
+describe('updateState', () => {
+  it('should calculate the correct position if finished', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: false,
+        duration: 1000,
+        initialIterations: 0,
+        iterations: 1,
+        reverse: false,
+        started: 0
+      },
+      state
+    }, 1001)
+
+    expect(state.position).toBeCloseTo(1)
+  })
+
+  it('should calculate correct position if not started', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: false,
+        duration: 1000,
+        initialIterations: 1.8,
+        iterations: 1,
+        reverse: false
+      },
+      state
+    }, 1000)
+
+    expect(state.position).toBeCloseTo(0.8)
+  })
+
+  it('should calculate correct position if not started and in reverse', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: false,
+        duration: 1000,
+        initialIterations: 1.8,
+        iterations: 1,
+        reverse: true
+      },
+      state
+    }, 1000)
+
+    expect(state.position).toBeCloseTo(0.2)
+  })
+
+  it('should calculate correct position if not started and alternating', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: true,
+        duration: 1000,
+        initialIterations: 1.8,
+        iterations: 1,
+        reverse: false
+      },
+      state
+    }, 1000)
+
+    expect(state.position).toBeCloseTo(0.8)
+  })
+
+  it('should calculate correct position if not started and alternating in reverse', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: true,
+        duration: 1000,
+        initialIterations: 1.8,
+        iterations: 1,
+        reverse: true
+      },
+      state
+    }, 1000)
+
+    expect(state.position).toBeCloseTo(0.2)
+  })
+
+  it('should calculate the correct position during first iteration', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: false,
+        duration: 1000,
+        initialIterations: 0,
+        iterations: 1,
+        reverse: false,
+        started: 0
+      },
+      state
+    }, 600)
+
+    expect(state.position).toBeCloseTo(0.6)
+  })
+
+  it('should calculate the correct position after multiple iterations', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: false,
+        duration: 1000,
+        initialIterations: 0,
+        iterations: 5,
+        reverse: false,
+        started: 0
+      },
+      state
+    }, 2600)
+
+    expect(state.position).toBeCloseTo(0.6)
+  })
+
+  it('should calculate the correct position with complex options', () => {
+    const state = {}
+
+    const t = {
+      playbackOptions: {
+        alternate: true,
+        duration: 1000,
+        initialIterations: 1.75,
+        iterations: 7,
+        reverse: true,
+        started: 250
+      },
+      state
+    }
+
+    updateState(t, 2500)
+
+    expect(state.position).toBeCloseTo(0)
+
+    updateState(t, 2750)
+
+    expect(state.position).toBeCloseTo(0.25)
+  })
+
+  it('should calculate the correct position with inifine iterations', () => {
+    const state = {}
+
+    updateState({
+      playbackOptions: {
+        alternate: true,
+        duration: 1000,
+        initialIterations: 0.75,
+        iterations: Infinity,
+        reverse: true,
+        started: 0
+      },
+      state
+    }, 0)
+
+    expect(state.position).toBeCloseTo(0.25)
+  })
+
+  it('should set finished state to false when not finished', () => {
+    const state = {}
+
+    const t = {
+      playbackOptions: {
+        alternate: true,
+        duration: 1000,
+        initialIterations: 1.8,
+        iterations: 1,
+        reverse: true,
+        started: 0
+      },
+      state
+    }
+
+    updateState(t, 999)
+
+    expect(state.finished).toBe(false)
+  })
+
+  it('should set finished state to true when finished', () => {
+    const state = {}
+
+    const t = {
+      playbackOptions: {
+        alternate: true,
+        duration: 1000,
+        initialIterations: 1.8,
+        iterations: 1,
+        reverse: true,
+        started: 0
+      },
+      state
+    }
+
+    updateState(t, 1000)
+
+    expect(state.finished).toBe(true)
   })
 })

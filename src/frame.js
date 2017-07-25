@@ -3,8 +3,8 @@
 import { add, cubify } from 'points'
 import clone from './clone'
 import { output } from './middleware'
-import { position } from './timeline'
 import { toPoints } from 'svg-points'
+import { updateState } from './timeline'
 
 /**
  * Shape data as specified by the
@@ -218,7 +218,7 @@ const commonPointStructure = structures => structures.reduce((structure, s) => (
 ), [])
 
 /**
- * The the current Frame of a Timeline.
+ * The current Frame of a Timeline.
  *
  * @param {Timeline} timeline
  * @param {number} [at]
@@ -237,19 +237,16 @@ const frame = (timeline, at) => {
     throw new TypeError(`The frame function's second argument must be of type number`)
   }
 
-  const timelinePosition = position(
-    timeline,
-    typeof at !== 'undefined' ? at : Date.now()
-  )
+  updateState(timeline, typeof at !== 'undefined' ? at : Date.now())
 
   return timeline.timelineShapes.map(({ shape, timelinePosition: { start, end } }) => {
-    if (timelinePosition <= start) {
+    if (timeline.state.position <= start) {
       return output(shape.keyframes[ 0 ].frameShape, timeline.middleware)
-    } else if (timelinePosition >= end) {
+    } else if (timeline.state.position >= end) {
       return output(shape.keyframes[ shape.keyframes.length - 1 ].frameShape, timeline.middleware)
     }
 
-    const shapePosition = (timelinePosition - start) / (end - start)
+    const shapePosition = (timeline.state.position - start) / (end - start)
 
     return frameShapeFromShape({
       shape,

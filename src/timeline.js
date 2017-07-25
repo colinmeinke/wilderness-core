@@ -3,6 +3,7 @@
 import clone from './clone'
 import config from './config'
 import { input } from './middleware'
+import { event } from './events'
 
 /**
  * The position of an object on a Timeline
@@ -197,9 +198,8 @@ const iterationsComplete = ({ at, duration, iterations, started }) => {
  * pause(timeline)
  */
 const pause = (timeline, playbackOptions = {}, at) => {
-  timeline.playbackOptions = updatePlaybackOptions(timeline, playbackOptions, at)
-  timeline.state.started = false
-  delete timeline.playbackOptions.started
+  timeline.playbackOptions = updatePlaybackOptions({ at, timeline, pause: true, playbackOptions })
+  updateState(timeline, at)
 }
 
 /**
@@ -213,29 +213,27 @@ const pause = (timeline, playbackOptions = {}, at) => {
  * play(timeline, { initialIterations: 0 })
  */
 const play = (timeline, playbackOptions = {}, at) => {
-  timeline.playbackOptions = updatePlaybackOptions(timeline, playbackOptions, at)
-  timeline.state.started = true
+  timeline.playbackOptions = updatePlaybackOptions({ at, timeline, playbackOptions })
+  updateState(timeline, at)
 }
 
 /**
- * A Position at a given time.
+ * Calculate the Timeline Position.
  *
- * @param {Timeline} timeline
- * @param {number} at
+ * @param {number} totalIterations - initialIterations + iterationsComplete.
+ * @param {boolean} reverse - Is the Timeline currently in reverse?
  *
  * @returns {Position}
  *
  * @example
- * position(timeline, Date.now())
+ * position(5.43, true)
  */
-const position = (timeline, at) => {
-  const complete = iterationsComplete({ ...timeline.playbackOptions, at })
-  const total = timeline.playbackOptions.initialIterations + complete
-  const i = total >= 1 && total % 1 === 0 ? 1 : total % 1
+const position = (totalIterations, reverse) => {
+  const i = totalIterations >= 1 && totalIterations % 1 === 0
+    ? 1
+    : totalIterations % 1
 
-  timeline.state.finished = timeline.playbackOptions.iterations - complete === 0
-
-  return currentReverse({ ...timeline.playbackOptions, complete }) ? 1 - i : i
+  return reverse ? 1 - i : i
 }
 
 /**
@@ -452,17 +450,16 @@ const timeline = (...props) => {
     playbackOptions.duration = duration
   }
 
-  const state = {
-    finished: playbackOptions.iterations === 0,
-    started: typeof playbackOptions.started !== 'undefined'
-  }
-
-  const t = { middleware, playbackOptions, state, timelineShapes }
+  const t = { middleware, playbackOptions, state: {}, timelineShapes }
 
   timelineShapes.map(({ shape }, i) => {
     shape.timeline = t
     shape.timelineIndex = i
   })
+
+  updateState(t)
+
+  t.event = event(t)
 
   return t
 }
@@ -553,20 +550,21 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
 /**
  * Updates the PlaybackOptions of a Timeline.
  *
- * @param {Timeline} timeline
- * @param {PlaybackOptions} playbackOptions
- * @param {number} [at]
+ * @param {Object} opts
+ * @param {number} [opts.at]
+ * @param {PlaybackOptions} opts.playbackOptions
+ * @param {Timeline} opts.timeline
  *
  * @example
- * updatePlaybackOptions(timeline, { initialIterations: 0 })
+ * updatePlaybackOptions({ timeline, playbackOptions })
  */
-const updatePlaybackOptions = (timeline, playbackOptions, at) => {
+const updatePlaybackOptions = ({ at, pause = false, playbackOptions, timeline }) => {
   if (__DEV__ && (typeof timeline !== 'object' || !timeline.timelineShapes || !timeline.playbackOptions)) {
-    throw new TypeError(`The play function's first argument must be a Timeline`)
+    throw new TypeError(`The updatePlaybackOptions function must be passed a Timeline`)
   }
 
   if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'number')) {
-    throw new TypeError(`The play function's third argument must be of type number`)
+    throw new TypeError(`The updatePlaybackOptions function at property must be of type number`)
   }
 
   const previous = timeline.playbackOptions
@@ -624,9 +622,29 @@ const updatePlaybackOptions = (timeline, playbackOptions, at) => {
     }
   }
 
-  timeline.state.finished = next.iterations === 0
+  if (pause) {
+    delete next.started
+  }
 
   return next
+}
+
+/**
+ * Updates the Timeline state.
+ *
+ * @param {Timeline} timeline
+ * @param {number} at
+ *
+ * @example
+ * updateState(timeline, Date.now())
+ */
+const updateState = ({ playbackOptions, state }, at) => {
+  state.started = typeof playbackOptions.started !== 'undefined'
+  state.iterationsComplete = iterationsComplete({ ...playbackOptions, at })
+  state.totalIterations = playbackOptions.initialIterations + state.iterationsComplete
+  state.reverse = currentReverse({ ...playbackOptions, complete: state.iterationsComplete })
+  state.finished = playbackOptions.iterations - state.iterationsComplete === 0
+  state.position = position(state.totalIterations, state.reverse)
 }
 
 /**
@@ -724,5 +742,14 @@ const validPlaybackOptions = ({
   }
 }
 
-export { currentReverse, pause, play, position, sameDirection }
+export {
+  currentReverse,
+  iterationsComplete,
+  pause,
+  play,
+  position,
+  sameDirection,
+  updateState
+}
+
 export default timeline
