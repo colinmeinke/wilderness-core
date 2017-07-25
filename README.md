@@ -3,8 +3,6 @@
 The SVG animation engine behind
 [Wilderness](https://github.com/colinmeinke/wilderness).
 
-
-
 Unless you are a library author you most likely want to head to
 one of the following implementations of Wilderness core:
 
