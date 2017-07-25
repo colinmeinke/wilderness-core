@@ -54,14 +54,6 @@ const animation = timeline(square)
 
 render(document.querySelector('svg'), animation)
 
-playButton.addEventListener('click', () => {
-  const opts = playbackOptions()
-  play(animation, opts)
-  console.log('play', opts)
-})
+playButton.addEventListener('click', () => play(animation, playbackOptions()))
 
-pauseButton.addEventListener('click', () => {
-  const opts = playbackOptions()
-  pause(animation, playbackOptions())
-  console.log('pause', opts)
-})
+pauseButton.addEventListener('click', () => pause(animation, playbackOptions()))
