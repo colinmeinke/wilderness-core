@@ -45,15 +45,26 @@ const playbackOptions = () => {
   return opts
 }
 
-const keyframe1 = { type: 'rect', width: 20, height: 20, x: 0, y: 40 }
-const keyframe2 = { type: 'rect', width: 20, height: 20, x: 80, y: 40 }
+const shape1Keyframe1 = { type: 'rect', width: 20, height: 20, x: 0, y: 40, name: 'KEYFRAME_1' }
+const shape1Keyframe2 = { type: 'rect', width: 20, height: 20, x: 30, y: 40, name: 'KEYFRAME_2' }
 
-const square = shape(keyframe1, keyframe2)
+const shape1 = shape(shape1Keyframe1, shape1Keyframe2)
 
-const animation = timeline(square)
+const shape2Keyframe1 = { type: 'rect', width: 20, height: 20, x: 50, y: 40, name: 'KEYFRAME_1' }
+const shape2Keyframe2 = { type: 'rect', width: 20, height: 20, x: 80, y: 40, name: 'KEYFRAME_2' }
+
+const shape2 = shape(shape2Keyframe1, shape2Keyframe2)
+
+const animation = timeline(
+  [ shape1, { name: 'SHAPE_1' }],
+  [ shape2, { name: 'SHAPE_2' }]
+)
 
 animation.event.subscribe('timeline.start', () => console.log('timeline.start'))
 animation.event.subscribe('timeline.finish', () => console.log('timeline.finish'))
+animation.event.subscribe('shape.start', ({ shapeName }) => console.log(`shape.start: ${shapeName}`))
+animation.event.subscribe('shape.finish', ({ shapeName }) => console.log(`shape.finish: ${shapeName}`))
+animation.event.subscribe('keyframe', ({ keyframeName, shapeName }) => console.log(`keyframe: ${shapeName} ${keyframeName}`))
 animation.event.subscribe('frame', () => console.log('frame'))
 
 render(document.querySelector('svg'), animation)

@@ -7,12 +7,12 @@ import { event } from './events'
 
 /**
  * The position of an object on a Timeline
- * where 0 is Timeline start and 1 is Timeline end.
+ * where 0 is Timeline start and 1 is Timeline finish.
  *
  * @typedef {Object} TimelinePosition
  *
  * @property {Position} start
- * @property {Position} end
+ * @property {Position} finish
  */
 
 /**
@@ -30,7 +30,7 @@ import { event } from './events'
  * @typedef {Object} MsTimelinePosition
  *
  * @property {number} start.
- * @property {number} end.
+ * @property {number} finish.
  */
 
 /**
@@ -260,14 +260,14 @@ const sameDirection = (alternate, iterations) => {
  * @param {(string|number)} [props.at]
  * @param {MsTimelineShape[]} props.msTimelineShapes
  * @param {number} props.offset
- * @param {number} props.timelineEnd - The current end of the timeline.
+ * @param {number} props.timelineFinish - The current finish of the timeline.
  *
  * @returns {number}
  *
  * @example
  * shapeStart({ 'foo', msTimelineShapes, 200, 2000 })
  */
-const shapeStart = ({ after, at, msTimelineShapes, offset, timelineEnd }) => {
+const shapeStart = ({ after, at, msTimelineShapes, offset, timelineFinish }) => {
   if (typeof after !== 'undefined' || typeof at !== 'undefined') {
     const reference = typeof after !== 'undefined' ? after : at
 
@@ -277,7 +277,7 @@ const shapeStart = ({ after, at, msTimelineShapes, offset, timelineEnd }) => {
       if (reference === s.shape.name) {
         return (typeof at !== 'undefined'
           ? s.timelinePosition.start
-          : s.timelinePosition.end) + offset
+          : s.timelinePosition.finish) + offset
       }
     }
 
@@ -299,7 +299,7 @@ const shapeStart = ({ after, at, msTimelineShapes, offset, timelineEnd }) => {
     }
   }
 
-  return timelineEnd + offset
+  return timelineFinish + offset
 }
 
 /**
@@ -483,7 +483,7 @@ const timelineShapes = ({ duration, msTimelineShapes, start }) => (
     shape,
     timelinePosition: {
       start: (timelinePosition.start - start) / duration,
-      end: (timelinePosition.end - start) / duration
+      finish: (timelinePosition.finish - start) / duration
     }
   }))
 )
@@ -502,7 +502,7 @@ const timelineShapes = ({ duration, msTimelineShapes, start }) => (
  */
 const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
   let timelineStart = 0
-  let timelineEnd = 0
+  let timelineFinish = 0
 
   const msTimelineShapes = []
 
@@ -524,18 +524,18 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
       at,
       msTimelineShapes,
       offset,
-      timelineEnd
+      timelineFinish
     })
 
-    const end = start + shape.duration
+    const finish = start + shape.duration
 
     timelineStart = Math.min(timelineStart, start)
-    timelineEnd = Math.max(timelineEnd, end)
+    timelineFinish = Math.max(timelineFinish, finish)
 
-    msTimelineShapes.push({ shape, timelinePosition: { start, end } })
+    msTimelineShapes.push({ shape, timelinePosition: { start, finish } })
   })
 
-  const timelineDuration = Math.abs(timelineStart - timelineEnd)
+  const timelineDuration = Math.abs(timelineStart - timelineFinish)
 
   return {
     duration: timelineDuration,

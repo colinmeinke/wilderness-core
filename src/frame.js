@@ -239,14 +239,14 @@ const frame = (timeline, at) => {
 
   updateState(timeline, typeof at !== 'undefined' ? at : Date.now())
 
-  return timeline.timelineShapes.map(({ shape, timelinePosition: { start, end } }) => {
+  return timeline.timelineShapes.map(({ shape, timelinePosition: { start, finish } }) => {
     if (timeline.state.position <= start) {
       return output(shape.keyframes[ 0 ].frameShape, timeline.middleware)
-    } else if (timeline.state.position >= end) {
+    } else if (timeline.state.position >= finish) {
       return output(shape.keyframes[ shape.keyframes.length - 1 ].frameShape, timeline.middleware)
     }
 
-    const shapePosition = (timeline.state.position - start) / (end - start)
+    const shapePosition = (timeline.state.position - start) / (finish - start)
 
     return frameShapeFromShape({
       shape,

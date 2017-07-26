@@ -198,9 +198,9 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 0 ].timelinePosition.start).toBe(0 / 650)
-    expect(timelineShapes[ 0 ].timelinePosition.end).toBe(500 / 650)
+    expect(timelineShapes[ 0 ].timelinePosition.finish).toBe(500 / 650)
     expect(timelineShapes[ 1 ].timelinePosition.start).toBe(300 / 650)
-    expect(timelineShapes[ 1 ].timelinePosition.end).toBe(650 / 650)
+    expect(timelineShapes[ 1 ].timelinePosition.finish).toBe(650 / 650)
   })
 
   it('should throw when Shape queued after unknown Shape or Keyframe', () => {
@@ -264,7 +264,7 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(150 / 850)
-    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(500 / 850)
+    expect(timelineShapes[ 2 ].timelinePosition.finish).toBe(500 / 850)
   })
 
   it('should correctly queue Shape at named (string) Shape', () => {
@@ -290,7 +290,7 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(0 / 1200)
-    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(350 / 1200)
+    expect(timelineShapes[ 2 ].timelinePosition.finish).toBe(350 / 1200)
   })
 
   it('should correctly queue Shape after named (index) Shape', () => {
@@ -316,7 +316,7 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(150 / 850)
-    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(500 / 850)
+    expect(timelineShapes[ 2 ].timelinePosition.finish).toBe(500 / 850)
   })
 
   it('should correctly queue Shape at named (index) Shape', () => {
@@ -342,7 +342,7 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(0 / 1200)
-    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(350 / 1200)
+    expect(timelineShapes[ 2 ].timelinePosition.finish).toBe(350 / 1200)
   })
 
   it('should correctly queue Shape after named Keyframe', () => {
@@ -363,7 +363,7 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 1 ].timelinePosition.start).toBe(250 / 750)
-    expect(timelineShapes[ 1 ].timelinePosition.end).toBe(600 / 750)
+    expect(timelineShapes[ 1 ].timelinePosition.finish).toBe(600 / 750)
   })
 
   it('should prioritise queing named Shape over Keyframe', () => {
@@ -390,11 +390,11 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 0 ].timelinePosition.start).toBe(0 / 1100)
-    expect(timelineShapes[ 0 ].timelinePosition.end).toBe(750 / 1100)
+    expect(timelineShapes[ 0 ].timelinePosition.finish).toBe(750 / 1100)
     expect(timelineShapes[ 1 ].timelinePosition.start).toBe(750 / 1100)
-    expect(timelineShapes[ 1 ].timelinePosition.end).toBe(1100 / 1100)
+    expect(timelineShapes[ 1 ].timelinePosition.finish).toBe(1100 / 1100)
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(400 / 1100)
-    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(750 / 1100)
+    expect(timelineShapes[ 2 ].timelinePosition.finish).toBe(750 / 1100)
   })
 
   it('should correctly queue Shape if passed queue object with only offset prop', () => {
@@ -420,7 +420,7 @@ describe('timeline', () => {
     )
 
     expect(timelineShapes[ 2 ].timelinePosition.start).toBe(500 / 850)
-    expect(timelineShapes[ 2 ].timelinePosition.end).toBe(850 / 850)
+    expect(timelineShapes[ 2 ].timelinePosition.finish).toBe(850 / 850)
   })
 
   it('should throw if a Shape is already associated with a timeline', () => {
