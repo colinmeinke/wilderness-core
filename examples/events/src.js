@@ -56,8 +56,8 @@ const shape2Keyframe2 = { type: 'rect', width: 20, height: 20, x: 80, y: 40, nam
 const shape2 = shape(shape2Keyframe1, shape2Keyframe2)
 
 const animation = timeline(
-  [ shape1, { name: 'SHAPE_1' }],
-  [ shape2, { name: 'SHAPE_2' }]
+  [ shape1, { name: 'SHAPE_1' } ],
+  [ shape2, { name: 'SHAPE_2' } ]
 )
 
 animation.event.subscribe('timeline.start', () => console.log('timeline.start'))
