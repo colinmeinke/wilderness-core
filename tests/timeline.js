@@ -111,8 +111,14 @@ describe('timeline', () => {
 
   it('should throw if passed an invalid shape queue.offset option', () => {
     const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
-    expect(() => timeline([ validShape, { queue: { offset: 'invalid' } } ]))
+    expect(() => timeline([ validShape, { queue: { offset: 'potato' } } ]))
       .toThrow('The queue.offset prop must be of type number')
+  })
+
+  it('should throw if passed both shape queue.at and queue.after options', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    expect(() => timeline([ validShape, { queue: { at: 0, after: 0 } } ]))
+      .toThrow('You cannot pass both queue.at and queue.after props')
   })
 
   it('should not throw if passed a valid Shape and options', () => {
@@ -590,6 +596,13 @@ describe('play', () => {
   it('should throw if playback options are invalid', () => {
     const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
     expect(() => { play(timeline(square), { duration: 'invalid' }) }).toThrow()
+  })
+
+  it('should throw when passed an invalid timestamp', () => {
+    const square = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+    const animation = timeline(square)
+    expect(() => { play(animation, {}, 'potato') })
+      .toThrow(`The updatePlaybackOptions function at property must be of type number`)
   })
 
   it('should set a started playback option', () => {

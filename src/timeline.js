@@ -329,46 +329,42 @@ const shapeWithOptionsFromArray = ([ shape, options ], i) => {
     throw new TypeError(`The name prop must be of type string or number`)
   }
 
-  if (typeof queue !== 'undefined') {
-    if (typeof queue === 'object' && (!Array.isArray(queue) && queue !== null)) {
-      const { after, at, offset = 0 } = queue
+  if (typeof queue === 'object' && (!Array.isArray(queue) && queue !== null)) {
+    const { after, at, offset = 0 } = queue
 
-      if (__DEV__ && (typeof offset !== 'undefined' && typeof offset !== 'number')) {
-        throw new TypeError(`The queue.offset prop must be of type number`)
-      }
-
-      if (__DEV__ && (typeof at !== 'undefined' && typeof after !== 'undefined')) {
-        throw new TypeError(`You cannot pass both queue.at and queue.after props`)
-      }
-
-      if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'string' && typeof at !== 'number')) {
-        throw new TypeError(`The queue.at prop must be of type string or number`)
-      }
-
-      if (__DEV__ && (typeof after !== 'undefined' && typeof after !== 'string' && typeof after !== 'number')) {
-        throw new TypeError(`The queue.after prop must be of type string or number`)
-      }
-
-      if (typeof at !== 'undefined') {
-        return { at, name, offset, shape }
-      }
-
-      if (typeof after !== 'undefined') {
-        return { after, name, offset, shape }
-      }
-
-      return { name, offset, shape }
-    } else if (typeof queue === 'number') {
-      return { name, offset: queue, shape }
-    } else if (typeof queue === 'string') {
-      return { after: queue, name, offset: 0, shape }
+    if (__DEV__ && (typeof offset !== 'undefined' && typeof offset !== 'number')) {
+      throw new TypeError(`The queue.offset prop must be of type number`)
     }
 
-    if (__DEV__) {
-      throw new TypeError(`The queue prop must be of type number, string or object`)
+    if (__DEV__ && (typeof at !== 'undefined' && typeof after !== 'undefined')) {
+      throw new TypeError(`You cannot pass both queue.at and queue.after props`)
     }
 
-    return
+    if (__DEV__ && (typeof at !== 'undefined' && typeof at !== 'string' && typeof at !== 'number')) {
+      throw new TypeError(`The queue.at prop must be of type string or number`)
+    }
+
+    if (__DEV__ && (typeof after !== 'undefined' && typeof after !== 'string' && typeof after !== 'number')) {
+      throw new TypeError(`The queue.after prop must be of type string or number`)
+    }
+
+    if (typeof at !== 'undefined') {
+      return { at, name, offset, shape }
+    }
+
+    if (typeof after !== 'undefined') {
+      return { after, name, offset, shape }
+    }
+
+    return { name, offset, shape }
+  } else if (typeof queue === 'number') {
+    return { name, offset: queue, shape }
+  } else if (typeof queue === 'string') {
+    return { after: queue, name, offset: 0, shape }
+  }
+
+  if (__DEV__) {
+    throw new TypeError(`The queue prop must be of type number, string or object`)
   }
 
   return { name, offset: 0, shape }
@@ -511,13 +507,9 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
       throw new Error(`A Shape can only be added to one timeline`)
     }
 
-    apply(shape, middleware)
+    shape.name = name
 
-    if (typeof name !== 'undefined') {
-      shape.name = name
-    } else if (typeof shape.name === 'undefined') {
-      shape.name = i
-    }
+    apply(shape, middleware)
 
     const start = shapeStart({
       after,
