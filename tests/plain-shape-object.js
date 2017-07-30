@@ -10,6 +10,13 @@ describe('plainShapeObject', () => {
       .toThrow(`The plainShapeObject function's first argument must be a Shape`)
   })
 
+  it('should throw if passed an invalid timestamp', () => {
+    const s = shape({ type: 'rect', x: 0, y: 0, width: 100, height: 100, fill: 'red' })
+    expect(() => plainShapeObject(s, 'potato')).toThrow(
+      `The plainShapeObject function's second argument must be of type number`
+    )
+  })
+
   it('should create the correct plainShapeObject with a basic shape not on a timeline', () => {
     const s = shape(
       { type: 'rect', x: 0, y: 0, width: 100, height: 100, fill: 'red' },
@@ -226,6 +233,18 @@ describe('valid', () => {
     expect(() => valid(s)).toThrow()
   })
 
+  it('should throw when offset transform does not have enough arguments', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      transforms: [[ 'offset', 50 ]]
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
   it('should throw when offset transform does not have correct arguments', () => {
     const s = {
       type: 'circle',
@@ -250,6 +269,18 @@ describe('valid', () => {
     expect(() => valid(s)).toThrow()
   })
 
+  it('should throw when rotate transform does not have enough arguments', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      transforms: [[ 'rotate' ]]
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
   it('should throw when rotate transform does not have correct arguments', () => {
     const s = {
       type: 'circle',
@@ -262,13 +293,37 @@ describe('valid', () => {
     expect(() => valid(s)).toThrow()
   })
 
-  it('should throw when scale transform does not have correct arguments', () => {
+  it('should throw when scale transform does not have enough arguments', () => {
     const s = {
       type: 'circle',
       cx: 50,
       cy: 50,
       r: 10,
-      transforms: [[ 'scale' ]]
+      transforms: [[ 'scale', 1, 2, 3 ]]
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
+  it('should throw when scale transform does not have correct scaleFactor argument', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      transforms: [[ 'scale', 'potato' ]]
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
+  it('should throw when scale transform does not have correct anchor argument', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      transforms: [[ 'scale', 2, 2 ]]
     }
 
     expect(() => valid(s)).toThrow()
@@ -293,6 +348,18 @@ describe('valid', () => {
   })
 
   it('should throw when forces property is invalid', () => {
+    const s = {
+      type: 'circle',
+      cx: 50,
+      cy: 50,
+      r: 10,
+      forces: 'potato'
+    }
+
+    expect(() => valid(s)).toThrow()
+  })
+
+  it('should throw when forces array item is invalid', () => {
     const s = {
       type: 'circle',
       cx: 50,
