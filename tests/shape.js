@@ -8,6 +8,11 @@ describe('shape', () => {
       .toThrow('The shape function must be passed at least one Plain Shape Object')
   })
 
+  it('should throw if passed an invalid argument', () => {
+    expect(() => shape('potato'))
+      .toThrow('The shape function must only be passed objects')
+  })
+
   it('should throw when passed invalid plain shape object core props', () => {
     const invalidShape = { foo: 'bar' }
     expect(() => shape(invalidShape)).toThrow()

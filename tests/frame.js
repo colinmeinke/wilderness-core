@@ -67,11 +67,40 @@ describe('frame', () => {
 
     expect(frame(animation, 500)[ 0 ].attributes[ 'data-foo' ]).toEqual(5)
   })
+
+  it('should apply to Keyframe forces to FrameShape', () => {
+    const force1 = frameShape => {
+      frameShape.attributes[ 'data-foo' ] += 1
+      return frameShape
+    }
+
+    const force2 = frameShape => {
+      frameShape.attributes[ 'data-foo' ] *= 2
+      return frameShape
+    }
+
+    const keyframe1 = { type: 'rect', width: 10, height: 10, x: 0, y: 0, 'data-foo': 0 }
+    const keyframe2 = { ...keyframe1, duration: 1000, easing: 'linear', 'data-foo': 10, forces: [ force1, force2 ] }
+    const square = shape(keyframe1, keyframe2)
+    const animation = timeline(square, { started: 0 })
+
+    expect(frame(animation, 500)[ 0 ].attributes[ 'data-foo' ]).toEqual(12)
+  })
 })
 
 describe('tween', () => {
-  it('should throw if passed arguments that are not structurally identicle', () => {
+  it('should throw if arguments are not of the same type', () => {
     expect(() => tween(2, 'foo', linear, 0.5))
+      .toThrow(`The tween function's from and to arguments must be of an identicle structure`)
+  })
+
+  it('should throw if one argument is an array but the other is not', () => {
+    expect(() => tween([ 1 ], 'foo', linear, 0.5))
+      .toThrow(`The tween function's from and to arguments must be of an identicle structure`)
+  })
+
+  it('should throw if one arguments is an object but the other is not', () => {
+    expect(() => tween({ bar: 'baz' }, 'foo', linear, 0.5))
       .toThrow(`The tween function's from and to arguments must be of an identicle structure`)
   })
 

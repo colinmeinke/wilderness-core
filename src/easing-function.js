@@ -25,6 +25,7 @@ const easingFunction = easing => {
         )
       }
 
+      /* istanbul ignore next */
       break
 
     case 'function':
@@ -35,6 +36,7 @@ const easingFunction = easing => {
         throw new TypeError(`Easing must be of type function or string`)
       }
 
+      /* istanbul ignore next */
       break
   }
 }
