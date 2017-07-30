@@ -10,7 +10,8 @@ import events, {
   subscribe,
   timeToPosition,
   timeToSamePosition,
-  unsubscribe
+  unsubscribe,
+  validEventName
 } from '../src/events'
 
 describe('activeEventNames', () => {
@@ -421,6 +422,15 @@ describe('playbackOptionsChanged', () => {
 describe('subscribe', () => {
   it('should create a subscribe function', () => {
     expect(typeof subscribe({ event: { subscriptions: [] } })).toBe('function')
+  })
+
+  it('should throw if not passed a function', () => {
+    const timeline = { event: { subscriptions: [] } }
+    const s = subscribe(timeline)
+
+    expect(() => s('timeline.start', 'potato')).toThrow(
+      `The subscribe functions second argument must be of type function`
+    )
   })
 
   it('should return unique tokens', () => {
@@ -1474,5 +1484,34 @@ describe('unsubscribe', () => {
     u(token)
 
     expect(timeline.event.subscriptions.length).toBe(0)
+  })
+
+  it('should not remove an item if no token is matched', () => {
+    const timeline = { event: { subscriptions: [] } }
+    const eventName = 'timeline.start'
+    const callback = () => console.log('hello world')
+
+    const s = subscribe(timeline)
+    const u = unsubscribe(timeline)
+
+    s(eventName, callback)
+
+    expect(u('potato')).toBe(false)
+
+    expect(timeline.event.subscriptions.length).toBe(1)
+  })
+})
+
+describe('validEventName', () => {
+  it('should throw if not passed a string', () => {
+    expect(() => validEventName([])).toThrow(
+      `The subscribe functions first argument must be of type string`
+    )
+  })
+
+  it('should throw if not passed a valid name', () => {
+    expect(() => validEventName('potato')).toThrow(
+      `The subscribe functions first argument was not a valid event name`
+    )
   })
 })

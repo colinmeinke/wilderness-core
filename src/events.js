@@ -444,7 +444,8 @@ export {
   subscribe,
   timeToPosition,
   timeToSamePosition,
-  unsubscribe
+  unsubscribe,
+  validEventName
 }
 
 export default events
