@@ -56,4 +56,18 @@ describe('motionPath', () => {
 
     expect(points).toEqual(expectedPoints)
   })
+
+  it('should return FrameShape if motion path has no effect', () => {
+    const force = motionPath({ type: 'path', d: 'M0,0H10' })
+
+    const frameShape = frameShapeFromPlainShapeObject({
+      type: 'rect',
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10
+    })
+
+    expect(force(frameShape, 0)).toBe(frameShape)
+  })
 })
