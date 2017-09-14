@@ -248,11 +248,7 @@ const frame = (timeline, at) => {
 
     const shapePosition = (timeline.state.position - start) / (finish - start)
 
-    return frameShapeFromShape({
-      shape,
-      position: shapePosition,
-      middleware: timeline.middleware
-    })
+    return frameShapeFromShape(shape, shapePosition, timeline.middleware)
   })
 }
 
@@ -306,19 +302,18 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
 /**
  * Creates a FrameShape from a Shape given the Position.
  *
- * @param {Object} opts
- * @param {Middleware[]} opts.middleware
- * @param {Position} opts.position
- * @param {Shape} opts.shape
+ * @param {Shape} shape
+ * @param {Position} position
+ * @param {Middleware[]} middleware
  *
  * @returns {FrameShape}
  *
  * @example
- * frameShapeFromShape({ position: 0.75, shape })
+ * frameShapeFromShape(shape, 0.75, [])
  */
-const frameShapeFromShape = ({ middleware = [], position, shape }) => {
-  const fromIndex = shape.keyframes.reduce((currentFromIndex, { position: keyframePosition }, i) => (
-    position > keyframePosition ? i : currentFromIndex
+const frameShapeFromShape = (shape, position, middleware) => {
+  const fromIndex = shape.keyframes.reduce((currentFromIndex, keyframe, i) => (
+    position > keyframe.position ? i : currentFromIndex
   ), 0)
 
   const toIndex = fromIndex + 1
@@ -442,7 +437,13 @@ const tween = (from, to, easing, position) => {
       throw new TypeError(errorMsg)
     }
 
-    return from.map((f, i) => (tween(f, to[ i ], easing, position)))
+    const arr = []
+
+    for (let i = 0, l = from.length; i < l; i++) {
+      arr.push(tween(from[ i ], to[ i ], easing, position))
+    }
+
+    return arr
   } else if (from !== null && typeof from === 'object') {
     if (to !== null && typeof to !== 'object') {
       throw new TypeError(errorMsg)
@@ -450,9 +451,9 @@ const tween = (from, to, easing, position) => {
 
     const obj = {}
 
-    Object.keys(from).map(k => {
+    for (let k in from) {
       obj[ k ] = tween(from[ k ], to[ k ], easing, position)
-    })
+    }
 
     return obj
   } else if (typeof from === 'number') {

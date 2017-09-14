@@ -23,15 +23,21 @@ const apply = (value, func) => {
   const v = func(value)
 
   if (Array.isArray(v)) {
-    return v.map(x => apply(x, func))
+    const arr = []
+
+    for (let i = 0, l = v.length; i < l; i++) {
+      arr.push(apply(v[ i ], func))
+    }
+
+    return arr
   }
 
   if (v !== null && typeof v === 'object') {
     const obj = {}
 
-    Object.keys(v).map(k => {
+    for (let k in v) {
       obj[ k ] = apply(v[ k ], func)
-    })
+    }
 
     return obj
   }
@@ -50,9 +56,15 @@ const apply = (value, func) => {
  * @example
  * input({ foo: 1, bar: [ 2, 3 ] }, middleware)
  */
-const input = (value, middleware) => middleware.reduce((v, m) => (
-  apply(v, m.input)
-), value)
+const input = (value, middleware) => {
+  let v = value
+
+  for (let i = 0, l = middleware.length; i < l; i++) {
+    v = apply(v, middleware[ i ].input)
+  }
+
+  return v
+}
 
 /**
  * Runs each Middleware output function in reverse on a value.
@@ -65,8 +77,14 @@ const input = (value, middleware) => middleware.reduce((v, m) => (
  * @example
  * output({ foo: 1, bar: [ 2, 3 ] }, middleware)
  */
-const output = (value, middleware) => [ ...middleware ].reverse().reduce((v, m) => (
-  apply(v, m.output)
-), value)
+const output = (value, middleware) => {
+  let v = value
+
+  for (let i = middleware.length - 1; i >= 0; i--) {
+    v = apply(v, middleware[ i ].output)
+  }
+
+  return v
+}
 
 export { input, output }

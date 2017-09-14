@@ -10,12 +10,21 @@
  */
 const clone = value => {
   if (Array.isArray(value)) {
-    return value.map(x => clone(x))
+    const arr = []
+
+    for (let i = 0, l = value.length; i < l; i++) {
+      arr.push(clone(value[ i ]))
+    }
+
+    return arr
   } else if (value !== null && typeof value === 'object') {
-    return Object.keys(value).reduce((obj, key) => {
+    const obj = {}
+
+    for (let key in value) {
       obj[ key ] = clone(value[ key ])
-      return obj
-    }, {})
+    }
+
+    return obj
   }
 
   return value

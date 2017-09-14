@@ -163,6 +163,8 @@ const htmlColors = {
   'yellowgreen': '#9ACD32'
 }
 
+const htmlColorKeys = Object.keys(htmlColors)
+
 /**
  * Converts a color string to a Color.
  *
@@ -253,7 +255,7 @@ const rgb = str => str.startsWith('rgb(')
  * @example
  * html('limegreen')
  */
-const html = str => Object.keys(htmlColors).indexOf(str) !== -1
+const html = str => htmlColorKeys.indexOf(str) !== -1
 
 /**
  * Converts a hex string to a Color.
