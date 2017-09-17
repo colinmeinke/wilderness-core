@@ -98,9 +98,19 @@ const active = ({ event, state }) => (
  * @example
  * activeEventNames(timeline)
  */
-const activeEventNames = ({ event: { subscriptions } }) => subscriptions
-  .map(({ name }) => name)
-  .reduce((a, x) => a.indexOf(x) === -1 ? a.concat(x) : a, [])
+const activeEventNames = ({ event: { subscriptions } }) => {
+  const s = []
+
+  for (let i = 0, l = subscriptions.length; i < l; i++) {
+    const name = subscriptions[ i ].name
+
+    if (s.indexOf(name) === -1) {
+      s.push(name)
+    }
+  }
+
+  return s
+}
 
 /**
  * Run EventSubscription callbacks for every event that has occured since last check.
@@ -116,17 +126,25 @@ const events = timeline => {
     timeline.event.previousState = {}
   }
 
-  if (timeline.event.subscriptions.length && active(timeline)) {
+  const subscriptions = timeline.event.subscriptions
+
+  if (subscriptions.length && active(timeline)) {
     const eventNames = activeEventNames(timeline)
     const queue = eventQueue(timeline, eventNames)
 
-    queue.map(({ name: eventName, options = {} }) => {
-      timeline.event.subscriptions.map(({ name, callback }) => {
-        if (eventName === name) {
-          callback(options)
+    for (let i = 0, l = queue.length; i < l; i++) {
+      const event = queue[ i ]
+      const eventName = event.name
+      const options = event.options || {}
+
+      for (let _i = 0, _l = subscriptions.length; _i < _l; _i++) {
+        const subscription = subscriptions[ _i ]
+
+        if (eventName === subscription.name) {
+          subscription.callback(options)
         }
-      })
-    })
+      }
+    }
   }
 
   timeline.event.previousPlaybackOptions = { ...timeline.playbackOptions }
@@ -166,36 +184,57 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
 
   if (eventNames.indexOf('timeline.start') !== -1) {
     const timestamps = getTimestamps(0)
-    timestamps.map(at => queue.push({ name: 'timeline.start', at }))
+
+    for (let i = 0, l = timestamps.length; i < l; i++) {
+      queue.push({ name: 'timeline.start', at: timestamps[ i ] })
+    }
   }
 
   if (eventNames.indexOf('timeline.finish') !== -1) {
     const timestamps = getTimestamps(1)
-    timestamps.map(at => queue.push({ name: 'timeline.finish', at }))
+
+    for (let i = 0, l = timestamps.length; i < l; i++) {
+      queue.push({ name: 'timeline.finish', at: timestamps[ i ] })
+    }
   }
 
   if (eventNames.indexOf('shape.start') !== -1) {
-    timelineShapes.map(({ shape: { name: shapeName }, timelinePosition: { start } }) => {
+    for (let i = 0, l = timelineShapes.length; i < l; i++) {
+      const { shape: { name: shapeName }, timelinePosition: { start } } = timelineShapes[ i ]
       const timestamps = getTimestamps(start)
-      timestamps.map(at => queue.push({ name: 'shape.start', at, options: { shapeName } }))
-    })
+
+      for (let _i = 0, _l = timestamps.length; _i < _l; _i++) {
+        queue.push({ name: 'shape.start', at: timestamps[ _i ], options: { shapeName } })
+      }
+    }
   }
 
   if (eventNames.indexOf('shape.finish') !== -1) {
-    timelineShapes.map(({ shape: { name: shapeName }, timelinePosition: { finish } }) => {
+    for (let i = 0, l = timelineShapes.length; i < l; i++) {
+      const { shape: { name: shapeName }, timelinePosition: { finish } } = timelineShapes[ i ]
       const timestamps = getTimestamps(finish)
-      timestamps.map(at => queue.push({ name: 'shape.finish', at, options: { shapeName } }))
-    })
+
+      for (let _i = 0, _l = timestamps.length; _i < _l; _i++) {
+        queue.push({ name: 'shape.finish', at: timestamps[ _i ], options: { shapeName } })
+      }
+    }
   }
 
   if (eventNames.indexOf('keyframe') !== -1) {
-    timelineShapes.map(({ shape: { name: shapeName, keyframes }, timelinePosition: { start, finish } }) => {
-      keyframes.map(({ name: keyframeName, position }) => {
+    for (let i = 0, l = timelineShapes.length; i < l; i++) {
+      const { shape: { name: shapeName, keyframes }, timelinePosition: { start, finish } } = timelineShapes[ i ]
+
+      for (let _i = 0, _l = keyframes.length; _i < _l; _i++) {
+        const { name: keyframeName, position } = keyframes[ _i ]
+
         const keyframePosition = start + (finish - start) * position
         const timestamps = getTimestamps(keyframePosition)
-        timestamps.map(at => queue.push({name: 'keyframe', at, options: { keyframeName, shapeName }}))
-      })
-    })
+
+        for (let __i = 0, __l = timestamps.length; __i < __l; __i++) {
+          queue.push({name: 'keyframe', at: timestamps[ __i ], options: { keyframeName, shapeName }})
+        }
+      }
+    }
   }
 
   if (eventNames.indexOf('frame') !== -1) {
@@ -228,8 +267,8 @@ const oldest = (a, b) => a.at === b.at ? 0 : (a.at < b.at ? -1 : 1)
  * @example
  * playbackOptionsChanged(timeline)
  */
-const playbackOptionsChanged = ({ event: { previousPlaybackOptions }, playbackOptions }) => (
-  JSON.stringify(playbackOptions) !== JSON.stringify(previousPlaybackOptions)
+const playbackOptionsChanged = timeline => (
+  JSON.stringify(timeline.playbackOptions) !== JSON.stringify(timeline.event.previousPlaybackOptions)
 )
 
 /**
@@ -269,11 +308,10 @@ const positionTimestamps = ({
     if (timestamp <= max) {
       const timestampReverse = currentReverse({
         alternate,
-        complete: iterationsComplete({ at: timestamp, duration, iterations, started }),
         initialIterations,
         iterations,
         reverse
-      })
+      }, iterationsComplete({ duration, iterations, started }, timestamp))
 
       const positionAtEnd = position === 0 || position === 1
       const timelineFinished = timestamp === finishedTimestamp
@@ -422,9 +460,15 @@ const validEventName = name => {
  * unsubscribe(timeline)(token)
  */
 const unsubscribe = timeline => token => {
-  const matchIndex = timeline.event.subscriptions.reduce((x, subscription, i) => (
-    subscription.token === token ? i : x
-  ), undefined)
+  const subscriptions = timeline.event.subscriptions
+
+  let matchIndex
+
+  for (let i = 0, l = subscriptions.length; i < l; i++) {
+    if (subscriptions[ i ].token === token) {
+      matchIndex = i
+    }
+  }
 
   if (typeof matchIndex !== 'undefined') {
     timeline.event.subscriptions.splice(matchIndex, 1)

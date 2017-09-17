@@ -62,19 +62,38 @@ import { updateState } from './timeline'
  * applyCurveStructure(frameShape, stucture)
  */
 const applyCurveStructure = (frameShape, structure) => {
-  const { points, childFrameShapes } = frameShape
+  const points = frameShape.points
+  const childFrameShapes = frameShape.childFrameShapes
 
   if (childFrameShapes) {
-    frameShape.childFrameShapes = childFrameShapes.map((childFrameShape, i) => (
-      applyCurveStructure(childFrameShape, structure[ i ])
-    ))
+    const nextChildFrameShapes = []
+
+    for (let i = 0, l = childFrameShapes.length; i < l; i++) {
+      nextChildFrameShapes.push(
+        applyCurveStructure(childFrameShapes[ i ], structure[ i ])
+      )
+    }
+
+    frameShape.childFrameShapes = nextChildFrameShapes
   } else {
-    const curves = structure.reduce((a, b) => a || b)
+    let curves = false
+
+    for (let i = 0, l = structure.length; i < l; i++) {
+      if (structure[ i ]) {
+        curves = true
+        break
+      }
+    }
 
     if (curves) {
-      frameShape.points = cubify(points).map((point, i) => {
+      const nextPoints = []
+      const cubifiedPoints = cubify(points)
+
+      for (let i = 0, l = cubifiedPoints.length; i < l; i++) {
+        const point = cubifiedPoints[ i ]
+
         if (structure[ i ] && !point.curve) {
-          return {
+          nextPoints.push({
             ...point,
             curve: {
               type: 'cubic',
@@ -83,11 +102,13 @@ const applyCurveStructure = (frameShape, structure) => {
               x2: points[ i ].x,
               y2: points[ i ].y
             }
-          }
+          })
+        } else {
+          nextPoints.push(point)
         }
+      }
 
-        return point
-      })
+      frameShape.points = nextPoints
     }
   }
 
@@ -113,7 +134,7 @@ const applyPointStructure = (frameShape, structure) => {
     }
 
     if (frameShape.childFrameShapes.length !== structure.length) {
-      structure.map((x, i) => {
+      for (let i = 0, l = structure.length; i < l; i++) {
         if (i >= frameShape.childFrameShapes.length) {
           const previous = frameShape.childFrameShapes[ i - 1 ].points
 
@@ -125,16 +146,24 @@ const applyPointStructure = (frameShape, structure) => {
             ]
           })
         }
-      })
+      }
     }
 
-    frameShape.childFrameShapes = frameShape.childFrameShapes.map((childFrameShape, i) => (
-      applyPointStructure(childFrameShape, structure[ i ])
-    ))
+    const nextChildFrameShapes = []
+
+    for (let i = 0, l = frameShape.childFrameShapes.length; i < l; i++) {
+      nextChildFrameShapes.push(
+        applyPointStructure(frameShape.childFrameShapes[ i ], structure[ i ])
+      )
+    }
+
+    frameShape.childFrameShapes = nextChildFrameShapes
   } else {
     const lines = splitLines(frameShape.points)
 
-    structure.map((desiredPoints, i) => {
+    for (let i = 0, l = structure.length; i < l; i++) {
+      const desiredPoints = structure[ i ]
+
       if (!lines[ i ]) {
         const previousLine = lines[ i - 1 ]
 
@@ -147,7 +176,7 @@ const applyPointStructure = (frameShape, structure) => {
       if (desiredPoints > lines[ i ].length) {
         lines[ i ] = add(lines[ i ], desiredPoints)
       }
-    })
+    }
 
     frameShape.points = joinLines(lines)
   }
@@ -171,7 +200,9 @@ const addToPointStructure = (structure, value, i) => {
       structure[ i ] = [ structure[ i ] ]
     }
 
-    value.reduce(addToPointStructure, structure[ i ])
+    for (let _i = 0, l = value.length; _i < l; _i++) {
+      structure[ i ] = addToPointStructure(structure[ i ], value[ _i ], _i)
+    }
   } else {
     if (Array.isArray(structure[ i ])) {
       addToPointStructure(structure[ i ], value, 0)
@@ -193,15 +224,28 @@ const addToPointStructure = (structure, value, i) => {
  * @example
  * commonCurveStructure(structures)
  */
-const commonCurveStructure = structures => structures.reduce((structure, s) => (
-  structure.map((x, i) => {
-    if (Array.isArray(x)) {
-      return commonCurveStructure([ x, s[ i ] ])
+const commonCurveStructure = structures => {
+  let structure = structures[ 0 ]
+
+  for (let i = 1, l = structures.length; i < l; i++) {
+    const s = structures[ i ]
+    const c = []
+
+    for (let _i = 0, _l = structure.length; _i < _l; _i++) {
+      const x = structure[ _i ]
+
+      if (Array.isArray(x)) {
+        c.push(commonCurveStructure([ x, s[ _i ] ]))
+      } else {
+        c.push(x || s[ _i ])
+      }
     }
 
-    return x || s[ i ]
-  })
-))
+    structure = c
+  }
+
+  return structure
+}
 
 /**
  * Creates a common PointStructure from an array of PointStructures.
@@ -213,9 +257,19 @@ const commonCurveStructure = structures => structures.reduce((structure, s) => (
  * @example
  * commonPointStructure(structures)
  */
-const commonPointStructure = structures => structures.reduce((structure, s) => (
-  s.reduce(addToPointStructure, structure)
-), [])
+const commonPointStructure = structures => {
+  let structure = []
+
+  for (let i = 0, l = structures.length; i < l; i++) {
+    const s = structures[ i ]
+
+    for (let _i = 0, _l = s.length; _i < _l; _i++) {
+      structure = addToPointStructure(structure, s[ _i ], _i)
+    }
+  }
+
+  return structure
+}
 
 /**
  * The current Frame of a Timeline.
@@ -239,17 +293,29 @@ const frame = (timeline, at) => {
 
   updateState(timeline, typeof at !== 'undefined' ? at : Date.now())
 
-  return timeline.timelineShapes.map(({ shape, timelinePosition: { start, finish } }) => {
-    if (timeline.state.position <= start) {
-      return output(shape.keyframes[ 0 ].frameShape, timeline.middleware)
-    } else if (timeline.state.position >= finish) {
-      return output(shape.keyframes[ shape.keyframes.length - 1 ].frameShape, timeline.middleware)
+  const frameShapes = []
+  const timelineShapes = timeline.timelineShapes
+
+  for (let i = 0, l = timelineShapes.length; i < l; i++) {
+    const timelineShape = timelineShapes[ i ]
+    const shape = timelineShape.shape
+    const keyframes = shape.keyframes
+    const timelinePosition = timelineShape.timelinePosition
+    const start = timelinePosition.start
+    const finish = timelinePosition.finish
+    const position = timeline.state.position
+
+    if (position <= start) {
+      frameShapes.push(output(keyframes[ 0 ].frameShape, timeline.middleware))
+    } else if (position >= finish) {
+      frameShapes.push(output(keyframes[ keyframes.length - 1 ].frameShape, timeline.middleware))
+    } else {
+      const shapePosition = (position - start) / (finish - start)
+      frameShapes.push(frameShapeFromShape(shape, shapePosition, timeline.middleware))
     }
+  }
 
-    const shapePosition = (timeline.state.position - start) / (finish - start)
-
-    return frameShapeFromShape(shape, shapePosition, timeline.middleware)
-  })
+  return frameShapes
 }
 
 /**
@@ -285,12 +351,15 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
   } = plainShapeObject
 
   if (plainShapeObject.type === 'g' && childPlainShapeObjects) {
-    return {
-      attributes,
-      childFrameShapes: childPlainShapeObjects.map(childPlainShapeObject => (
-        frameShapeFromPlainShapeObject(childPlainShapeObject)
-      ))
+    const childFrameShapes = []
+
+    for (let i = 0, l = childPlainShapeObjects.length; i < l; i++) {
+      childFrameShapes.push(
+        frameShapeFromPlainShapeObject(childPlainShapeObjects[ i ])
+      )
     }
+
+    return { attributes, childFrameShapes }
   }
 
   return {
@@ -312,15 +381,22 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
  * frameShapeFromShape(shape, 0.75, [])
  */
 const frameShapeFromShape = (shape, position, middleware) => {
-  const fromIndex = shape.keyframes.reduce((currentFromIndex, keyframe, i) => (
-    position > keyframe.position ? i : currentFromIndex
-  ), 0)
+  const { keyframes } = shape
+
+  let fromIndex = 0
+
+  for (let i = 0, l = keyframes.length; i < l; i++) {
+    if (position > keyframes[ i ].position) {
+      fromIndex = i
+    }
+  }
 
   const toIndex = fromIndex + 1
 
-  const from = shape.keyframes[ fromIndex ]
-  const to = shape.keyframes[ toIndex ]
+  const from = keyframes[ fromIndex ]
+  const to = keyframes[ toIndex ]
   const keyframePosition = (position - from.position) / (to.position - from.position)
+  const forces = to.tween.forces
 
   let frameShape = tween(
     from.frameShape,
@@ -329,9 +405,9 @@ const frameShapeFromShape = (shape, position, middleware) => {
     keyframePosition
   )
 
-  to.tween.forces.map(force => {
-    frameShape = force(frameShape, keyframePosition)
-  })
+  for (let i = 0, l = forces.length; i < l; i++) {
+    frameShape = forces[ i ](frameShape, keyframePosition)
+  }
 
   return output(frameShape, middleware)
 }
@@ -359,11 +435,19 @@ const joinLines = lines => [].concat(...lines)
  * curveStructure(frameShape)
  */
 const curveStructure = ({ points, childFrameShapes }) => {
+  const s = []
+
   if (childFrameShapes) {
-    return childFrameShapes.map(curveStructure)
+    for (let i = 0, l = childFrameShapes.length; i < l; i++) {
+      s.push(curveStructure(childFrameShapes[ i ]))
+    }
+  } else {
+    for (let i = 0, l = points.length; i < l; i++) {
+      s.push(typeof points[ i ].curve !== 'undefined')
+    }
   }
 
-  return points.map(({ curve }) => typeof curve !== 'undefined')
+  return s
 }
 
 /**
@@ -378,18 +462,26 @@ const curveStructure = ({ points, childFrameShapes }) => {
  */
 const pointStructure = ({ points, childFrameShapes }) => {
   if (childFrameShapes) {
-    return childFrameShapes.map(pointStructure)
+    const s = []
+
+    for (let i = 0, l = childFrameShapes.length; i < l; i++) {
+      s.push(pointStructure(childFrameShapes[ i ]))
+    }
+
+    return s
   }
 
-  return points.reduce((structure, { moveTo }) => {
-    if (moveTo) {
+  let structure = []
+
+  for (let i = 0, l = points.length; i < l; i++) {
+    if (points[ i ].moveTo) {
       structure.push(1)
     } else {
       structure[ structure.length - 1 ]++
     }
+  }
 
-    return structure
-  }, [])
+  return structure
 }
 
 /**
@@ -405,13 +497,15 @@ const pointStructure = ({ points, childFrameShapes }) => {
 const splitLines = points => {
   const lines = []
 
-  points.map(point => {
+  for (let i = 0, l = points.length; i < l; i++) {
+    const point = points[ i ]
+
     if (point.moveTo) {
       lines.push([ point ])
     } else {
       lines[ lines.length - 1 ].push(point)
     }
-  })
+  }
 
   return lines
 }
@@ -430,11 +524,19 @@ const splitLines = points => {
  * tween(0, 100, easeOut, 0.75)
  */
 const tween = (from, to, easing, position) => {
-  const errorMsg = `The tween function's from and to arguments must be of an identicle structure`
+  if (typeof from === 'number') {
+    if (__DEV__ && typeof to !== 'number') {
+      throw new TypeError(`The tween function's from and to arguments must be of an identicle structure`)
+    }
 
-  if (Array.isArray(from)) {
+    if (from === to) {
+      return from
+    }
+
+    return easing(position, from, to, 1)
+  } else if (Array.isArray(from)) {
     if (__DEV__ && !Array.isArray(to)) {
-      throw new TypeError(errorMsg)
+      throw new TypeError(`The tween function's from and to arguments must be of an identicle structure`)
     }
 
     const arr = []
@@ -445,8 +547,8 @@ const tween = (from, to, easing, position) => {
 
     return arr
   } else if (from !== null && typeof from === 'object') {
-    if (to !== null && typeof to !== 'object') {
-      throw new TypeError(errorMsg)
+    if (__DEV__ && to !== null && typeof to !== 'object') {
+      throw new TypeError(`The tween function's from and to arguments must be of an identicle structure`)
     }
 
     const obj = {}
@@ -456,16 +558,6 @@ const tween = (from, to, easing, position) => {
     }
 
     return obj
-  } else if (typeof from === 'number') {
-    if (__DEV__ && typeof to !== 'number') {
-      throw new TypeError(errorMsg)
-    }
-
-    if (from === to) {
-      return from
-    }
-
-    return easing(position, from, to, 1)
   }
 
   return from

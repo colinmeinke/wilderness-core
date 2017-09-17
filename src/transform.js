@@ -42,10 +42,12 @@ const apply = (frameShape, [ name, ...args ]) => {
  * flattenPoints(frameShape)
  */
 const flattenPoints = (frameShape, points = [], pointsMap = new WeakMap()) => {
-  if (frameShape.childFrameShapes) {
-    frameShape.childFrameShapes.map(childFrameShape => {
-      flattenPoints(childFrameShape, points, pointsMap)
-    })
+  const childFrameShapes = frameShape.childFrameShapes
+
+  if (childFrameShapes) {
+    for (let i = 0, l = childFrameShapes.length; i < l; i++) {
+      flattenPoints(childFrameShapes[ i ], points, pointsMap)
+    }
   } else {
     pointsMap.set(frameShape, points.length)
     points.push(frameShape.points)
@@ -64,18 +66,20 @@ const flattenPoints = (frameShape, points = [], pointsMap = new WeakMap()) => {
  *
  */
 const pointsToFrameShape = ({ frameShape, points, pointsMap }) => {
+  const childFrameShapes = frameShape.childFrameShapes
+
   if (frameShape.points) {
     frameShape.points = points[ pointsMap.get(frameShape) ]
   }
 
-  if (frameShape.childFrameShapes) {
-    frameShape.childFrameShapes.map(childFrameShape => {
+  if (childFrameShapes) {
+    for (let i = 0, l = childFrameShapes.length; i < l; i++) {
       pointsToFrameShape({
-        frameShape: childFrameShape,
+        frameShape: childFrameShapes[ i ],
         points,
         pointsMap
       })
-    })
+    }
   }
 
   return frameShape
@@ -92,7 +96,13 @@ const pointsToFrameShape = ({ frameShape, points, pointsMap }) => {
  * @example
  * transform(frameShape, [[ 'rotate', 45 ]])
  */
-const transform = (frameShape, transforms) => transforms.reduce(apply, frameShape)
+const transform = (frameShape, transforms) => {
+  for (let i = 0, l = transforms.length; i < l; i++) {
+    frameShape = apply(frameShape, transforms[ i ])
+  }
+
+  return frameShape
+}
 
 /**
  * Applies an array of transforms to Points.
@@ -105,11 +115,14 @@ const transform = (frameShape, transforms) => transforms.reduce(apply, frameShap
  * @example
  * transform(points, [[ 'rotate', 45 ]])
  */
-const transformPoints = (points, transforms) => (
-  transforms.reduce((nextPoints, [ name, ...args ]) => (
-    transformFunctions[ name ](nextPoints, ...args)
-  ), points)
-)
+const transformPoints = (points, transforms) => {
+  for (let i = 0, l = transforms.length; i < l; i++) {
+    const [ name, ...args ] = transforms[ i ]
+    points = transformFunctions[ name ](points, ...args)
+  }
+
+  return points
+}
 
 export { flattenPoints, pointsToFrameShape, transformPoints }
 export default transform

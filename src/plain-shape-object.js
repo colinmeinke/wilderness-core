@@ -56,13 +56,17 @@ import { toPath, valid as shapeValid } from 'svg-points'
 const corePropsValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(plainShapeObject => {
-    const result = shapeValid(plainShapeObject)
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const result = shapeValid(plainShapeObjects[ i ])
 
     if (!result.valid) {
-      result.errors.map(e => errors.push(e))
+      const errs = result.errors
+
+      for (let _i = 0, _l = errs.length; _i < _l; _i++) {
+        errors.push(errs[ _i ])
+      }
     }
-  })
+  }
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))
@@ -105,19 +109,21 @@ const errorMsg = errors => (
 const forcesPropValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ forces }) => {
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const forces = plainShapeObjects[ i ].forces
+
     if (typeof forces !== 'undefined') {
       if (Array.isArray(forces)) {
-        forces.map(force => {
-          if (typeof force !== 'function') {
+        for (let _i = 0, _l = forces.length; _i < _l; _i++) {
+          if (typeof forces[ _i ] !== 'function') {
             errors.push('each force item should be of type function')
           }
-        })
+        }
       } else {
         errors.push('the forces prop must be of type array')
       }
     }
-  })
+  }
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))
@@ -143,7 +149,11 @@ const forcesPropValid = plainShapeObjects => {
 const motionPathPropsValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ accuracy, rotate }) => {
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const plainShapeObject = plainShapeObjects[ i ]
+    const accuracy = plainShapeObject.accuracy
+    const rotate = plainShapeObject.rotate
+
     if (typeof accuracy !== 'undefined' && !(typeof accuracy === 'number' && accuracy > 0)) {
       errors.push('the accuracy prop must be a number greater than 0')
     }
@@ -151,7 +161,7 @@ const motionPathPropsValid = plainShapeObjects => {
     if (typeof rotate !== 'undefined' && !(typeof rotate === 'boolean' || typeof rotate === 'number')) {
       errors.push('the rotate prop must be a of type boolean or number')
     }
-  })
+  }
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))
@@ -177,11 +187,13 @@ const motionPathPropsValid = plainShapeObjects => {
 const namePropValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ name }) => {
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const name = plainShapeObjects[ i ].name
+
     if (typeof name !== 'undefined' && !(typeof name === 'string' || typeof name === 'number')) {
       errors.push('the name prop must be of type string or number')
     }
-  })
+  }
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))
@@ -229,10 +241,16 @@ const plainShapeObject = (shape, at) => {
  */
 const plainShapeObjectFromFrameShape = ({ attributes, points, childFrameShapes }) => {
   if (childFrameShapes) {
+    const shapes = []
+
+    for (let i = 0, l = childFrameShapes.length; i < l; i++) {
+      shapes.push(plainShapeObjectFromFrameShape(childFrameShapes[ i ]))
+    }
+
     return {
       ...attributes,
       type: 'g',
-      shapes: childFrameShapes.map(plainShapeObjectFromFrameShape)
+      shapes
     }
   }
 
@@ -260,10 +278,14 @@ const plainShapeObjectFromFrameShape = ({ attributes, points, childFrameShapes }
 const transformsPropValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ transforms }) => {
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const transforms = plainShapeObjects[ i ].transforms
+
     if (typeof transforms !== 'undefined') {
       if (Array.isArray(transforms)) {
-        transforms.map(([ key, ...args ]) => {
+        for (let _i = 0, _l = transforms.length; _i < _l; _i++) {
+          const [ key, ...args ] = transforms[ i ]
+
           switch (key) {
             case 'moveIndex':
             case 'rotate':
@@ -313,12 +335,12 @@ const transformsPropValid = plainShapeObjects => {
             default:
               errors.push(`${key} is not a valid transform`)
           }
-        })
+        }
       } else {
         errors.push('the transforms prop must be of type array')
       }
     }
-  })
+  }
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))
@@ -344,7 +366,9 @@ const transformsPropValid = plainShapeObjects => {
 const tweenPropsValid = plainShapeObjects => {
   const errors = []
 
-  plainShapeObjects.map(({ delay, duration, easing }) => {
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const { delay, duration, easing } = plainShapeObjects[ i ]
+
     if (typeof delay !== 'undefined' && !(typeof delay === 'number' && delay > 0)) {
       errors.push('the delay prop must be a number greater than 0')
     }
@@ -356,7 +380,7 @@ const tweenPropsValid = plainShapeObjects => {
     if (typeof easing !== 'undefined' && !(typeof easing === 'function' || typeof easing === 'string')) {
       errors.push('the easing prop must be a of type function or string')
     }
-  })
+  }
 
   if (errors.length) {
     throw new TypeError(errorMsg(errors))

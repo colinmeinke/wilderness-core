@@ -107,15 +107,6 @@ import { event } from './events'
  */
 
 /**
- * The options for the currentReverse function.
- *
- * @typedef {Object} CurrentReverseOptions
- *
- * @extends PlaybackOptions
- * @property {Object[]} complete - The number of iterations complete.
- */
-
-/**
  * Runs each Middleware input function on every Keyframe's FrameShape.
  *
  * @param {Shape} shape
@@ -125,29 +116,30 @@ import { event } from './events'
  * apply(shape, middleware)
  */
 const apply = ({ keyframes }, middleware) => {
-  keyframes.map(keyframe => {
+  for (let i = 0, l = keyframes.length; i < l; i++) {
+    const keyframe = keyframes[ i ]
     keyframe.frameShape = input(keyframe.frameShape, middleware)
-  })
+  }
 }
 
 /**
  * Is playback currently in reverse?
  *
- * @param {CurrentReverseOptions} opts
+ * @param {PlaybackOptions} playbackOptions
+ * @param {number} complete - The number of iterations complete.
  *
  * @example
- * currentReverse({ ...playbackOptions, complete })
+ * currentReverse(playbackOptions, complete)
  */
-const currentReverse = ({
-  alternate,
-  complete,
-  initialIterations,
-  iterations,
-  reverse
-}) => {
+const currentReverse = (playbackOptions, complete) => {
+  const reverse = playbackOptions.reverse
+
   if (complete === 0) {
     return reverse
   }
+
+  const alternate = playbackOptions.alternate
+  const initialIterations = playbackOptions.initialIterations
 
   const initialReverse = sameDirection(alternate, initialIterations)
     ? reverse
@@ -161,18 +153,19 @@ const currentReverse = ({
 /**
  * The number of iterations a Timeline has completed.
  *
- * @param {Object} opts
+ * @param {PlaybackOptions} playbackOptions
  * @param {number} opts.at
- * @param {number} opts.duration
- * @param {number} opts.iterations
- * @param {number} [opts.started]
  *
  * @returns {number}
  *
  * @example
- * iterations(opts)
+ * iterationsComplete(playbackOptions, 1000)
  */
-const iterationsComplete = ({ at, duration, iterations, started }) => {
+const iterationsComplete = (playbackOptions, at) => {
+  const duration = playbackOptions.duration
+  const iterations = playbackOptions.iterations
+  const started = playbackOptions.started
+
   if (typeof started === 'undefined' || at <= started) {
     return 0
   }
@@ -387,18 +380,22 @@ const sort = props => {
     )
   }
 
-  const { options, shapesWithOptions } = props.reduce((current, prop, i) => {
+  let options = {}
+
+  const shapesWithOptions = []
+
+  for (let i = 0, l = props.length; i < l; i++) {
+    const prop = props[ i ]
+
     if (Array.isArray(prop)) {
-      current.shapesWithOptions.push(
-        shapeWithOptionsFromArray(prop, i)
-      )
+      shapesWithOptions.push(shapeWithOptionsFromArray(prop, i))
     } else {
       if (__DEV__ && typeof prop !== 'object') {
         throw new TypeError(`The timeline function must only be passed objects and arrays`)
       }
 
       if (prop.keyframes) {
-        current.shapesWithOptions.push({
+        shapesWithOptions.push({
           name: i,
           offset: config.defaults.timeline.queue,
           shape: prop
@@ -412,12 +409,10 @@ const sort = props => {
           }
         }
 
-        current.options = clone(prop)
+        options = clone(prop)
       }
     }
-
-    return current
-  }, { options: {}, shapesWithOptions: [] })
+  }
 
   return {
     middleware: validMiddleware(options),
@@ -448,10 +443,12 @@ const timeline = (...props) => {
 
   const t = { middleware, playbackOptions, state: {}, timelineShapes }
 
-  timelineShapes.map(({ shape }, i) => {
+  for (let i = 0, l = timelineShapes.length; i < l; i++) {
+    const shape = timelineShapes[ i ].shape
+
     shape.timeline = t
     shape.timelineIndex = i
-  })
+  }
 
   updateState(t)
 
@@ -474,15 +471,24 @@ const timeline = (...props) => {
  * @example
  * timelineShapes()
  */
-const timelineShapes = ({ duration, msTimelineShapes, start }) => (
-  msTimelineShapes.map(({ shape, timelinePosition }) => ({
-    shape,
-    timelinePosition: {
-      start: (timelinePosition.start - start) / duration,
-      finish: (timelinePosition.finish - start) / duration
-    }
-  }))
-)
+const timelineShapes = ({ duration, msTimelineShapes, start }) => {
+  const s = []
+
+  for (let i = 0, l = msTimelineShapes.length; i < l; i++) {
+    const msTimelineShape = msTimelineShapes[ i ]
+    const timelinePosition = msTimelineShape.timelinePosition
+
+    s.push({
+      shape: msTimelineShape.shape,
+      timelinePosition: {
+        start: (timelinePosition.start - start) / duration,
+        finish: (timelinePosition.finish - start) / duration
+      }
+    })
+  }
+
+  return s
+}
 
 /**
  * Converts an array of ShapesWithOptions into TimelineShapes
@@ -502,7 +508,9 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
 
   const msTimelineShapes = []
 
-  shapesWithOptions.map(({ after, at, name, offset, shape }, i) => {
+  for (let i = 0, l = shapesWithOptions.length; i < l; i++) {
+    const { after, at, name, offset, shape } = shapesWithOptions[ i ]
+
     if (__DEV__ && typeof shape.timeline !== 'undefined') {
       throw new Error(`A Shape can only be added to one timeline`)
     }
@@ -525,7 +533,7 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
     timelineFinish = Math.max(timelineFinish, finish)
 
     msTimelineShapes.push({ shape, timelinePosition: { start, finish } })
-  })
+  }
 
   const timelineDuration = Math.abs(timelineStart - timelineFinish)
 
@@ -569,10 +577,7 @@ const updatePlaybackOptions = ({ at, pause = false, playbackOptions, timeline })
 
   if (typeof playbackOptions.initialIterations !== 'undefined') {
     if (typeof playbackOptions.reverse === 'undefined') {
-      next.reverse = currentReverse({
-        ...previous,
-        complete: next.initialIterations - previous.initialIterations
-      })
+      next.reverse = currentReverse(previous, next.initialIterations - previous.initialIterations)
     }
 
     if (
@@ -582,8 +587,8 @@ const updatePlaybackOptions = ({ at, pause = false, playbackOptions, timeline })
       next.iterations = Math.max(0, previous.initialIterations + previous.iterations - next.initialIterations)
     }
   } else {
-    const complete = iterationsComplete({ ...previous, at: next.started })
-    const reverse = currentReverse({ ...previous, complete })
+    const complete = iterationsComplete(previous, next.started)
+    const reverse = currentReverse(previous, complete)
 
     next.initialIterations = previous.initialIterations + complete
 
@@ -630,11 +635,14 @@ const updatePlaybackOptions = ({ at, pause = false, playbackOptions, timeline })
  * @example
  * updateState(timeline, Date.now())
  */
-const updateState = ({ playbackOptions, state }, at) => {
+const updateState = (t, at) => {
+  const playbackOptions = t.playbackOptions
+  const state = t.state
+
   state.started = typeof playbackOptions.started !== 'undefined'
-  state.iterationsComplete = iterationsComplete({ ...playbackOptions, at })
+  state.iterationsComplete = iterationsComplete(playbackOptions, at)
   state.totalIterations = playbackOptions.initialIterations + state.iterationsComplete
-  state.reverse = currentReverse({ ...playbackOptions, complete: state.iterationsComplete })
+  state.reverse = currentReverse(playbackOptions, state.iterationsComplete)
   state.finished = playbackOptions.iterations - state.iterationsComplete === 0
   state.position = position(state.totalIterations, state.reverse)
 }
@@ -654,7 +662,9 @@ const validMiddleware = ({ middleware = config.defaults.timeline.middleware }) =
     throw new TypeError(`The timeline function middleware option must be of type array`)
   }
 
-  middleware.map(({ name, input, output }) => {
+  for (let i = 0, l = middleware.length; i < l; i++) {
+    const { name, input, output } = middleware[ i ]
+
     if (typeof name !== 'string') {
       throw new TypeError(`A middleware must have a name prop`)
     }
@@ -666,7 +676,7 @@ const validMiddleware = ({ middleware = config.defaults.timeline.middleware }) =
     if (typeof output !== 'function') {
       throw new TypeError(`The ${name} middleware must have an output method`)
     }
-  })
+  }
 
   return middleware
 }

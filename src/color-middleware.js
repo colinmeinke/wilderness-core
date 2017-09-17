@@ -271,7 +271,14 @@ const hexToColor = hex => {
   let x = hex.replace('#', '')
 
   if (x.length === 3) {
-    x = x.split('').map(v => `${v}${v}`).join('')
+    let y = ''
+
+    for (let i = 0; i < 3; i++) {
+      const v = x.charAt(i)
+      y += `${v}${v}`
+    }
+
+    x = y
   }
 
   return {

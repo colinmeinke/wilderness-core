@@ -9,7 +9,9 @@
  * clone('hello world')
  */
 const clone = value => {
-  if (Array.isArray(value)) {
+  if (typeof value !== 'object') {
+    return value
+  } else if (Array.isArray(value)) {
     const arr = []
 
     for (let i = 0, l = value.length; i < l; i++) {
@@ -17,7 +19,7 @@ const clone = value => {
     }
 
     return arr
-  } else if (value !== null && typeof value === 'object') {
+  } else if (value !== null) {
     const obj = {}
 
     for (let key in value) {

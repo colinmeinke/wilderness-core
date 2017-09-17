@@ -40,17 +40,19 @@ const units = [
 const input = x => {
   if (typeof x === 'string') {
     const parts = x.split(' ')
+    const values = []
 
-    const values = parts.map(part => {
+    for (let i = 0, l = parts.length; i < l; i++) {
+      const part = parts[ i ]
       const number = parseFloat(part)
       const unit = part.replace(number, '')
 
       if (!isNaN(number) && (unit === '' || units.indexOf(unit) !== -1)) {
-        return [ number, unit ]
+        values.push([ number, unit ])
+      } else {
+        values.push(part)
       }
-
-      return part
-    })
+    }
 
     if (values.toString() !== parts.toString()) {
       return { middleware: name, values }
@@ -72,7 +74,14 @@ const input = x => {
  */
 const output = x => {
   if (typeof x === 'object' && x.middleware === name) {
-    return x.values.map(a => a.join('')).join(' ')
+    const values = x.values
+    const result = []
+
+    for (let i = 0, l = values.length; i < l; i++) {
+      result.push(values[ i ].join(''))
+    }
+
+    return result.join(' ')
   }
 
   return x

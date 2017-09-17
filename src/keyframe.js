@@ -43,21 +43,36 @@ import transform from './transform'
  * equaliseKeyframes(keyframes)
  */
 const equaliseKeyframes = keyframes => {
-  const pointStrucs = keyframes.map(({ frameShape }) => pointStructure(frameShape))
+  const pointStrucs = []
+  const k = []
+  const curveStrucs = []
+  const result = []
+
+  for (let i = 0, l = keyframes.length; i < l; i++) {
+    pointStrucs.push(pointStructure(keyframes[ i ].frameShape))
+  }
+
   const pointStruc = commonPointStructure(pointStrucs)
 
-  const k = keyframes.map(keyframe => {
+  for (let i = 0, l = keyframes.length; i < l; i++) {
+    const keyframe = keyframes[ i ]
     keyframe.frameShape = applyPointStructure(keyframe.frameShape, pointStruc)
-    return keyframe
-  })
+    k.push(keyframe)
+  }
 
-  const curveStrucs = k.map(({ frameShape }) => curveStructure(frameShape))
+  for (let i = 0, l = k.length; i < l; i++) {
+    curveStrucs.push(curveStructure(k[ i ].frameShape))
+  }
+
   const curveStruc = commonCurveStructure(curveStrucs)
 
-  return k.map(keyframe => {
+  for (let i = 0, l = k.length; i < l; i++) {
+    const keyframe = k[ i ]
     keyframe.frameShape = applyCurveStructure(keyframe.frameShape, curveStruc)
-    return keyframe
-  })
+    result.push(keyframe)
+  }
+
+  return result
 }
 
 /**
@@ -73,15 +88,17 @@ const equaliseKeyframes = keyframes => {
 const keyframesAndDuration = plainShapeObjects => {
   const keyframes = []
 
-  plainShapeObjects.map(({
-    delay,
-    duration,
-    easing,
-    forces = [],
-    name,
-    transforms = [],
-    ...plainShapeObject
-  }, i) => {
+  for (let i = 0, l = plainShapeObjects.length; i < l; i++) {
+    const {
+      delay,
+      duration,
+      easing,
+      forces = [],
+      name,
+      transforms = [],
+      ...plainShapeObject
+    } = plainShapeObjects[ i ]
+
     const frameShape = frameShapeFromPlainShapeObject(plainShapeObject)
 
     const keyframe = {
@@ -112,7 +129,7 @@ const keyframesAndDuration = plainShapeObjects => {
     }
 
     keyframes.push(keyframe)
-  })
+  }
 
   const equalisedKeyframes = equaliseKeyframes(keyframes)
   const totalDuration = keyframesTotalDuration(keyframes)
@@ -126,7 +143,7 @@ const keyframesAndDuration = plainShapeObjects => {
 /**
  * Adds the position prop to each Keyframe in a Keyframe array.
  *
- * @param {Keyframe[]} k
+ * @param {Keyframe[]} keyframes
  * @param {number} totalDuration
  *
  * @returns {Keyframe[]}
@@ -134,21 +151,26 @@ const keyframesAndDuration = plainShapeObjects => {
  * @example
  * positionKeyframes(keyframes)
  */
-const positionKeyframes = (k, totalDuration) => {
+const positionKeyframes = (keyframes, totalDuration) => {
+  const k = []
+
   let durationAtKeyframe = 0
 
-  return k.map(keyframe => {
+  for (let i = 0, l = keyframes.length; i < l; i++) {
+    const keyframe = keyframes[ i ]
     const { tween: { duration = 0 } = {} } = keyframe
 
     durationAtKeyframe += duration
 
-    return {
+    k.push({
       ...keyframe,
       position: durationAtKeyframe === 0
         ? 0
         : durationAtKeyframe / totalDuration
-    }
-  })
+    })
+  }
+
+  return k
 }
 
 /**
@@ -161,9 +183,15 @@ const positionKeyframes = (k, totalDuration) => {
  * @example
  * keyframesTotalDuration(keyframes)
  */
-const keyframesTotalDuration = k => k.reduce((
-  currentDuration,
-  { tween: { duration = 0 } = {} }
-) => (currentDuration += duration), 0)
+const keyframesTotalDuration = k => {
+  let currentDuration = 0
+
+  for (let i = 0, l = k.length; i < l; i++) {
+    const { tween: { duration = 0 } = {} } = k[ i ]
+    currentDuration += duration
+  }
+
+  return currentDuration
+}
 
 export default keyframesAndDuration

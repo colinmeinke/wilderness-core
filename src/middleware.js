@@ -22,7 +22,9 @@
 const apply = (value, func) => {
   const v = func(value)
 
-  if (Array.isArray(v)) {
+  if (typeof v !== 'object') {
+    return v
+  } else if (Array.isArray(v)) {
     const arr = []
 
     for (let i = 0, l = v.length; i < l; i++) {
@@ -30,9 +32,7 @@ const apply = (value, func) => {
     }
 
     return arr
-  }
-
-  if (v !== null && typeof v === 'object') {
+  } else if (v !== null) {
     const obj = {}
 
     for (let k in v) {

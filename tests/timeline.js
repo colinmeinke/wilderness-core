@@ -539,51 +539,55 @@ describe('sameDirection', () => {
 
 describe('currentReverse', () => {
   it('should calculate correct reverse when not started', () => {
-    expect(currentReverse({
+    const playbackOptions = {
       alternate: true,
       duration: 1000,
       initialIterations: 0,
       iterations: 1,
       reverse: false,
-      started: 0,
-      complete: 0
-    })).toBe(false)
+      started: 0
+    }
+
+    expect(currentReverse(playbackOptions, 0)).toBe(false)
   })
 
   it('should calculate correct reverse when not started in reverse', () => {
-    expect(currentReverse({
+    const playbackOptions = {
       alternate: true,
       duration: 1000,
       initialIterations: 0,
       iterations: 1,
       reverse: true,
-      started: 0,
-      complete: 0
-    })).toBe(true)
+      started: 0
+    }
+
+    expect(currentReverse(playbackOptions, 0)).toBe(true)
   })
 
   it('should calculate correct reverse when complete', () => {
-    expect(currentReverse({
+    const playbackOptions = {
       alternate: true,
       duration: 1000,
       initialIterations: 0,
       iterations: 1,
       reverse: false,
-      started: 0,
-      complete: 1
-    })).toBe(false)
+      started: 0
+    }
+
+    expect(currentReverse(playbackOptions, 1)).toBe(false)
   })
 
   it('should calculate correct reverse when complete in reverse', () => {
-    expect(currentReverse({
+    const playbackOptions = {
       alternate: true,
       duration: 1000,
       initialIterations: 0,
       iterations: 1,
       reverse: true,
-      started: 0,
-      complete: 1
-    })).toBe(true)
+      started: 0
+    }
+
+    expect(currentReverse(playbackOptions, 1)).toBe(true)
   })
 })
 
