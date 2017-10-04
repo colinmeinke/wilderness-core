@@ -1,5 +1,3 @@
-/* globals __DEV__ */
-
 import {
   currentReverse,
   iterationsComplete,
@@ -9,69 +7,31 @@ import {
 /**
  * An event.
  *
- * @typedef {Object} Event
+ * @typedef {array} Event
  *
- * @property {number} at - The time the event occured.
- * @property {string} name - The event name.
- * @property {Object} options - Any additional event data.
+ * @property {string} 0 - The event name.
+ * @property {number} 1 - The time the event occured.
+ * @property {...*} - Arguments to be passed to the callback functions.
  */
 
 /**
  * A Timeline event subscription.
  *
- * @typedef {Object} EventSubscription
+ * @typedef {array} EventSubscription
  *
- * @property {function} callback
- * @property {string} name
- * @property {number} token
+ * @property {string} 0 - The name of the Event.
+ * @property {function} 1 - The callback to run when an Event occurs.
  */
 
 /**
- * An object to hold Timeline EventSubscriptions, and subscribe/unsubscribe functions.
+ * An object to hold Timeline EventSubscriptions.
  *
- * @typedef {Object} EventObject
+ * @typedef {Object} EventsObject
  *
  * @property {Object} previousPlaybackOptions
  * @property {Object} previousState
- * @property {function} subscribe - A function to subscribe to Timeline events.
  * @property {EventSubscription[]} subscriptions
- * @property {function} unsubscribe - A function to unsubscribe to Timeline events.
  */
-
-/**
- * Token incrementor.
- */
-let t = 0
-
-/**
- * Accepted event names.
- */
-const acceptedEventNames = [
-  'timeline.start',
-  'timeline.finish',
-  'shape.start',
-  'shape.finish',
-  'keyframe',
-  'frame'
-]
-
-/**
- * An EventObject creator.
- *
- * @param {Timeline} timeline
- *
- * @returns {EventObject}
- *
- * @example
- * event(timeline)
- */
-const event = timeline => ({
-  previousPlaybackOptions: {},
-  previousState: {},
-  subscribe: subscribe(timeline),
-  subscriptions: [],
-  unsubscribe: unsubscribe(timeline)
-})
 
 /**
  * Is a Timeline active?
@@ -83,86 +43,99 @@ const event = timeline => ({
  * @example
  * active(timeline)
  */
-const active = ({ event, state }) => (
+const active = ({ events, state }) => (
   state.started &&
-  (!state.finished || typeof event.previousState === 'undefined' || !event.previousState.finished)
+  (!state.finished || typeof events.previousState === 'undefined' || !events.previousState.finished)
 )
+
+/**
+ * An EventsObject creator.
+ *
+ * @param {EventSubscription[]} subscriptions
+ *
+ * @returns {EventsObject}
+ *
+ * @example
+ * createEvents(subscriptions)
+ */
+const createEvents = subscriptions => ({
+  eventNames: eventNames(subscriptions),
+  previousPlaybackOptions: {},
+  previousState: {},
+  subscriptions
+})
 
 /**
  * A unique list of Timeline EventSubscription names.
  *
- * @param {Timeline} timeline
+ * @param {EventSubscription[]} subscriptions
  *
  * @returns {string[]}
  *
  * @example
- * activeEventNames(timeline)
+ * eventNames(subscriptions)
  */
-const activeEventNames = ({ event: { subscriptions } }) => {
-  const s = []
+const eventNames = subscriptions => {
+  const names = []
 
   for (let i = 0, l = subscriptions.length; i < l; i++) {
-    const name = subscriptions[ i ].name
+    const name = subscriptions[ i ][ 0 ]
 
-    if (s.indexOf(name) === -1) {
-      s.push(name)
+    if (names.indexOf(name) === -1) {
+      names.push(name)
     }
   }
 
-  return s
+  return names
 }
 
 /**
- * Run EventSubscription callbacks for every event that has occured since last check.
+ * Run EventSubscription callbacks for every event that has occured since
+ * last check.
  *
  * @param {Timeline} timeline
  *
  * @example
- * events(timeline)
+ * flushEvents(timeline)
  */
-const events = timeline => {
+const flushEvents = timeline => {
   if (playbackOptionsChanged(timeline)) {
-    timeline.event.previousPlaybackOptions = {}
-    timeline.event.previousState = {}
+    timeline.events.previousPlaybackOptions = {}
+    timeline.events.previousState = {}
   }
 
-  const subscriptions = timeline.event.subscriptions
-
-  if (subscriptions.length && active(timeline)) {
-    const eventNames = activeEventNames(timeline)
-    const queue = eventQueue(timeline, eventNames)
+  if (active(timeline)) {
+    const subscriptions = timeline.events.subscriptions
+    const queue = eventQueue(timeline)
 
     for (let i = 0, l = queue.length; i < l; i++) {
-      const event = queue[ i ]
-      const eventName = event.name
-      const options = event.options || {}
+      const [ eventName, , ...args ] = queue[ i ]
 
       for (let _i = 0, _l = subscriptions.length; _i < _l; _i++) {
         const subscription = subscriptions[ _i ]
 
-        if (eventName === subscription.name) {
-          subscription.callback(options)
+        if (eventName === subscription[ 0 ]) {
+          subscription[ 1 ](...args)
         }
       }
     }
   }
 
-  timeline.event.previousPlaybackOptions = { ...timeline.playbackOptions }
-  timeline.event.previousState = { ...timeline.state }
+  timeline.events.previousPlaybackOptions = { ...timeline.playbackOptions }
+  timeline.events.previousState = { ...timeline.state }
 }
 
 /**
  * An array of Events that have occured since last checked.
  *
  * @param {Timeline} timeline
- * @param {string[]} eventNames
  *
  * @returns {Event[]}
  *
  * @example
- * eventQueue(timeline, eventNames)
+ * eventQueue(timeline)
  */
-const eventQueue = ({ event: { previousState }, playbackOptions, state, timelineShapes }, eventNames) => {
+const eventQueue = ({ events: { eventNames, previousState }, playbackOptions, state, timelineShapes }) => {
   const queue = []
   const { alternate, duration, initialIterations, iterations, reverse, started } = playbackOptions
   const max = started + (duration * state.iterationsComplete)
@@ -186,7 +159,7 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
     const timestamps = getTimestamps(0)
 
     for (let i = 0, l = timestamps.length; i < l; i++) {
-      queue.push({ name: 'timeline.start', at: timestamps[ i ] })
+      queue.push([ 'timeline.start', timestamps[ i ] ])
     }
   }
 
@@ -194,7 +167,7 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
     const timestamps = getTimestamps(1)
 
     for (let i = 0, l = timestamps.length; i < l; i++) {
-      queue.push({ name: 'timeline.finish', at: timestamps[ i ] })
+      queue.push([ 'timeline.finish', timestamps[ i ] ])
     }
   }
 
@@ -204,7 +177,7 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
       const timestamps = getTimestamps(start)
 
       for (let _i = 0, _l = timestamps.length; _i < _l; _i++) {
-        queue.push({ name: 'shape.start', at: timestamps[ _i ], options: { shapeName } })
+        queue.push([ 'shape.start', timestamps[ _i ], shapeName ])
       }
     }
   }
@@ -215,7 +188,7 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
       const timestamps = getTimestamps(finish)
 
       for (let _i = 0, _l = timestamps.length; _i < _l; _i++) {
-        queue.push({ name: 'shape.finish', at: timestamps[ _i ], options: { shapeName } })
+        queue.push([ 'shape.finish', timestamps[ _i ], shapeName ])
       }
     }
   }
@@ -231,14 +204,14 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
         const timestamps = getTimestamps(keyframePosition)
 
         for (let __i = 0, __l = timestamps.length; __i < __l; __i++) {
-          queue.push({name: 'keyframe', at: timestamps[ __i ], options: { keyframeName, shapeName }})
+          queue.push([ 'keyframe', timestamps[ __i ], keyframeName, shapeName ])
         }
       }
     }
   }
 
   if (eventNames.indexOf('frame') !== -1) {
-    queue.push({ name: 'frame', at: max })
+    queue.push([ 'frame', max ])
   }
 
   return queue.sort(oldest)
@@ -255,7 +228,7 @@ const eventQueue = ({ event: { previousState }, playbackOptions, state, timeline
  * @example
  * oldest(event1, event2)
  */
-const oldest = (a, b) => a.at === b.at ? 0 : (a.at < b.at ? -1 : 1)
+const oldest = (a, b) => a[ 1 ] === b[ 1 ] ? 0 : (a[ 1 ] < b[ 1 ] ? -1 : 1)
 
 /**
  * Have playbackOptions changed since last check?
@@ -268,7 +241,7 @@ const oldest = (a, b) => a.at === b.at ? 0 : (a.at < b.at ? -1 : 1)
  * playbackOptionsChanged(timeline)
  */
 const playbackOptionsChanged = timeline => (
-  JSON.stringify(timeline.playbackOptions) !== JSON.stringify(timeline.event.previousPlaybackOptions)
+  JSON.stringify(timeline.playbackOptions) !== JSON.stringify(timeline.events.previousPlaybackOptions)
 )
 
 /**
@@ -395,101 +368,15 @@ const timeToSamePosition = ({ alternate, duration, position, reverse }) => (
   )
 )
 
-/**
- * Creates a subscribe function.
- * The created function adds an EventSubscription to the subscriptions
- * property of an EventObject.
- *
- * @param {Timeline} timeline
- *
- * @returns {function}
- *
- * @example
- * subscribe(timeline)('timeline.start', () => console.log('timeline.start'))
- */
-const subscribe = timeline => (name, callback) => {
-  if (validEventName(name)) {
-    if (__DEV__ && typeof callback !== 'function') {
-      throw new TypeError(`The subscribe functions second argument must be of type function`)
-    }
-
-    const token = ++t
-
-    timeline.event.subscriptions.push({ name, callback, token })
-
-    return token
-  }
-}
-
-/**
- * Is an event name valid?
- *
- * @param {string} name
- *
- * @throws {TypeError} Throws if not valid
- *
- * @returns {true}
- *
- * @example
- * validEventName('timeline.start')
- */
-const validEventName = name => {
-  if (__DEV__) {
-    if (typeof name !== 'string') {
-      throw new TypeError(`The subscribe functions first argument must be of type string`)
-    }
-
-    if (acceptedEventNames.indexOf(name) === -1) {
-      throw new TypeError(`The subscribe functions first argument was not a valid event name`)
-    }
-  }
-
-  return true
-}
-
-/**
- * Creates an unsubscribe function.
- * Created function removes an EventSubscription from the subscriptions
- * property of an EventObject, given the Event token.
- *
- * @param {Timeline} timeline
- *
- * @returns {function}
- *
- * @example
- * unsubscribe(timeline)(token)
- */
-const unsubscribe = timeline => token => {
-  const subscriptions = timeline.event.subscriptions
-
-  let matchIndex
-
-  for (let i = 0, l = subscriptions.length; i < l; i++) {
-    if (subscriptions[ i ].token === token) {
-      matchIndex = i
-    }
-  }
-
-  if (typeof matchIndex !== 'undefined') {
-    timeline.event.subscriptions.splice(matchIndex, 1)
-    return true
-  }
-
-  return false
-}
-
 export {
-  activeEventNames,
-  event,
+  createEvents,
+  eventNames,
   eventQueue,
   oldest,
   playbackOptionsChanged,
   positionTimestamps,
-  subscribe,
   timeToPosition,
-  timeToSamePosition,
-  unsubscribe,
-  validEventName
+  timeToSamePosition
 }
 
-export default events
+export default flushEvents

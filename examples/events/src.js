@@ -57,15 +57,18 @@ const shape2 = shape(shape2Keyframe1, shape2Keyframe2)
 
 const animation = timeline(
   [ shape1, { name: 'SHAPE_1' } ],
-  [ shape2, { name: 'SHAPE_2' } ]
+  [ shape2, { name: 'SHAPE_2' } ],
+  {
+    events: [
+      [ 'timeline.start', () => console.log('timeline.start') ],
+      [ 'timeline.finish', () => console.log('timeline.finish') ],
+      [ 'shape.start', shapeName => console.log(`shape.start: ${shapeName}`) ],
+      [ 'shape.finish', shapeName => console.log(`shape.finish: ${shapeName}`) ],
+      [ 'keyframe', (keyframeName, shapeName) => console.log(`keyframe: ${shapeName} ${keyframeName}`) ],
+      [ 'frame', () => console.log('frame') ]
+    ]
+  }
 )
-
-animation.event.subscribe('timeline.start', () => console.log('timeline.start'))
-animation.event.subscribe('timeline.finish', () => console.log('timeline.finish'))
-animation.event.subscribe('shape.start', ({ shapeName }) => console.log(`shape.start: ${shapeName}`))
-animation.event.subscribe('shape.finish', ({ shapeName }) => console.log(`shape.finish: ${shapeName}`))
-animation.event.subscribe('keyframe', ({ keyframeName, shapeName }) => console.log(`keyframe: ${shapeName} ${keyframeName}`))
-animation.event.subscribe('frame', () => console.log('frame'))
 
 render(document.querySelector('svg'), animation)
 

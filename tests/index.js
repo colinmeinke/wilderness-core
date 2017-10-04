@@ -2,7 +2,7 @@
 
 import {
   colorMiddleware,
-  events,
+  flushEvents,
   frame,
   motionPath,
   pause,
@@ -22,9 +22,9 @@ describe('colorMiddleware', () => {
   })
 })
 
-describe('events', () => {
+describe('flushEvents', () => {
   it('should be exported', () => {
-    expect(typeof events).toBe('function')
+    expect(typeof flushEvents).toBe('function')
   })
 })
 

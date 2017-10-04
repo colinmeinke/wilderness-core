@@ -1,9 +1,8 @@
 /* globals __DEV__ */
 
-import clone from './clone'
 import config from './config'
 import { input } from './middleware'
-import { event } from './events'
+import { createEvents } from './events'
 
 /**
  * The position of an object on a Timeline
@@ -86,10 +85,12 @@ import { event } from './events'
  */
 
 /**
- * An object containing Middlware, PlaybackOptions and ShapesWithOptions.
+ * An object containing EventSubscriptions, Middlware, PlaybackOptions and
+ * ShapesWithOptions.
  *
  * @typedef {Object} SortedTimelineProps
  *
+ * @property {EventSubscription[]} events
  * @property {Middleware[]} middleware
  * @property {PlaybackOptions} playbackOptions
  * @property {ShapeWithOptions[]} shapesWithOptions
@@ -105,6 +106,18 @@ import { event } from './events'
  * @property {Object} state - Holds the last known state of the timeline.
  * @property {TimelineShape[]} timelineShapes
  */
+
+/**
+ * Accepted event names.
+ */
+const acceptedEventNames = [
+  'timeline.start',
+  'timeline.finish',
+  'shape.start',
+  'shape.finish',
+  'keyframe',
+  'frame'
+]
 
 /**
  * Runs each Middleware input function on every Keyframe's FrameShape.
@@ -409,12 +422,13 @@ const sort = props => {
           }
         }
 
-        options = clone(prop)
+        options = prop
       }
     }
   }
 
   return {
+    events: validEvents(options.events),
     middleware: validMiddleware(options),
     playbackOptions: validPlaybackOptions(options),
     shapesWithOptions
@@ -434,7 +448,7 @@ const sort = props => {
  * timeline(circle, [ square, { queue: -200 } ], { duration: 5000 })
  */
 const timeline = (...props) => {
-  const { middleware, playbackOptions, shapesWithOptions } = sort(props)
+  const { events, middleware, playbackOptions, shapesWithOptions } = sort(props)
   const { duration, timelineShapes } = timelineShapesAndDuration(shapesWithOptions, middleware)
 
   if (typeof playbackOptions.duration === 'undefined') {
@@ -452,7 +466,9 @@ const timeline = (...props) => {
 
   updateState(t)
 
-  t.event = event(t)
+  if (events.length) {
+    t.events = createEvents(events)
+  }
 
   return t
 }
@@ -645,6 +661,49 @@ const updateState = (t, at) => {
   state.reverse = currentReverse(playbackOptions, state.iterationsComplete)
   state.finished = playbackOptions.iterations - state.iterationsComplete === 0
   state.position = position(state.totalIterations, state.reverse)
+}
+
+/**
+ * Extracts and validates events from an object.
+ *
+ * @param {Object} opts
+ *
+ * @returns {Object[]}
+ *
+ * @example
+ * validEvents(opts)
+ */
+const validEvents = (events = []) => {
+  if (!Array.isArray(events)) {
+    if (__DEV__) {
+      throw new TypeError(`The timeline function events option must be of type array`)
+    }
+
+    return []
+  }
+
+  const valid = []
+
+  for (let i = 0, l = events.length; i < l; i++) {
+    const event = events[ i ]
+    const name = event[ 0 ]
+
+    if (typeof name !== 'string') {
+      if (__DEV__) {
+        throw new TypeError(`An event must have a name string as the first item`)
+      }
+    } else if (typeof event[ 1 ] !== 'function') {
+      if (__DEV__) {
+        throw new TypeError(`The ${name} event must have an callback function`)
+      }
+    } else {
+      if (acceptedEventNames.indexOf(name) !== -1) {
+        valid.push(event)
+      }
+    }
+  }
+
+  return valid
 }
 
 /**

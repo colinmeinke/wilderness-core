@@ -1,5 +1,5 @@
 import colorMiddleware from './color-middleware'
-import events from './events'
+import flushEvents from './events'
 import frame from './frame'
 import motionPath from './motion-path-force'
 import plainShapeObject from './plain-shape-object'
@@ -9,7 +9,7 @@ import unitMiddleware from './unit-middleware'
 
 export {
   colorMiddleware,
-  events,
+  flushEvents,
   frame,
   motionPath,
   pause,

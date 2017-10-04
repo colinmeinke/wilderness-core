@@ -1,66 +1,64 @@
 /* globals describe it expect */
 
-import events, {
-  activeEventNames,
-  event,
+import flushEvents, {
+  createEvents,
+  eventNames,
   eventQueue,
   oldest,
   playbackOptionsChanged,
   positionTimestamps,
-  subscribe,
   timeToPosition,
-  timeToSamePosition,
-  unsubscribe,
-  validEventName
+  timeToSamePosition
 } from '../src/events'
 
-describe('activeEventNames', () => {
+describe('eventNames', () => {
   it('should return active event names from a timeline', () => {
-    const timeline = { event: { subscriptions: [
-      { name: 'timeline.start' },
-      { name: 'frame' }
-    ] } }
+    const subscriptions = [
+      [ 'timeline.start' ],
+      [ 'frame' ]
+    ]
 
-    expect(activeEventNames(timeline)).toEqual([
+    expect(eventNames(subscriptions)).toEqual([
       'timeline.start',
       'frame'
     ])
   })
 
   it('should remove duplicate active event names', () => {
-    const timeline = { event: { subscriptions: [
-      { name: 'timeline.start' },
-      { name: 'frame' },
-      { name: 'timeline.start' }
-    ] } }
+    const subscriptions = [
+      [ 'timeline.start' ],
+      [ 'frame' ],
+      [ 'timeline.start' ]
+    ]
 
-    expect(activeEventNames(timeline)).toEqual([
+    expect(eventNames(subscriptions)).toEqual([
       'timeline.start',
       'frame'
     ])
   })
 })
 
-describe('event', () => {
+describe('createEvents', () => {
   it('should create an EventObject', () => {
-    const e = event({})
+    const e = createEvents([])
+    expect(e).toHaveProperty('eventNames')
     expect(e).toHaveProperty('previousPlaybackOptions')
     expect(e).toHaveProperty('previousState')
-    expect(e).toHaveProperty('subscribe')
     expect(e).toHaveProperty('subscriptions')
-    expect(e).toHaveProperty('unsubscribe')
+    expect(Array.isArray(e.eventNames)).toBe(true)
     expect(typeof e.previousPlaybackOptions).toBe('object')
     expect(typeof e.previousState).toBe('object')
-    expect(typeof e.subscribe).toBe('function')
     expect(Array.isArray(e.subscriptions)).toBe(true)
-    expect(typeof e.unsubscribe).toBe('function')
   })
 })
 
 describe('eventQueue', () => {
   it('should include a timeline.start event', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'timeline.start' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -72,16 +70,17 @@ describe('eventQueue', () => {
       state: { iterationsComplete: 0.5 }
     }
 
-    const eventNames = [ 'timeline.start' ]
-
-    expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'timeline.start', at: 0 }
+    expect(eventQueue(timeline)).toEqual([
+      [ 'timeline.start', 0 ]
     ])
   })
 
   it('should include multiple timeline.start events', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'timeline.start' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -93,19 +92,20 @@ describe('eventQueue', () => {
       state: { iterationsComplete: 4 }
     }
 
-    const eventNames = [ 'timeline.start' ]
-
-    expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'timeline.start', at: 0 },
-      { name: 'timeline.start', at: 100 },
-      { name: 'timeline.start', at: 200 },
-      { name: 'timeline.start', at: 300 }
+    expect(eventQueue(timeline)).toEqual([
+      [ 'timeline.start', 0 ],
+      [ 'timeline.start', 100 ],
+      [ 'timeline.start', 200 ],
+      [ 'timeline.start', 300 ]
     ])
   })
 
   it('should not include events outside of bounds', () => {
     const timeline = {
-      event: { previousState: { iterationsComplete: 0.45 } },
+      events: {
+        eventNames: [ 'timeline.start' ],
+        previousState: { iterationsComplete: 0.45 }
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -117,14 +117,15 @@ describe('eventQueue', () => {
       state: { iterationsComplete: 0.5 }
     }
 
-    const eventNames = [ 'timeline.start' ]
-
-    expect(eventQueue(timeline, eventNames)).toEqual([])
+    expect(eventQueue(timeline)).toEqual([])
   })
 
   it('should include a timeline.finish event', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'timeline.finish' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -136,16 +137,17 @@ describe('eventQueue', () => {
       state: { iterationsComplete: 1 }
     }
 
-    const eventNames = [ 'timeline.finish' ]
-
     expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'timeline.finish', at: 100 }
+      [ 'timeline.finish', 100 ]
     ])
   })
 
   it('should include shape.start events', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'shape.start' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -161,17 +163,18 @@ describe('eventQueue', () => {
       ]
     }
 
-    const eventNames = [ 'shape.start' ]
-
     expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'shape.start', at: 0, options: { shapeName: 'SHAPE_1' } },
-      { name: 'shape.start', at: 50, options: { shapeName: 'SHAPE_2' } }
+      [ 'shape.start', 0, 'SHAPE_1' ],
+      [ 'shape.start', 50, 'SHAPE_2' ]
     ])
   })
 
   it('should include shape.finish events', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'shape.finish' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -187,17 +190,18 @@ describe('eventQueue', () => {
       ]
     }
 
-    const eventNames = [ 'shape.finish' ]
-
-    expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'shape.finish', at: 50, options: { shapeName: 'SHAPE_1' } },
-      { name: 'shape.finish', at: 100, options: { shapeName: 'SHAPE_2' } }
+    expect(eventQueue(timeline)).toEqual([
+      [ 'shape.finish', 50, 'SHAPE_1' ],
+      [ 'shape.finish', 100, 'SHAPE_2' ]
     ])
   })
 
   it('should include keyframe events', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'keyframe' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -231,19 +235,20 @@ describe('eventQueue', () => {
       ]
     }
 
-    const eventNames = [ 'keyframe' ]
-
-    expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'keyframe', at: 0, options: { keyframeName: 0, shapeName: 'SHAPE_1' } },
-      { name: 'keyframe', at: 50, options: { keyframeName: 1, shapeName: 'SHAPE_1' } },
-      { name: 'keyframe', at: 50, options: { keyframeName: 0, shapeName: 'SHAPE_2' } },
-      { name: 'keyframe', at: 100, options: { keyframeName: 1, shapeName: 'SHAPE_2' } }
+    expect(eventQueue(timeline)).toEqual([
+      [ 'keyframe', 0, 0, 'SHAPE_1' ],
+      [ 'keyframe', 50, 1, 'SHAPE_1' ],
+      [ 'keyframe', 50, 0, 'SHAPE_2' ],
+      [ 'keyframe', 100, 1, 'SHAPE_2' ]
     ])
   })
 
   it('should include a frame event', () => {
     const timeline = {
-      event: { previousState: {} },
+      events: {
+        eventNames: [ 'frame' ],
+        previousState: {}
+      },
       playbackOptions: {
         alternate: false,
         duration: 100,
@@ -255,24 +260,23 @@ describe('eventQueue', () => {
       state: { iterationsComplete: 0.5 }
     }
 
-    const eventNames = [ 'frame' ]
-
-    expect(eventQueue(timeline, eventNames)).toEqual([
-      { name: 'frame', at: 50 }
+    expect(eventQueue(timeline)).toEqual([
+      [ 'frame', 50 ]
     ])
   })
 })
 
-describe('events', () => {
+describe('flushEvents', () => {
   it('should call a subscription callback', () => {
     let i = 0
 
     const timeline = {
-      event: {
+      events: {
+        eventNames: [ 'timeline.start' ],
         previousPlaybackOptions: {},
         previousState: {},
         subscriptions: [
-          { name: 'timeline.start', callback: () => ++i }
+          [ 'timeline.start', () => ++i ]
         ]
       },
       playbackOptions: {
@@ -290,7 +294,7 @@ describe('events', () => {
       }
     }
 
-    events(timeline)
+    flushEvents(timeline)
 
     expect(i).toBe(1)
   })
@@ -299,11 +303,12 @@ describe('events', () => {
     let i = 0
 
     const timeline = {
-      event: {
+      events: {
+        eventNames: [ 'timeline.start' ],
         previousPlaybackOptions: {},
         previousState: {},
         subscriptions: [
-          { name: 'timeline.start', callback: () => ++i }
+          [ 'timeline.start', () => ++i ]
         ]
       },
       playbackOptions: {
@@ -321,7 +326,7 @@ describe('events', () => {
       }
     }
 
-    events(timeline)
+    flushEvents(timeline)
 
     expect(i).toBe(4)
   })
@@ -330,7 +335,8 @@ describe('events', () => {
     let i = 0
 
     const timeline = {
-      event: {
+      events: {
+        eventNames: [ 'timeline.start' ],
         previousPlaybackOptions: {
           alternate: false,
           duration: 100,
@@ -345,7 +351,7 @@ describe('events', () => {
           iterationsComplete: 3.45
         },
         subscriptions: [
-          { name: 'timeline.start', callback: () => ++i }
+          [ 'timeline.start', () => ++i ]
         ]
       },
       playbackOptions: {
@@ -363,7 +369,7 @@ describe('events', () => {
       }
     }
 
-    events(timeline)
+    flushEvents(timeline)
 
     expect(i).toBe(0)
   })
@@ -372,17 +378,17 @@ describe('events', () => {
 describe('oldest', () => {
   it('should sort an array of Events to oldest first', () => {
     const queue = [
-      { at: 100 },
-      { at: 0 },
-      { at: 50 },
-      { at: 7 }
+      [ 0, 100 ],
+      [ 0, 0 ],
+      [ 0, 50 ],
+      [ 0, 7 ]
     ]
 
     const expectedQueue = [
-      { at: 0 },
-      { at: 7 },
-      { at: 50 },
-      { at: 100 }
+      [ 0, 0 ],
+      [ 0, 7 ],
+      [ 0, 50 ],
+      [ 0, 100 ]
     ]
 
     expect(queue.sort(oldest)).toEqual(expectedQueue)
@@ -392,7 +398,7 @@ describe('oldest', () => {
 describe('playbackOptionsChanged', () => {
   it('should return true when playback options have changed', () => {
     const timeline = {
-      event: {
+      events: {
         previousPlaybackOptions: {}
       },
       playbackOptions: {
@@ -405,7 +411,7 @@ describe('playbackOptionsChanged', () => {
 
   it('should return false when playback options have changed', () => {
     const timeline = {
-      event: {
+      events: {
         previousPlaybackOptions: {
           started: 100
         }
@@ -416,47 +422,6 @@ describe('playbackOptionsChanged', () => {
     }
 
     expect(playbackOptionsChanged(timeline)).toBe(false)
-  })
-})
-
-describe('subscribe', () => {
-  it('should create a subscribe function', () => {
-    expect(typeof subscribe({ event: { subscriptions: [] } })).toBe('function')
-  })
-
-  it('should throw if not passed a function', () => {
-    const timeline = { event: { subscriptions: [] } }
-    const s = subscribe(timeline)
-
-    expect(() => s('timeline.start', 'potato')).toThrow(
-      `The subscribe functions second argument must be of type function`
-    )
-  })
-
-  it('should return unique tokens', () => {
-    const timeline = { event: { subscriptions: [] } }
-    const eventName = 'timeline.start'
-    const callback = () => console.log('hello world')
-
-    const s = subscribe(timeline)
-
-    const token1 = s(eventName, callback)
-    const token2 = s(eventName, callback)
-
-    expect(token1).not.toBe(token2)
-  })
-
-  it('should add an item to the subsciptions array', () => {
-    const timeline = { event: { subscriptions: [] } }
-    const eventName = 'timeline.start'
-    const callback = () => console.log('hello world')
-
-    const s = subscribe(timeline)
-
-    const token = s(eventName, callback)
-    const expectedSubscription = { callback, name: eventName, token }
-
-    expect(timeline.event.subscriptions[ 0 ]).toEqual(expectedSubscription)
   })
 })
 
@@ -1463,55 +1428,5 @@ describe('timeToSamePosition', () => {
     }
 
     expect(timeToSamePosition(opts)).toBe(150)
-  })
-})
-
-describe('unsubscribe', () => {
-  it('should create an unsubscribe function', () => {
-    expect(typeof unsubscribe({ event: { subscriptions: [] } })).toBe('function')
-  })
-
-  it('should remove an item from the subsciptions array', () => {
-    const timeline = { event: { subscriptions: [] } }
-    const eventName = 'timeline.start'
-    const callback = () => console.log('hello world')
-
-    const s = subscribe(timeline)
-    const u = unsubscribe(timeline)
-
-    const token = s(eventName, callback)
-
-    u(token)
-
-    expect(timeline.event.subscriptions.length).toBe(0)
-  })
-
-  it('should not remove an item if no token is matched', () => {
-    const timeline = { event: { subscriptions: [] } }
-    const eventName = 'timeline.start'
-    const callback = () => console.log('hello world')
-
-    const s = subscribe(timeline)
-    const u = unsubscribe(timeline)
-
-    s(eventName, callback)
-
-    expect(u('potato')).toBe(false)
-
-    expect(timeline.event.subscriptions.length).toBe(1)
-  })
-})
-
-describe('validEventName', () => {
-  it('should throw if not passed a string', () => {
-    expect(() => validEventName([])).toThrow(
-      `The subscribe functions first argument must be of type string`
-    )
-  })
-
-  it('should throw if not passed a valid name', () => {
-    expect(() => validEventName('potato')).toThrow(
-      `The subscribe functions first argument was not a valid event name`
-    )
   })
 })

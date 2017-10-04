@@ -1,5 +1,5 @@
 import { toPath } from 'svg-points'
-import { events, frame, play as corePlay } from '../src'
+import { flushEvents, frame, play as corePlay } from '../src'
 
 const play = (timeline, playbackOptions = {}) => {
   corePlay(timeline, playbackOptions)
@@ -14,7 +14,9 @@ const tick = timeline => {
       updateEls(shape.els, frameShapes[ i ])
     })
 
-    events(timeline)
+    if (timeline.events) {
+      flushEvents(timeline)
+    }
 
     tick(timeline)
   })

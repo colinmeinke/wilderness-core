@@ -139,13 +139,21 @@ describe('timeline', () => {
   it('should return an object with the correct props', () => {
     const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
     const animation = timeline(validShape)
-    expect(animation).toHaveProperty('event')
+    expect(animation).not.toHaveProperty('events')
     expect(animation).toHaveProperty('middleware')
     expect(animation).toHaveProperty('playbackOptions')
     expect(animation).toHaveProperty('state')
     expect(animation).toHaveProperty('timelineShapes')
-    expect(animation.event).toHaveProperty('subscribe')
-    expect(animation.event).toHaveProperty('unsubscribe')
+  })
+
+  it('should return an object with the correct optional props', () => {
+    const validShape = shape({ type: 'rect', width: 50, height: 50, x: 100, y: 100 })
+
+    const animation = timeline(validShape, {
+      events: [[ 'timeline.start', () => ({}) ]]
+    })
+
+    expect(animation).toHaveProperty('events')
   })
 
   it('should return default playback options', () => {
