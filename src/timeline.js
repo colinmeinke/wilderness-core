@@ -101,7 +101,8 @@ import { createEvents } from './events'
  *
  * @typedef {Object} Timeline
  *
- * @property {Middleware[]} middleware
+ * @property {EventsObject} [events]
+ * @property {Middleware[]} [middleware]
  * @property {PlaybackOptions} playbackOptions
  * @property {Object} state - Holds the last known state of the timeline.
  * @property {TimelineShape[]} timelineShapes
@@ -393,22 +394,30 @@ const sort = props => {
     )
   }
 
-  let options = {}
-
-  const shapesWithOptions = []
+  const sorted = {
+    events: [],
+    middleware: config.defaults.timeline.middleware,
+    playbackOptions: {
+      alternate: config.defaults.timeline.alternate,
+      initialIterations: config.defaults.timeline.initialIterations,
+      iterations: config.defaults.timeline.iterations,
+      reverse: config.defaults.timeline.reverse
+    },
+    shapesWithOptions: []
+  }
 
   for (let i = 0, l = props.length; i < l; i++) {
     const prop = props[ i ]
 
     if (Array.isArray(prop)) {
-      shapesWithOptions.push(shapeWithOptionsFromArray(prop, i))
+      sorted.shapesWithOptions.push(shapeWithOptionsFromArray(prop, i))
     } else {
       if (__DEV__ && typeof prop !== 'object') {
         throw new TypeError(`The timeline function must only be passed objects and arrays`)
       }
 
       if (prop.keyframes) {
-        shapesWithOptions.push({
+        sorted.shapesWithOptions.push({
           name: i,
           offset: config.defaults.timeline.queue,
           shape: prop
@@ -422,17 +431,23 @@ const sort = props => {
           }
         }
 
-        options = prop
+        if (prop.middleware) {
+          sorted.middleware = validMiddleware(prop.middleware)
+        }
+
+        if (prop.events) {
+          sorted.events = validEvents(prop.events)
+        }
+
+        sorted.playbackOptions = validPlaybackOptions({
+          ...sorted.playbackOptions,
+          ...prop
+        })
       }
     }
   }
 
-  return {
-    events: validEvents(options.events),
-    middleware: validMiddleware(options),
-    playbackOptions: validPlaybackOptions(options),
-    shapesWithOptions
-  }
+  return sorted
 }
 
 /**
@@ -455,13 +470,17 @@ const timeline = (...props) => {
     playbackOptions.duration = duration
   }
 
-  const t = { middleware, playbackOptions, state: {}, timelineShapes }
+  const t = { playbackOptions, state: {}, timelineShapes }
 
   for (let i = 0, l = timelineShapes.length; i < l; i++) {
     const shape = timelineShapes[ i ].shape
 
     shape.timeline = t
     shape.timelineIndex = i
+  }
+
+  if (middleware.length) {
+    t.middleware = middleware
   }
 
   updateState(t)
@@ -533,7 +552,9 @@ const timelineShapesAndDuration = (shapesWithOptions, middleware) => {
 
     shape.name = name
 
-    apply(shape, middleware)
+    if (middleware.length) {
+      apply(shape, middleware)
+    }
 
     const start = shapeStart({
       after,
@@ -673,7 +694,7 @@ const updateState = (t, at) => {
  * @example
  * validEvents(opts)
  */
-const validEvents = (events = []) => {
+const validEvents = events => {
   if (!Array.isArray(events)) {
     if (__DEV__) {
       throw new TypeError(`The timeline function events option must be of type array`)
@@ -716,7 +737,7 @@ const validEvents = (events = []) => {
  * @example
  * validMiddleware(opts)
  */
-const validMiddleware = ({ middleware = config.defaults.timeline.middleware }) => {
+const validMiddleware = middleware => {
   if (!Array.isArray(middleware)) {
     throw new TypeError(`The timeline function middleware option must be of type array`)
   }
@@ -751,11 +772,11 @@ const validMiddleware = ({ middleware = config.defaults.timeline.middleware }) =
  * validPlaybackOptions(opts)
  */
 const validPlaybackOptions = ({
-  alternate = config.defaults.timeline.alternate,
+  alternate,
   duration,
-  initialIterations = config.defaults.timeline.initialIterations,
-  iterations = config.defaults.timeline.iterations,
-  reverse = config.defaults.timeline.reverse,
+  initialIterations,
+  iterations,
+  reverse,
   started
 }) => {
   const playbackOptions = {}

@@ -295,6 +295,7 @@ const frame = (timeline, at) => {
 
   const frameShapes = []
   const timelineShapes = timeline.timelineShapes
+  const middleware = timeline.middleware
 
   for (let i = 0, l = timelineShapes.length; i < l; i++) {
     const timelineShape = timelineShapes[ i ]
@@ -305,14 +306,17 @@ const frame = (timeline, at) => {
     const finish = timelinePosition.finish
     const position = timeline.state.position
 
-    if (position <= start) {
-      frameShapes.push(output(keyframes[ 0 ].frameShape, timeline.middleware))
-    } else if (position >= finish) {
-      frameShapes.push(output(keyframes[ keyframes.length - 1 ].frameShape, timeline.middleware))
-    } else {
-      const shapePosition = (position - start) / (finish - start)
-      frameShapes.push(frameShapeFromShape(shape, shapePosition, timeline.middleware))
-    }
+    const frameShape = position <= start
+      ? keyframes[ 0 ].frameShape
+      : position >= finish
+        ? keyframes[ keyframes.length - 1 ].frameShape
+        : frameShapeFromShape(shape, (position - start) / (finish - start))
+
+    frameShapes.push(
+      middleware
+        ? output(frameShape, middleware)
+        : frameShape
+    )
   }
 
   return frameShapes
@@ -373,14 +377,13 @@ const frameShapeFromPlainShapeObject = ({ shapes: childPlainShapeObjects, ...pla
  *
  * @param {Shape} shape
  * @param {Position} position
- * @param {Middleware[]} middleware
  *
  * @returns {FrameShape}
  *
  * @example
  * frameShapeFromShape(shape, 0.75, [])
  */
-const frameShapeFromShape = (shape, position, middleware) => {
+const frameShapeFromShape = (shape, position) => {
   const { keyframes } = shape
 
   let fromIndex = 0
@@ -409,7 +412,7 @@ const frameShapeFromShape = (shape, position, middleware) => {
     frameShape = forces[ i ](frameShape, keyframePosition)
   }
 
-  return output(frameShape, middleware)
+  return frameShape
 }
 
 /**
